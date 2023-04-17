@@ -10,7 +10,7 @@ import { type AppRouter } from "@acme/api";
 /**
  * A set of typesafe hooks for consuming your API.
  */
-export const api = createTRPCReact<AppRouter>();
+export const trpc = createTRPCReact<AppRouter>();
 export { type RouterInputs, type RouterOutputs } from "@acme/api";
 
 /**
@@ -45,7 +45,7 @@ export const TRPCProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [queryClient] = React.useState(() => new QueryClient());
   const [trpcClient] = React.useState(() =>
-    api.createClient({
+    trpc.createClient({
       transformer: superjson,
       links: [
         httpBatchLink({
@@ -56,8 +56,8 @@ export const TRPCProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   return (
-    <api.Provider client={trpcClient} queryClient={queryClient}>
+    <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    </api.Provider>
+    </trpc.Provider>
   );
 };

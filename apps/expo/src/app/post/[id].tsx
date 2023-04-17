@@ -1,12 +1,13 @@
 import { SafeAreaView, Text, View } from "react-native";
 import { SplashScreen, Stack, useSearchParams } from "expo-router";
 
-import { api } from "../../utils/api";
+import { trpc } from "../../utils/trpc";
 
 const Post: React.FC = () => {
   const { id } = useSearchParams();
-  if (!id || typeof id !== "string") throw new Error("unreachable");
-  const { data } = api.post.byId.useQuery({ id });
+  const idString =
+    typeof id === "string" ? id : typeof id === "undefined" ? ":)" : id[0]!;
+  const { data } = trpc.post.byId.useQuery({ id: idString });
 
   if (!data) return <SplashScreen />;
 

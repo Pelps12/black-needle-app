@@ -1,11 +1,12 @@
+import { z } from "zod";
+
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const authRouter = createTRPCRouter({
-  getSession: publicProcedure.query(({ ctx }) => {
-    return ctx.session;
+  getSession: protectedProcedure.query(({ ctx }) => {
+    return ctx.auth.userId;
   }),
   getSecretMessage: protectedProcedure.query(() => {
-    // testing type validation of overridden next-auth Session in @acme/auth package
-    return "you can see this secret message!";
+    return "You are logged in and can see this secret message!";
   }),
 });
