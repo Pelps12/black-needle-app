@@ -6,7 +6,8 @@ import { FlashList } from "@shopify/flash-list";
 import { trpc, type RouterOutputs } from "../utils/trpc";
 
 const Profile = () => {
-  const { signOut } = useAuth();
+  const { signOut, isSignedIn } = useAuth();
+  const getSession = trpc.auth.getSession.useQuery();
   return (
     <View className="rounded-lg border-2 border-gray-500 p-4">
       <Button

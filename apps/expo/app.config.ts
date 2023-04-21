@@ -32,7 +32,7 @@ const defineConfig = (): ExpoConfig => ({
   },
   extra: {
     eas: {
-      projectId: "your-project-id",
+      projectId: "bcef5ffc-e91d-49a5-9287-7f60dba8a190",
     },
     CLERK_PUBLISHABLE_KEY,
   },

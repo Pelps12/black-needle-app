@@ -1,7 +1,9 @@
 import React from "react";
 import { Text, View } from "react-native";
 import { Image } from "expo-image";
+import { Link } from "expo-router";
 import { useUser } from "@clerk/clerk-react";
+import { Entypo } from "@expo/vector-icons";
 
 const Header = () => {
   const { user } = useUser();
@@ -22,11 +24,9 @@ const Header = () => {
           source={require("../../assets/shopping_cart.svg")}
           alt=":)"
         />
-        <Image
-          className="h-8 w-8 rounded-full"
-          source={require("../../assets/notif_bell.svg")}
-          alt=":)"
-        />
+        <Link href="/chat">
+          <Entypo name="chat" size={24} color="black" />
+        </Link>
 
         <Image
           className="h-10 w-10 rounded-full"

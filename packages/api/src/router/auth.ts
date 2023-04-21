@@ -1,8 +1,7 @@
-import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import { protectedProcedure, router } from "../trpc";
 
-export const authRouter = createTRPCRouter({
+export const authRouter = router({
   getSession: protectedProcedure.query(({ ctx }) => {
     return ctx.auth.userId;
   }),

@@ -1,8 +1,9 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import { protectedProcedure, publicProcedure, router } from "../trpc";
 
-export const userRouter = createTRPCRouter({
+export const userRouter = router({
   getCategories: publicProcedure
     .input(
       z.object({

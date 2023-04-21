@@ -27,6 +27,7 @@
     "expo-auth-session": "^4.0.3",
     "expo-constants": "~14.2.1",
     "expo-device": "^5.2.1",
+    "expo-font": "^11.1.1",
     "expo-image": "^1.2.0",
     "expo-linking": "~4.0.1",
     "expo-notifications": "^0.18.1",
@@ -47,6 +48,7 @@
   },
   "devDependencies": {
     "@acme/api": "*",
+    "@acme/db": "*",
     "@acme/eslint-config": "*",
     "@acme/tailwind-config": "*",
     "@babel/core": "^7.21.4",

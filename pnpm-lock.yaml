@@ -79,6 +79,9 @@ importers:
       expo-device:
         specifier: ^5.2.1
         version: 5.2.1(expo@48.0.10)
+      expo-font:
+        specifier: ^11.1.1
+        version: 11.1.1(expo@48.0.10)
       expo-image:
         specifier: ^1.2.0
         version: 1.2.0(expo@48.0.10)
@@ -134,6 +137,9 @@ importers:
       '@acme/api':
         specifier: '*'
         version: link:../../packages/api
+      '@acme/db':
+        specifier: '*'
+        version: link:../../packages/db
       '@acme/eslint-config':
         specifier: '*'
         version: link:../../packages/config/eslint
