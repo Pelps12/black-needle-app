@@ -1,17 +1,22 @@
+// @ts-check
+import { env } from './src/env/server.mjs';
+
 /**
- * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation.
- * This is especially useful for Docker builds and Linting.
+ * Don't be scared of the generics here.
+ * All they do is to give us autocompletion when using this.
+ *
+ * @template {import('next').NextConfig} T
+ * @param {T} config - A generic parameter that flows through to the return type
+ * @constraint {{import('next').NextConfig}}
  */
-// !process.env.SKIP_ENV_VALIDATION && (await import("./src/env.mjs"));
+function defineNextConfig(config) {
+	return config;
+}
 
-/** @type {import("next").NextConfig} */
-const config = {
-  reactStrictMode: true,
-  /** Enables hot reloading for local packages without a build step */
-  transpilePackages: ["@acme/api", "@acme/auth", "@acme/db"],
-  /** We already do linting and typechecking as separate tasks in CI */
-  eslint: { ignoreDuringBuilds: !!process.env.CI },
-  typescript: { ignoreBuildErrors: !!process.env.CI },
-};
-
-export default config;
+export default defineNextConfig({
+	reactStrictMode: true,
+	swcMinify: true,
+	images: {
+		domains: ['lh3.googleusercontent.com', 'pbs.twimg.com', 'ucarecdn.com']
+	}
+});

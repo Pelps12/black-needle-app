@@ -1,0 +1,81 @@
+{
+    "reviews":[
+        {
+            "id": 1,
+            "title": "Very good",
+            "desc": "Blah blah blah blah blah blah blah blah"
+        },
+        {
+            "id": 2,
+            "title": "Very bad",
+            "desc": "ah ah ah ah ah ah ah ah"
+        }
+    ],
+    "posts": [
+        {
+            "id": 1,
+            "title": "Jollof Rice",
+            "content":[
+                {
+                    "id": 1,
+                    "url": "/jollof.jpg"
+                },
+                {
+                    "id": 2,
+                    "url": "/jollof.jpg"
+                },
+                {
+                    "id": 3,
+                    "url": "/jollof.jpg"
+                },
+                {
+                    "id": 4,
+                    "url": "/jollof.jpg"
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "title": "Bean Rice",
+            "content":[
+                {
+                    "id": 1,
+                    "url": "/avatar.png"
+                },
+                {
+                    "id": 2,
+                    "url": "/avatar.png"
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "title": "Fried Rice",
+            "content":[
+                {
+                    "id": 1,
+                    "url": "/avatar.png"
+                },
+                {
+                    "id": 2,
+                    "url": "/avatar.png"
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "title": "Red Rice",
+            "content":[
+                {
+                    "id": 1,
+                    "url": "/avatar.png"
+                },
+                {
+                    "id": 2,
+                    "url": "/avatar.png"
+                }
+            ]
+        }
+    ]
+}
+	
