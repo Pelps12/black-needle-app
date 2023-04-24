@@ -53,6 +53,7 @@ model User {
   password      String?
   phoneVerified Boolean?      @default(false) @map("phone_verified")
   phoneNumber   String?
+  paymentId     String?
   role          Role          @default(BUYER)
   cart          Cart?
   seller        Seller?

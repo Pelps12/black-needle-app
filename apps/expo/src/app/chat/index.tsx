@@ -44,20 +44,23 @@ const Message = ({
   );
   return (
     <>
-      {userId && (
+      {userId && otherUser && (
         <Link
-          href={`/chat/${data.id}`}
+          href={`/chat/${otherUser.userId}`}
           className=" my-auto flex cursor-pointer flex-row items-center justify-center border-b border-gray-300 p-3 text-sm"
         >
-          {otherUser?.user.image ? (
-            <Image
-              className="h-16 w-16 rounded-full "
-              source={otherUser?.user.image}
-              alt="username"
-            />
-          ) : (
-            <View className="h-16 w-16 rounded-full bg-[#d9d9d9]" />
-          )}
+          <View>
+            {otherUser?.user.image ? (
+              <Image
+                className="h-16 w-16 rounded-full "
+                source={otherUser?.user.image}
+                alt="username"
+              />
+            ) : (
+              <View className="h-16 w-16 rounded-full bg-[#d9d9d9]" />
+            )}
+          </View>
+
           <View className="w-full">
             <View className="flex justify-between">
               <Text className="ml-2 block font-semibold text-gray-600">

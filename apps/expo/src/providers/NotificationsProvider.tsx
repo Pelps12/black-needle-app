@@ -56,42 +56,40 @@ const NotificationsProvider = ({ children }: { children: React.ReactNode }) => {
   const notificationListener = useRef<any>();
   const responseListener = useRef<any>();
   const router = useRouter();
-  const { isSignedIn } = useAuth();
   useEffect(() => {
-    if (isSignedIn) {
-      console.log(isSignedIn);
-      registerForPushNotificationsAsync().then((token) => {
-        token &&
-          tokenMutation.mutate({
-            expoToken: token,
-          });
-        setExpoPushToken(token);
+    console.log("I AM HER IN JERICO");
+    registerForPushNotificationsAsync().then((token) => {
+      token &&
+        tokenMutation.mutate({
+          expoToken: token,
+        });
+      setExpoPushToken(token);
+    });
+
+    notificationListener.current =
+      Notifications.addNotificationReceivedListener((notification) => {
+        setNotification(notification);
       });
 
-      notificationListener.current =
-        Notifications.addNotificationReceivedListener((notification) => {
-          setNotification(notification);
+    responseListener.current =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        console.log(response);
+        router.push({
+          pathname: "chat/[id]",
+          params: {
+            id: response.notification.request.content.data["senderId"],
+          },
         });
+        console.log(response.notification.request.content.data["senderId"]);
+      });
 
-      responseListener.current =
-        Notifications.addNotificationResponseReceivedListener((response) => {
-          router.push({
-            pathname: "chat/[id]",
-            params: {
-              id: response.notification.request.content.data["senderId"],
-            },
-          });
-          console.log(response.notification.request.content.data["senderId"]);
-        });
-
-      return () => {
-        Notifications.removeNotificationSubscription(
-          notificationListener.current,
-        );
-        Notifications.removeNotificationSubscription(responseListener.current);
-      };
-    }
-  }, [isSignedIn]);
+    return () => {
+      Notifications.removeNotificationSubscription(
+        notificationListener.current,
+      );
+      Notifications.removeNotificationSubscription(responseListener.current);
+    };
+  }, []);
   return <>{children}</>;
 };
 

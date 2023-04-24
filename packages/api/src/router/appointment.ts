@@ -1,14 +1,17 @@
-/* eslint-disable @typescript-eslint/restrict-plus-operands */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
+import {
+  Expo,
+  ExpoPushMessage,
+  type ExpoPushTicket,
+  type ExpoPushToken,
+} from "expo-server-sdk";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { Day } from "@acme/db";
 
 import { protectedProcedure, publicProcedure, router } from "../trpc";
+
+const expo = new Expo({ accessToken: process.env.EXPO_ACCESS_TOKEN });
 
 export const appointmentRouter = router({
   getFreeTimeslots: publicProcedure
@@ -124,12 +127,9 @@ export const appointmentRouter = router({
         sellerAvailability: z.string(),
         date: z.date(),
         priceId: z.string(),
-        origin: z.string(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      console.log(input.date);
-
       if (input.date < new Date()) {
         throw new TRPCError({
           code: "BAD_REQUEST",
@@ -181,58 +181,107 @@ export const appointmentRouter = router({
               },
             },
           },
+          seller: {
+            include: {
+              user: {
+                include: {
+                  tokens: true,
+                },
+              },
+            },
+          },
         },
       });
       if (appointment) {
-        /* const session = await stripe.checkout.sessions.create({
-					line_items: [
-						{
-							price_data: {
-								currency: 'usd',
-								product_data: {
-									name: appointment.price.name,
-									images: appointment.price.category.Image.map((image) => image.link)
-								},
-								unit_amount: appointment.price.amount * 100
-							},
-							quantity: 1
-						}
-					],
-					success_url: `${env.NEXT_PUBLIC_URL}/profile`,
-					cancel_url: `${input.origin}/?canceled=true`,
-					custom_text: {
-						submit: {
-							message:
-								'We have 15% service charge.\n We are working on making this reflect more clearly'
-						}
-					},
-					mode: 'payment',
-					payment_intent_data: {
-						transfer_group: appointment.id,
+        const expoTokens: ExpoPushToken[] = appointment.seller.user.tokens
+          .map((token) => token.token)
+          .filter((token) => Expo.isExpoPushToken(token));
 
-						metadata: {
-							userId: ctx.session.user.id,
-							type: 'appointment',
-							username: ctx.session.user.name || 'Unknown User',
-							seller: JSON.stringify({
-								id: appointment.id,
-								sellerNumber: timeslot.seller.phoneNumber
-							})
-						}
-					}
-				}); */
-        //CONVERT TO PUSH NOTIFICATIONS
-        /* const messageCalls: Promise<MessageInstance>[] = [];
-
-				const message = await twilio.messages.create({
-					body: `Appointment for ${appointment.price.name} from ${
-						ctx.session.user.name || 'Customer'
-					}.\nGo to https://sakpa.co/profile to approve the order`,
-					to: `+1${timeslot.seller.phoneNumber}`,
-					messagingServiceSid: env.MESSAGING_SID
-				}); */
+        if (expoTokens.length > 0) {
+          const ticket = await expo.sendPushNotificationsAsync([
+            {
+              to: expoTokens,
+              title: `New Appointment from ${
+                ctx.auth.user?.username ?? "User"
+              }`,
+              body: "Respond to their request",
+              sound: "default",
+              data: {
+                senderId: ctx.auth.userId,
+              },
+            },
+          ]);
+          console.log(ticket);
+        }
       }
 
       return appointment;
+    }),
+  getAppointment: protectedProcedure
+    .input(
+      z.object({
+        sellerMode: z.boolean().default(false),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      if (input.sellerMode) {
+        const appointments = await ctx.prisma.appointment.findMany({
+          where: {
+            price: {
+              category: {
+                sellerId: ctx.auth.userId,
+              },
+            },
+          },
+          include: {
+            price: {
+              include: {
+                category: {
+                  include: {
+                    Image: true,
+                    seller: {
+                      select: {
+                        downPaymentPercentage: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          orderBy: {
+            updatedAt: "desc",
+          },
+        });
+        console.log(appointments);
+        return appointments;
+      } else {
+        const appointment = await ctx.prisma.appointment.findMany({
+          where: {
+            userId: ctx.auth.userId,
+          },
+          include: {
+            price: {
+              include: {
+                category: {
+                  include: {
+                    Image: true,
+                    seller: {
+                      select: {
+                        downPaymentPercentage: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          orderBy: {
+            updatedAt: "desc",
+          },
+        });
+        console.log(appointment);
+        return appointment;
+      }
     }),
 });

@@ -8,9 +8,10 @@ import {
   View,
 } from "react-native";
 import { Image } from "expo-image";
-import { useSearchParams } from "expo-router";
+import { Link, useSearchParams } from "expo-router";
 
 import Modal from "../../components/Modal";
+import Categories from "../../components/Seller/Categories";
 import Prices from "../../components/Seller/Prices";
 import { trpc } from "../../utils/trpc";
 
@@ -45,14 +46,14 @@ const SellerPage = () => {
           <Text className=" text-4xl font-semibold">
             {data?.user?.name ?? "Unknown"}
           </Text>
-          <Pressable
-            className={`my-2 flex flex-row content-center items-center justify-center  rounded-md bg-[#1dbaa7]   text-black shadow-sm`}
-            onPress={() => console.log(":)")}
+          <Link
+            className={`my-2 flex flex-row content-center items-center justify-center rounded-xl  bg-[#1dbaa7] px-3 py-1  text-black shadow-sm`}
+            href={`/chat/${idString}`}
           >
-            <Text className="px-4 py-2 text-center text-2xl font-semibold text-white">
-              Chat
+            <Text className=" text-center text-xl font-semibold text-white">
+              CHAT
             </Text>
-          </Pressable>
+          </Link>
         </View>
       </View>
 
@@ -92,6 +93,13 @@ const SellerPage = () => {
         {activeTab == "PRICES" && data?.user?.seller?.Category && (
           <Prices
             prices={data?.user?.seller?.Category}
+            sellerId={data.user.id}
+          />
+        )}
+
+        {activeTab == "CATEGORIES" && data?.user?.seller?.Category && (
+          <Categories
+            categories={data?.user?.seller.Category}
             sellerId={data.user.id}
           />
         )}
