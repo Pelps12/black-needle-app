@@ -23,6 +23,8 @@ const server = z.object({
   DISCORD_CLIENT_SECRET: z.string(),
   CLERK_SECRET_KEY: z.string(),
   EXPO_ACCESS_TOKEN: z.string(),
+  ABLY_API_KEY: z.string(),
+  ABLY_HASH: z.string(),
 });
 
 /**
@@ -51,6 +53,8 @@ const processEnv = {
     process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
   CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
   EXPO_ACCESS_TOKEN: process.env.EXPO_ACCESS_TOKEN,
+  ABLY_API_KEY: process.env.ABLY_API_KEY,
+  ABLY_HASH: process.env.ABLY_HASH,
 };
 
 // Don't touch the part below

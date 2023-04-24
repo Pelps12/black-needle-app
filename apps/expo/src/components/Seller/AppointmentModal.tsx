@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import {
+  Alert,
   FlatList,
   Pressable,
   SafeAreaView,
@@ -28,7 +27,7 @@ import {
   startOfToday,
 } from "date-fns";
 
-import type { AppRouter } from "@acme/api/src/root";
+import type { AppRouter } from "@acme/api/index";
 
 import { trpc } from "../../utils/trpc";
 
@@ -108,22 +107,19 @@ const BuyerAppointment = ({
         sellerAvailability: time.availabilityId,
         date: time.date,
         priceId: priceId,
-        origin: document.referrer,
       },
       {
-        onSuccess: (data) => {
+        onSuccess: () => {
           // var windowReference = window.open();
           // windowReference.location.assign(`${env.NEXT_PUBLIC_URL}/profile`)
           // window.open(`${env.NEXT_PUBLIC_URL}/profile`, '_self');
-          router.push(`profile?defaultIndex=1`);
+          router.push(`/schedule`);
         },
         onError: (err) => {
           //Unreachable
           if (err.data?.code === "UNAUTHORIZED") {
             if (err.message !== "UNAUTHORIZED") {
-              alert(err.message);
-            } else {
-              document.getElementById("my-modal-4")?.click();
+              Alert.alert(err.message);
             }
           }
         },
@@ -264,7 +260,7 @@ const BuyerAppointment = ({
             )}
           </View>
           {selectedTimeSlot && (
-            <>
+            <Fragment>
               <View
                 className=" mx-4 flex flex-row items-center justify-between 
 							"
@@ -295,7 +291,7 @@ const BuyerAppointment = ({
                   Note: Appointment still requires seller approval
                 </Text>
               </View>
-            </>
+            </Fragment>
           )}
         </View>
       </SafeAreaView>

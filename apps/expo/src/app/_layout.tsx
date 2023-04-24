@@ -1,14 +1,18 @@
 import React from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Constants from "expo-constants";
+import { useFonts } from "expo-font";
 import { Tabs } from "expo-router";
 import * as SecureStore from "expo-secure-store";
+import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { ClerkProvider, SignedIn, SignedOut } from "@clerk/clerk-expo";
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
+import { StripeProvider } from "@stripe/stripe-react-native";
 
 import { SignInSignUpScreen } from "../components/SignIn";
 import Header from "../components/header";
+import AblyProvider from "../providers/AblyProvider";
 import NotificationsProvider from "../providers/NotificationsProvider";
 import { TRPCProvider } from "../utils/trpc";
 
@@ -21,9 +25,27 @@ const tokenCache = {
   },
 };
 
+SplashScreen.preventAutoHideAsync(); //Prevent the splash screen from automatically removing
+
 // This is the main layout of the app
 // It wraps your pages with the providers they need
 const RootLayout = () => {
+  const [fontsLoaded] = useFonts({
+    MTBold: require("../../assets/fonts/static/Montserrat-Bold.ttf"),
+    MTSemi: require("../../assets/fonts/static/Montserrat-SemiBold.ttf"),
+    MTMedium: require("../../assets/fonts/static/Montserrat-Medium.ttf"),
+  });
+
+  const onLayoutRootView = React.useCallback(async () => {
+    if (fontsLoaded) {
+      await SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
   return (
     <ClerkProvider
       publishableKey={
@@ -35,117 +57,128 @@ const RootLayout = () => {
         <TRPCProvider>
           <SafeAreaProvider>
             <NotificationsProvider>
-              {/*
-          The Stack component displays the current page.
-          It also allows you to configure your screens 
-        */}
-              {/*  <Stack
-          screenOptions={{
-            headerStyle: {
-              backgroundColor: "#F2F2F2",
-            },
+              <AblyProvider>
+                <StripeProvider
+                  publishableKey={
+                    Constants.expoConfig?.extra
+                      ?.STRIPE_PUBLISHABLE_KEY as string
+                  }
+                >
+                  <Tabs
+                    screenOptions={{
+                      headerStyle: {
+                        backgroundColor: "#F2F2F2",
+                      },
 
-            header: () => <Header />,
-            headerShadowVisible: false,
-          }}
-        /> */}
-              <Tabs
-                screenOptions={{
-                  headerStyle: {
-                    backgroundColor: "#F2F2F2",
-                  },
+                      header: () => <Header />,
+                      headerShadowVisible: false,
+                      tabBarStyle: {
+                        backgroundColor: "#D9D9D9",
+                        borderRadius: 15,
+                        height: 90,
+                        paddingTop: 10,
+                      },
+                      tabBarActiveTintColor: "#72a2f9",
+                    }}
+                    initialRouteName="index"
+                  >
+                    <Tabs.Screen
+                      name="index"
+                      options={{
+                        title: "Home",
+                        tabBarIcon: ({ color }) => (
+                          <FontAwesome name="home" size={24} color={color} />
+                        ),
+                      }}
+                    />
+                    <Tabs.Screen
+                      name="seller/[id]"
+                      options={{
+                        title: "Seller",
+                        href: null,
+                        tabBarIcon: ({ color }) => (
+                          <MaterialIcons
+                            name="attach-money"
+                            size={24}
+                            color={color}
+                          />
+                        ),
+                      }}
+                    />
 
-                  header: () => <Header />,
-                  headerShadowVisible: false,
-                  tabBarStyle: {
-                    backgroundColor: "#D9D9D9",
-                    borderRadius: 15,
-                    height: 90,
-                    paddingTop: 10,
-                  },
-                  tabBarActiveTintColor: "#72a2f9",
-                }}
-                initialRouteName="index"
-              >
-                <Tabs.Screen
-                  name="index"
-                  options={{
-                    title: "Home",
-                    tabBarIcon: ({ color }) => (
-                      <FontAwesome name="home" size={24} color={color} />
-                    ),
-                  }}
-                />
-                <Tabs.Screen
-                  name="seller/[id]"
-                  options={{
-                    title: "Seller",
-                    href: null,
-                    tabBarIcon: ({ color }) => (
-                      <MaterialIcons
-                        name="attach-money"
-                        size={24}
-                        color={color}
-                      />
-                    ),
-                  }}
-                />
+                    <Tabs.Screen
+                      name="post/[id]"
+                      options={{
+                        href: null,
+                        title: "Schedule2",
+                        tabBarIcon: ({ color }) => (
+                          <MaterialIcons
+                            name="schedule"
+                            size={24}
+                            color={color}
+                          />
+                        ),
+                      }}
+                    />
 
-                <Tabs.Screen
-                  name="post/[id]"
-                  options={{
-                    href: null,
-                    title: "Schedule",
-                    tabBarIcon: ({ color }) => (
-                      <MaterialIcons name="schedule" size={24} color={color} />
-                    ),
-                  }}
-                />
+                    <Tabs.Screen
+                      name="schedule"
+                      options={{
+                        title: "Schedule",
+                        tabBarIcon: ({ color }) => (
+                          <MaterialIcons
+                            name="schedule"
+                            size={24}
+                            color={color}
+                          />
+                        ),
+                      }}
+                    />
 
-                <Tabs.Screen
-                  name="schedule"
-                  options={{
-                    title: "Schedule",
-                    tabBarIcon: ({ color }) => (
-                      <MaterialIcons name="schedule" size={24} color={color} />
-                    ),
-                  }}
-                />
+                    <Tabs.Screen
+                      name="profile"
+                      options={{
+                        title: "Profile",
+                        tabBarIcon: ({ color }) => (
+                          <FontAwesome name="user" size={24} color={color} />
+                        ),
+                      }}
+                    />
 
-                <Tabs.Screen
-                  name="profile"
-                  options={{
-                    title: "Profile",
-                    tabBarIcon: ({ color }) => (
-                      <FontAwesome name="user" size={24} color={color} />
-                    ),
-                  }}
-                />
+                    <Tabs.Screen
+                      name="chat/index"
+                      options={{
+                        href: null,
+                        title: "Chat",
+                        tabBarIcon: ({ color }) => (
+                          <MaterialIcons
+                            name="schedule"
+                            size={24}
+                            color={color}
+                          />
+                        ),
+                      }}
+                    />
 
-                <Tabs.Screen
-                  name="chat/index"
-                  options={{
-                    href: null,
-                    title: "Chat",
-                    tabBarIcon: ({ color }) => (
-                      <MaterialIcons name="schedule" size={24} color={color} />
-                    ),
-                  }}
-                />
+                    <Tabs.Screen
+                      name="chat/[id]"
+                      options={{
+                        href: null,
+                        title: "ChatBox",
+                        tabBarIcon: ({ color }) => (
+                          <MaterialIcons
+                            name="schedule"
+                            size={24}
+                            color={color}
+                          />
+                        ),
+                      }}
+                    />
+                  </Tabs>
 
-                <Tabs.Screen
-                  name="chat/[id]"
-                  options={{
-                    href: null,
-                    title: "ChatBox",
-                    tabBarIcon: ({ color }) => (
-                      <MaterialIcons name="schedule" size={24} color={color} />
-                    ),
-                  }}
-                />
-              </Tabs>
-
-              <StatusBar />
+                  <StatusBar />
+                </StripeProvider>
+              </AblyProvider>
             </NotificationsProvider>
           </SafeAreaProvider>
         </TRPCProvider>
