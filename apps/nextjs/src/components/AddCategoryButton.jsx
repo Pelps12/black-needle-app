@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
 import BlankGallaryTab from './BlankGallaryTab';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@clerk/nextjs';
+import React, { useState } from 'react';
 
 const AddCategoryButton = ({
 	disableEditButton,
@@ -12,7 +12,6 @@ const AddCategoryButton = ({
 	setSelectedFile,
 	numberOfImages,
 	setNumberOfImages,
-	status,
 	setDeleteDisableButton,
 	setEditDisableButton,
 	setDisableAddCategoryButton,
@@ -24,7 +23,7 @@ const AddCategoryButton = ({
 	onSelectFile
 }) => {
 	const [blankCategory, showBlankCategory] = useState(false);
-	const { data: session } = useSession();
+	const { userId, isSignedIn } = useAuth();
 	const [deleteBlank, setDeleteBlank] = useState(false);
 	const onClick = () => {
 		showBlankCategory(true);
@@ -58,7 +57,7 @@ const AddCategoryButton = ({
 					onSelectFile={onSelectFile}
 				/>
 			)}
-			{status === 'authenticated' && session.user.id === uid ? (
+			{isSignedIn && userId === uid ? (
 				<div className="m-4 flex justify-center ">
 					<button
 						disabled={disableAddCategoryButton}

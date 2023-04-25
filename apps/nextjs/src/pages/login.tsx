@@ -1,26 +1,8 @@
-import LoginForm from '../components/LoginForm';
-import { getCsrfToken, getProviders } from 'next-auth/react';
-import type { ClientSafeProvider, LiteralUnion } from 'next-auth/react';
-import { CtxOrReq } from 'next-auth/client/_utils';
-import { BuiltInProviderType } from 'next-auth/providers';
+import { SignIn } from '@clerk/nextjs';
 
-const Login = ({
-	providers
-}: {
-	providers: Record<LiteralUnion<BuiltInProviderType, string>, ClientSafeProvider> | null;
-}) => {
-	console.log(providers);
-	return <LoginForm providers={providers} />;
-};
-
-export async function getServerSideProps(context: CtxOrReq | undefined) {
-	const providers = await getProviders();
-	console.log('Hello');
-	console.log(providers);
-	const test = await getCsrfToken(context);
-	return {
-		props: { providers }
-	};
-}
-
-export default Login;
+const SignInPage = () => (
+	<div className="flex justify-center p-5">
+		<SignIn path="/login" routing="path" signUpUrl="/sign-up" />
+	</div>
+);
+export default SignInPage;

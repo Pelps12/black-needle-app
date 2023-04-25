@@ -1,13 +1,14 @@
-import { useSession } from 'next-auth/react';
-import { NextPage } from 'next/types';
-import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
+import { trpc } from '../utils/trpc';
 import Modal from './Modal';
 import ProfileEdit from './ProfileEdit';
+import { useAuth, useUser } from '@clerk/nextjs';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { trpc } from '../utils/trpc';
+import { NextPage } from 'next/types';
+import React, { useEffect, useState } from 'react';
+
 const ProfileSideBar: NextPage = () => {
-	const { data: session, status } = useSession();
+	const { user, isSignedIn, isLoaded } = useUser();
 	const [isOpen, setIsOpen] = useState(false);
 	const router = useRouter();
 	const stripePageMut = trpc.user.createStripeAccountLink.useMutation();
@@ -39,12 +40,12 @@ const ProfileSideBar: NextPage = () => {
 		<div className="border-b lg:border-b-0 border-r  border-gray-300 lg:col-span-1">
 			<div className="m-3 ">
 				<div className="flex items-center gap-5 my-3">
-					{status !== 'loading' ? (
+					{isLoaded || isSignedIn ? (
 						<div className="avatar">
 							<div className="w-24 rounded-full">
 								<Image
 									className="rounded-full w-auto object-cover"
-									src={session?.user?.image || '/Missing_avatar.svg'}
+									src={user?.profileImageUrl || '/Missing_avatar.svg'}
 									alt="User"
 									width={100}
 									height={100}
@@ -57,8 +58,8 @@ const ProfileSideBar: NextPage = () => {
 
 					<div className="flex flex-col gap-2 max-w-sm">
 						{' '}
-						{session?.user ? (
-							<span className="text-2xl uppercase font-bold ">{session?.user.name}</span>
+						{user ? (
+							<span className="text-2xl uppercase font-bold ">{user.username}</span>
 						) : (
 							<p className="h-[2rem] w-32 animate-pulse bg-gray-400 rounded-md" />
 						)}
@@ -66,7 +67,7 @@ const ProfileSideBar: NextPage = () => {
 				</div>
 
 				<div className="flex justify-end gap-2">
-					{session?.user?.role !== 'BUYER' && (
+					{user?.publicMetadata.role !== 'BUYER' && (
 						<button className="btn btn-sm mr-2 btn-primary" onClick={(e) => handleSellerStripe()}>
 							{stripePageMut.isLoading && (
 								<svg
@@ -99,7 +100,7 @@ const ProfileSideBar: NextPage = () => {
 				</div>
 
 				<Modal isOpen={isOpen} closeModal={closeModal}>
-					<ProfileEdit isOpen={isOpen} session={session} closeModal={closeModal} />
+					<ProfileEdit isOpen={isOpen} closeModal={closeModal} />
 				</Modal>
 			</div>
 		</div>

@@ -4,17 +4,16 @@ import MixpanelProvider from '../../providers/Mixpanel';
 import Layout from '../components/Layout';
 import SEOConfig from '../utils/next-seo.config';
 import { trpc } from '../utils/trpc';
-import type { Session } from 'next-auth';
-import { SessionProvider } from 'next-auth/react';
+import { ClerkProvider } from '@clerk/nextjs';
 import { DefaultSeo } from 'next-seo';
 import type { AppType } from 'next/dist/shared/lib/utils';
 import React from 'react';
 
-const MyApp: AppType<{ session: Session | null }> = ({ Component, pageProps }) => {
+const MyApp: AppType = ({ Component, pageProps }) => {
 	return (
 		<React.Fragment>
 			<DefaultSeo {...SEOConfig} />
-			<SessionProvider session={pageProps.session}>
+			<ClerkProvider {...pageProps}>
 				<MixpanelProvider>
 					<AblyProvider>
 						<Layout>
@@ -22,7 +21,7 @@ const MyApp: AppType<{ session: Session | null }> = ({ Component, pageProps }) =
 						</Layout>
 					</AblyProvider>
 				</MixpanelProvider>
-			</SessionProvider>
+			</ClerkProvider>
 		</React.Fragment>
 	);
 };

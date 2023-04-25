@@ -1,21 +1,20 @@
-import React, { Fragment, useEffect, useRef, useState } from 'react';
-import { useSession } from 'next-auth/react';
-import { trpc } from '../utils/trpc';
-import Image from 'next/image';
-import AddCategoryButton from './AddCategoryButton';
-import SaveAndDeleteCategory from './SaveAndDeleteCategory';
-import EditAndSaveCategory from './EditAndSaveCategory';
-import RemoveImageButton from './RemoveImageButton';
 import { env } from '../env/client.mjs';
-import dataURItoBlob from '@utils/URItoFile';
 import { useLoadingStore } from '../utils/sellerUploadStore';
-
+import { trpc } from '../utils/trpc';
+import AddCategoryButton from './AddCategoryButton';
+import EditAndSaveCategory from './EditAndSaveCategory';
 import Modal from './Modal';
+import RemoveImageButton from './RemoveImageButton';
+import SaveAndDeleteCategory from './SaveAndDeleteCategory';
+import { useAuth } from '@clerk/nextjs';
+import dataURItoBlob from '@utils/URItoFile';
+import Image from 'next/image';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
 
 const GalleryTab = ({ uid, posts, setCategories, categories }) => {
 	const catUpdate = trpc.user.updateImage.useMutation();
 	const catDelete = trpc.user.deleteCategory.useMutation();
-	const { data: session, status } = useSession();
+	const { userId, isSignedIn } = useAuth();
 	const [selectedFile, setSelectedFile] = useState();
 	const [oldCategory, setOldCategory] = useState(null);
 	const [disableSaveButton, setSaveDisableButton] = useState('');
@@ -110,7 +109,7 @@ const GalleryTab = ({ uid, posts, setCategories, categories }) => {
 		}
 	};
 
-	if (status === 'authenticated') console.log(session.user.id);
+	if (isSignedIn) console.log(userId);
 	const handleEditClick = (event, categories) => {
 		event.preventDefault();
 		setEditCategory(categories.id);
@@ -276,7 +275,7 @@ const GalleryTab = ({ uid, posts, setCategories, categories }) => {
 				categories !== undefined &&
 				categories.map((post) => (
 					<div key={post.id}>
-						{status === 'authenticated' && session.user.id === uid && editCategory === post.id ? (
+						{isSignedIn && userId === uid && editCategory === post.id ? (
 							<SaveAndDeleteCategory
 								uid={uid}
 								disableCancelButton={disableCancelButton}
@@ -289,8 +288,6 @@ const GalleryTab = ({ uid, posts, setCategories, categories }) => {
 							/>
 						) : (
 							<EditAndSaveCategory
-								status={status}
-								session={session}
 								uid={uid}
 								disableDeleteButton={disableDeleteButton}
 								disableEditButton={disableEditButton}
@@ -365,7 +362,6 @@ const GalleryTab = ({ uid, posts, setCategories, categories }) => {
 				numberOfImages={numberOfImages}
 				setNumberOfImages={setNumberOfImages}
 				uid={uid}
-				status={status}
 				disableAddCategoryButton={disableAddCategoryButton}
 				setDisableAddCategoryButton={setDisableAddCategoryButton}
 				posts={posts}

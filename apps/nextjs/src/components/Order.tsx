@@ -1,19 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { Tab } from '@headlessui/react';
+import { env } from '../env/client.mjs';
 import { trpc } from '../utils/trpc';
+import Appointment from './Appointment';
+import { useAuth, useUser } from '@clerk/nextjs';
+import { Tab } from '@headlessui/react';
 import { Category, OrderOnItem, Price, Image as PrismaImage, OrderStatus } from '@prisma/client';
 import Image from 'next/image';
-import { useSession } from 'next-auth/react';
-import { env } from '../env/client.mjs';
-import Appointment from './Appointment';
 import { useRouter } from 'next/router';
+import React, { useEffect, useState } from 'react';
 
 function classNames(...classes: string[]) {
 	return classes.filter(Boolean).join(' ');
 }
 
 const Order: React.FC = () => {
-	const { data: session, status } = useSession();
+	const { user, isSignedIn } = useUser();
 	const router = useRouter();
 	const ind = router.query.defaultIndex;
 	const index = typeof ind === 'string' ? ind : typeof ind === 'undefined' ? 'undefined' : ind[0]!;
@@ -85,7 +85,7 @@ const Order: React.FC = () => {
 					</Tab>
 				</Tab.List>
 				<div className="flex justify-end items-center">
-					{session?.user?.role === 'SELLER' && (
+					{user?.publicMetadata.role === 'SELLER' && (
 						<div className="flex items-center gap-2 font-semibold">
 							SELLER MODE
 							<input

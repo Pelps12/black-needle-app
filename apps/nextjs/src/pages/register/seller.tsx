@@ -1,17 +1,17 @@
+import { env } from '../../env/client.mjs';
+import { colourOptions as colorOptions, ServicesOption } from '../../utils/data';
+import { trpc } from '../../utils/trpc';
+import { useAuth } from '@clerk/nextjs';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { NextSeo } from 'next-seo';
+import { useRouter } from 'next/router';
 import React, { useEffect, useRef } from 'react';
-import { useSession } from 'next-auth/react';
 import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { trpc } from '../../utils/trpc';
-import { colourOptions as colorOptions, ServicesOption } from '../../utils/data';
 import { GroupBase, StylesConfig } from 'react-select';
-import CreatableSelect from 'react-select/creatable';
 import makeAnimated from 'react-select/animated';
-import { useRouter } from 'next/router';
-import { env } from '../../env/client.mjs';
-import { NextSeo } from 'next-seo';
+import CreatableSelect from 'react-select/creatable';
+import * as z from 'zod';
 
 type FormFields = {
 	phone_number: string;
@@ -43,7 +43,7 @@ const SellerRegister = () => {
 	const mutation = trpc.user.createSeller.useMutation();
 	const refreshStripeMut = trpc.user.refreshStripe.useMutation();
 	const verifyStripe = trpc.user.verifyStripe.useMutation();
-	const { data: session, status } = useSession();
+	const { userId, isSignedIn } = useAuth();
 
 	const { query } = useRouter();
 	const [downPaymentValue, setDownPaymentValue] = useState(0);
@@ -134,7 +134,7 @@ const SellerRegister = () => {
 				});
 			}
 		}
-	}, [query, session]);
+	}, [query, userId]);
 	return (
 		<>
 			<NextSeo

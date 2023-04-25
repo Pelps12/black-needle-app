@@ -1,9 +1,8 @@
+import { env } from '../env/client.mjs';
+import { trpc } from '../utils/trpc';
+import { useAuth, useUser } from '@clerk/nextjs';
 import { Dialog, Tab, Transition } from '@headlessui/react';
 import React, { Fragment, useEffect, useRef, useState } from 'react';
-import { useSession } from 'next-auth/react';
-import { Session } from 'next-auth';
-import { trpc } from '../utils/trpc';
-import { env } from '../env/client.mjs';
 
 function classNames(...classes: string[]) {
 	return classes.filter(Boolean).join(' ');
@@ -11,17 +10,18 @@ function classNames(...classes: string[]) {
 
 const ProfileEdit = ({
 	isOpen,
-	session,
+
 	closeModal
 }: {
 	isOpen: boolean;
-	session: Session | null;
+
 	closeModal: () => void;
 }) => {
+	const { user, isSignedIn } = useUser();
 	const [imageButton, setImageButton] = useState(false);
 	const [selectedFile, setSelectedFile] = useState<File>();
 	const [selectedDataURI, setSelectedDataURI] = useState<string>();
-	const [name, setName] = useState(session?.user?.name);
+	const [name, setName] = useState(userId);
 
 	const updateUser = trpc.user.updateUser.useMutation();
 	const getUser = trpc.user.getMe.useQuery(undefined, {
@@ -29,7 +29,7 @@ const ProfileEdit = ({
 		onSuccess: (data) => {
 			setPhoneNumber(data?.phoneNumber || '');
 			console.log(
-				name === session?.user?.name && !selectedFile && !phoneNumber
+				name === user?.username && !selectedFile && !phoneNumber
 					? true
 					: phoneNumber === (getUser.data?.phoneNumber || '')
 			);
@@ -134,7 +134,7 @@ const ProfileEdit = ({
 							</label>
 
 							<img
-								src={selectedDataURI || session?.user?.image || '/Missing_avatar.svg'}
+								src={selectedDataURI || user?.profileImageUrl || '/Missing_avatar.svg'}
 								className="mx-auto cursor-pointer ml-0   rounded-full h-24 w-24 object-cover"
 								alt=""
 							/>
@@ -169,7 +169,7 @@ const ProfileEdit = ({
 						<div className="flex justify-end">
 							<button
 								className={`btn btn-sm  mr-0 text-right ${
-									(name === session?.user?.name &&
+									(name === user?.username &&
 										!selectedFile &&
 										(!phoneNumber ? true : phoneNumber === (getUser.data?.phoneNumber || ':)'))) ||
 									updateUser.isLoading

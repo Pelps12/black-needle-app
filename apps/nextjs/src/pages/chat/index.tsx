@@ -1,17 +1,17 @@
 //import dynamic from 'next/dynamic';
-import { useRouter } from 'next/router';
-import { GetServerSideProps, InferGetServerSidePropsType, NextPage } from 'next/types';
-import type { Session } from 'next-auth';
-import React, { MouseEvent } from 'react';
-import ChatSidebar from '../../components/ChatSidebar';
 
 import Chat from '../../components/Chat';
-import { useSession } from 'next-auth/react';
+import ChatSidebar from '../../components/ChatSidebar';
+import { useAuth } from '@clerk/nextjs';
 import { NextSeo } from 'next-seo';
+import { useRouter } from 'next/router';
+import { GetServerSideProps, InferGetServerSidePropsType, NextPage } from 'next/types';
+import React, { MouseEvent } from 'react';
+
 const ChatPage: NextPage = () => {
 	const router = useRouter();
 	const { id } = router.query;
-	const { data: session, status } = useSession();
+	const { userId, isSignedIn } = useAuth();
 
 	const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
 		e.preventDefault();
@@ -20,12 +20,12 @@ const ChatPage: NextPage = () => {
 	return (
 		<>
 			<NextSeo title="Chat | Sakpa" description="Chat with others for services on campus" />
-			{status === 'authenticated' && (
+			{isSignedIn && (
 				<div className=" mx-auto">
 					<div className="min-w-full border rounded lg:grid lg:grid-cols-3">
 						<ChatSidebar />
 						{(typeof id === 'string' || id === undefined) && (
-							<Chat id={session?.user?.id} rId={id} routerReady={router.isReady} />
+							<Chat id={userId} rId={id} routerReady={router.isReady} />
 						)}
 					</div>
 				</div>

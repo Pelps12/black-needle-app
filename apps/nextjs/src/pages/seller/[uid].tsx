@@ -1,19 +1,18 @@
-import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
 import SellersPage from '../../components/SellersPage';
-import fsPromises from 'fs/promises';
-import path from 'path';
-import { trpc } from '../../utils/trpc';
-import Head from 'next/head';
-import type { Category, Image, User } from '@prisma/client';
-import { NextSeo, ProfilePageJsonLd } from 'next-seo';
-import { env } from 'env/client.mjs';
-import { GetServerSideProps, NextPage } from 'next';
-import isbot from 'isbot';
-import { appRouter } from 'server/trpc/router/index';
-import { unstable_getServerSession } from 'next-auth';
 import { prisma } from '../../server/db/client';
+import { trpc } from '../../utils/trpc';
+import type { Category, Image, User } from '@prisma/client';
+import { env } from 'env/client.mjs';
+import fsPromises from 'fs/promises';
+import isbot from 'isbot';
+import { GetServerSideProps, NextPage } from 'next';
+import { NextSeo, ProfilePageJsonLd } from 'next-seo';
+import Head from 'next/head';
+import { useRouter } from 'next/router';
+import path from 'path';
+import React, { useEffect, useState } from 'react';
 import { getServerAuthSession } from 'server/common/get-server-auth-session';
+import { appRouter } from 'server/trpc/router/index';
 
 /* export async function getServerSideProps() {
 	const filePath = path.join(process.cwd(), 'Gallery.json');

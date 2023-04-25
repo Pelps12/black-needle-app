@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import ProfileCard from './ProfileCard';
-import PricesTab from './PricesTab';
+import { trpc } from '../utils/trpc';
+import Availability from './Availability';
 import GalleryTab from './GalleryTab';
+import PricesTab from './PricesTab';
+import ProfileCard from './ProfileCard';
 import RatingTab from './RatingTab';
 import Ratings from './Ratings';
-import { trpc } from '../utils/trpc';
-import { useEffectOnce } from 'react-use';
+import { useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/router';
-import Availability from './Availability';
-import { useSession } from 'next-auth/react';
+import React, { useState, useEffect } from 'react';
+import { useEffectOnce } from 'react-use';
 
 function classNames(...classes) {
 	return classes.filter(Boolean).join(' ');
@@ -16,7 +16,7 @@ function classNames(...classes) {
 
 const SellersPage = ({ uid, posts, reviews, user }) => {
 	const router = useRouter();
-	const { data: session, status } = useSession();
+	const { userId, isSignedIn } = useAuth();
 	const [active, setActive] = useState(
 		router.query.active === undefined ? 'CATEGORIES' : router.query.active
 	);
@@ -58,7 +58,7 @@ const SellersPage = ({ uid, posts, reviews, user }) => {
 						PRICES
 					</button>
 				</div>
-				{status === 'authenticated' && session.user.id === uid ? (
+				{isSignedIn && userId === uid ? (
 					<div className={`tab ${active === 'AVAILABILITY' && 'tab-active'}`}>
 						<button
 							onClick={() => onButtonClick('AVAILABILITY')}

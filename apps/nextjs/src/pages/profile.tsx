@@ -1,4 +1,8 @@
 //import dynamic from 'next/dynamic';
+
+import Order from '../components/Order';
+import ProfileSideBar from '../components/ProfileSideBar';
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 import {
 	GetServerSideProps,
@@ -6,12 +10,8 @@ import {
 	NextApiRequest,
 	NextPage
 } from 'next/types';
-import type { Session } from 'next-auth';
 import React, { MouseEvent } from 'react';
 
-import ProfileSideBar from '../components/ProfileSideBar';
-import Order from '../components/Order';
-import Head from 'next/head';
 const ProfilePage: NextPage = () => {
 	const router = useRouter();
 

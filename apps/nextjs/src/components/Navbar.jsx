@@ -3,16 +3,15 @@ import { trpc } from '../utils/trpc';
 import Modal from './Modal';
 import ShoppingCart from './ShoppingCart';
 import { assertConfiguration } from '@ably-labs/react-hooks';
+import { useUser } from '@clerk/nextjs';
 import { motion } from 'framer-motion';
-import { useSession, signOut, getProviders, signIn } from 'next-auth/react';
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 const Navbar = () => {
-	const { data: session, status } = useSession();
-	const [image, setImage] = useState(null);
+	const { user, isSignedIn, signOut, signIn, isLoaded } = useUser();
 	const [isOpen, setIsOpen] = useState(false);
 	const [isCart, setIsCart] = useState(false);
 	const products = trpc.cart.getCart.useQuery(undefined, {
@@ -51,15 +50,6 @@ const Navbar = () => {
 	const messageCount = uniqueItems(messages, 'name');
 
 	useEffect(() => {
-		//console.log(status);
-		if (status === 'authenticated') {
-			setImage(session?.user?.image);
-			//console.log(image);
-			//assertConfiguration().connect();
-		}
-	}, [session]);
-
-	useEffect(() => {
 		async function anyNameFunction() {
 			const { data, isSuccess } = await products.refetch();
 			if (isSuccess) {
@@ -69,11 +59,6 @@ const Navbar = () => {
 
 		// Execute the created function directly
 		anyNameFunction();
-	}, []);
-
-	useEffect(() => {
-		getProviders().then((providers) => setProviders(providers));
-		//console.log(providers);
 	}, []);
 
 	const handleLogout = (e) => {
@@ -122,36 +107,13 @@ const Navbar = () => {
 					)}
 
 					<div className="dropdown dropdown-end">
-						{status === 'unauthenticated' ? (
+						{!isSignedIn && isLoaded ? (
 							<>
 								<label tabIndex={0} className="btn btn-primary modal-button " htmlFor="my-modal-4">
 									SIGN IN
 								</label>
-								{/* <ul
-								tabIndex={0}
-								className="menu menu-compact dropdown-content mt-3 p-2 shadow-lg bg-base-100 rounded-box w-52"
-							>
-								{providers &&
-									providers !== undefined &&
-									Object.values(providers).map((provider) => (
-										<div key={provider.name} className="justify-center flex">
-											<button
-												className={`rounded-md content-center px-2 py-3 my-2 ${
-													provider.id === 'facebook'
-														? 'bg-[#1778F2] text-white'
-														: 'bg-slate-200 text-black'
-												}`}
-												onClick={() =>
-													signIn(provider.id, { callbackUrl: env.NEXT_PUBLIC_URL })
-												}
-											>
-												Sign in with {provider.name}
-											</button>
-										</div>
-									))}
-							</ul> */}
 							</>
-						) : status === 'loading' ? (
+						) : !isSignedIn && !isLoaded ? (
 							<label tabIndex={0} className=" avatar">
 								<div className="w-10 rounded-full">
 									<h2 className="h-10 w-10 rounded-full bg-gray-400 animate-pulse" />
@@ -162,7 +124,7 @@ const Navbar = () => {
 								<label tabIndex={0} className={`avatar `}>
 									<div className="w-10 rounded-full">
 										<Image
-											src={session?.user?.image || '/Missing_avatar.svg'}
+											src={user.profileImageUrl || '/Missing_avatar.svg'}
 											className="w-10 rounded-full"
 											width="100"
 											height="100"
@@ -181,8 +143,8 @@ const Navbar = () => {
 										<Link href="/chat">Chat</Link>
 									</li>
 									<li>
-										{session?.user.role === 'SELLER' ? (
-											<Link href={`/seller/${session?.user.id}`}>Seller Page</Link>
+										{user?.publicMetadata.role === 'SELLER' ? (
+											<Link href={`/seller/${user.id}`}>Seller Page</Link>
 										) : (
 											<Link href="/join">Become a Seller</Link>
 										)}

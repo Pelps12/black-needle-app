@@ -1,16 +1,15 @@
-import React, { useState, Fragment, useEffect, useRef } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
-import ProductForm from './ProductForm';
-import { trpc } from '../utils/trpc';
-import { useSession } from 'next-auth/react';
-import EditPrice from './EditPrice';
-import { useRouter } from 'next/router';
 import { useBearStore } from '../utils/messsageStore';
-import Image from 'next/image';
-import Modal from './Modal';
+import { trpc } from '../utils/trpc';
 import BuyerAppointment from './BuyerAppointment';
+import EditPrice from './EditPrice';
+import Modal from './Modal';
 import NewAppointmentModal from './NewAppointmentModal';
-
+import ProductForm from './ProductForm';
+import { useAuth } from '@clerk/nextjs';
+import { Dialog, Transition } from '@headlessui/react';
+import Image from 'next/image';
+import { useRouter } from 'next/router';
+import React, { useState, Fragment, useEffect, useRef } from 'react';
 import 'react-datepicker/dist/react-datepicker.css';
 
 const PricesTab = ({ productID, uid, posts, categories }) => {
@@ -25,7 +24,7 @@ const PricesTab = ({ productID, uid, posts, categories }) => {
 
 	const [isAppointmentOpen, setIsAppointmentOpen] = useState(false);
 	const [editPriceID, setEditPriceID] = useState(null);
-	const { data: session, status } = useSession();
+	const { userId, isSignedIn } = useAuth();
 	const [startDate, setStartDate] = useState(new Date());
 	const [price, setPrice] = useState([]);
 	const [disableAddButton, setDisableAddButton] = useState('disable');
@@ -325,7 +324,7 @@ const PricesTab = ({ productID, uid, posts, categories }) => {
 		<>
 			<div className="grid grid-cols-3 justify-center">
 				<div className="col-start-3 justify-self-end self-center">
-					{status === 'authenticated' && session.user.id === uid ? (
+					{isSignedIn && userId === uid ? (
 						<button type="button" onClick={openModal} className="btn btn-sm	btn-secondary">
 							Add Product
 						</button>
@@ -412,7 +411,7 @@ const PricesTab = ({ productID, uid, posts, categories }) => {
 								<div className="card-body items-center text-center">
 									<h2 className="card-title">{prc.name}</h2>${prc.amount}
 									<div className="card-actions">
-										{status === 'authenticated' && session.user.id === uid ? (
+										{isSignedIn && userId === uid ? (
 											<>
 												<button
 													onClick={(event) => openEditModal(event, prc)}
@@ -441,7 +440,7 @@ const PricesTab = ({ productID, uid, posts, categories }) => {
 												Add to Cart
 											</button>
 										) : null}
-										{status === 'authenticated' && session.user.id === uid ? (
+										{isSignedIn && userId === uid ? (
 											<button onClick={() => handleDeleteClick(prc.id)} className="btn btn-primary">
 												Delete
 											</button>

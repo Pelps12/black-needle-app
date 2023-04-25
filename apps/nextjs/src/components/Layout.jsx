@@ -6,7 +6,6 @@ import Footer from './Footer';
 import LoginForm from './LoginForm';
 import Navbar from './Navbar';
 import SearchBar from './SearchBar';
-import { getProviders } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useState, useEffect, useContext } from 'react';
 
@@ -17,10 +16,6 @@ export default function Layout({ children }) {
 	const [searchResults, setSearchResults] = useState([]);
 	const [filterValue, setFilterValue] = useState('');
 	const router = useRouter();
-	useEffect(() => {
-		console.log(checked2);
-		getProviders().then((providers) => setProviders(providers));
-	}, []);
 
 	useEffect(() => {
 		console.log(checked2);
@@ -44,8 +39,8 @@ export default function Layout({ children }) {
 				onChange={(e) => setChecked2(e.target.checked)}
 			/>
 			<label htmlFor="my-modal-4" className="modal cursor-pointer">
-				<label className="modal-box relative" htmlFor="">
-					<LoginForm providers={providers} />
+				<label className="relative" htmlFor="">
+					<LoginForm />
 				</label>
 			</label>
 			{/* <Footer /> */}

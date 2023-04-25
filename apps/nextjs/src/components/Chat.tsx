@@ -1,21 +1,21 @@
-import React, { FC, MouseEvent, useEffect, useRef, useState } from 'react';
-import { useChannel } from '@ably-labs/react-hooks';
-import { useSession } from 'next-auth/react';
+import useOnScreen from '../../hooks/useOnScreen';
 import { useBearStore, useMessageCountStore } from '../utils/messsageStore';
 import { trpc } from '../utils/trpc';
-import Image from 'next/image';
-import useOnScreen from '../../hooks/useOnScreen';
-import { useInView } from 'react-intersection-observer';
-import { useRouter } from 'next/router';
+import { useChannel } from '@ably-labs/react-hooks';
+import { useAuth } from '@clerk/nextjs';
 import emojiRegex from 'emoji-regex';
 import GraphemeSplitter from 'grapheme-splitter';
+import Image from 'next/image';
+import { useRouter } from 'next/router';
+import React, { FC, MouseEvent, useEffect, useRef, useState } from 'react';
+import { useInView } from 'react-intersection-observer';
 
 const Chat: FC<{ id: string | undefined; rId: string | undefined; routerReady: boolean }> = ({
 	id,
 	rId,
 	routerReady
 }): JSX.Element => {
-	const { data: session, status } = useSession();
+	const { userId, isSignedIn, isLoaded } = useAuth();
 	const [messageText, setMessageText] = useState<string>('');
 
 	const router = useRouter();
@@ -78,7 +78,7 @@ const Chat: FC<{ id: string | undefined; rId: string | undefined; routerReady: b
 		}
 	}, [inView]);
 
-	const [channel, ably] = useChannel(`chat:${session?.user?.id}`, (message) => {
+	const [channel, ably] = useChannel(`chat:${userId}}`, (message) => {
 		console.log(message);
 		setAblyMessages((ablyMessages) => [
 			...ablyMessages,
@@ -170,7 +170,7 @@ const Chat: FC<{ id: string | undefined; rId: string | undefined; routerReady: b
 					{rId ? (
 						<>
 							<div className="">
-								{status !== 'loading' ? (
+								{!isLoaded && !isSignedIn ? (
 									<Image
 										className="object-cover w-16 h-16 rounded-full"
 										src={getRoom.data?.user?.image || '/Missing_avatar.svg'}
@@ -200,21 +200,19 @@ const Chat: FC<{ id: string | undefined; rId: string | undefined; routerReady: b
 						<ul className=" ">
 							<li ref={ref}></li>
 							{prevMessRouter.data &&
-								status === 'authenticated' &&
+								isSignedIn &&
 								prevMessRouter.data.pages.map((page, idx) => (
 									<React.Fragment key={page.nextCursor?.sendAt.toISOString()}>
 										{[...page.messages].reverse().map((message) => (
 											<li
 												key={message.id}
-												className={`chat ${
-													message.userId !== session.user?.id ? 'chat-start' : 'chat-end'
-												}`}
+												className={`chat ${message.userId !== userId ? 'chat-start' : 'chat-end'}`}
 											>
 												<div
 													className={` chat-bubble  ${
 														!nonBubble(message.message)
 															? `${
-																	message.userId === session.user?.id
+																	message.userId === userId
 																		? 'chat-bubble-primary'
 																		: 'bg-base-200 text-neutral'
 															  }`

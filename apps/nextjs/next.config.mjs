@@ -16,7 +16,8 @@ function defineNextConfig(config) {
 export default defineNextConfig({
 	reactStrictMode: true,
 	swcMinify: true,
+	transpilePackages: ['@acme/api', '@acme/auth', '@acme/db'],
 	images: {
-		domains: ['lh3.googleusercontent.com', 'pbs.twimg.com', 'ucarecdn.com']
+		domains: ['lh3.googleusercontent.com', 'pbs.twimg.com', 'ucarecdn.com', 'images.clerk.dev']
 	}
 });
