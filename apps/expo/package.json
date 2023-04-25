@@ -4,7 +4,7 @@
   "main": "index.tsx",
   "scripts": {
     "clean": "git clean -xdf .expo .turbo node_modules",
-    "dev": "expo start",
+    "dev": "expo start --tunnel",
     "dev:android": "expo start --android",
     "dev:ios": "expo start --ios",
     "lint": "eslint .",
@@ -16,6 +16,7 @@
     "@clerk/clerk-expo": "^0.16.1",
     "@clerk/clerk-react": "^4.15.1",
     "@expo/metro-config": "^0.7.1",
+    "@expo/ngrok": "^4.1.1",
     "@expo/vector-icons": "^13.0.0",
     "@shopify/flash-list": "1.4.2",
     "@stripe/stripe-react-native": "0.23.3",
