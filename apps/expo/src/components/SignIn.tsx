@@ -7,6 +7,11 @@ import {
   Text,
   View,
 } from "react-native";
+import {
+  AppleAuthenticationButton,
+  AppleAuthenticationButtonStyle,
+  AppleAuthenticationButtonType,
+} from "expo-apple-authentication";
 import { Image } from "expo-image";
 import { useOAuth } from "@clerk/clerk-expo";
 
@@ -79,7 +84,17 @@ const SignInWithOAuth = () => {
           Sign in with Google
         </Text>
       </Pressable>
-      <AppleButton onPress={handleSignInWithApplePress} />
+      <View>
+        <AppleAuthenticationButton
+          buttonType={AppleAuthenticationButtonType.SIGN_IN}
+          buttonStyle={AppleAuthenticationButtonStyle.BLACK}
+          cornerRadius={5}
+          onPress={() => {
+            // Handle sign-in with Apple here
+            handleSignInWithApplePress();
+          }}
+        />
+      </View>
     </View>
   );
 };

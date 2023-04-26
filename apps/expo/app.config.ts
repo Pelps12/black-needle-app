@@ -6,11 +6,12 @@ const CLERK_PUBLISHABLE_KEY =
 const PUBLIC_URL = "http://localhost:3000";
 const STRIPE_PUBLISHABLE_KEY =
   "pk_test_51M482WChaXTQFF1r63Ekbj7Gl8pcRDNLhGNLrLdshWxGOWyDtsmucwUgVUcOYcNm6e9GAcrOI4M8kDwb4qdovjcb006Gu3lgyh";
+const MERCHANT_ID = "merchant.co.sakpa";
 
 const defineConfig = (): ExpoConfig => ({
-  name: "expo",
-  slug: "expo",
-  scheme: "expo",
+  name: "Sakpa",
+  slug: "sakpa",
+  scheme: "sakpa",
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/sakpa_icon.png",
@@ -41,6 +42,7 @@ const defineConfig = (): ExpoConfig => ({
     CLERK_PUBLISHABLE_KEY,
     PUBLIC_URL,
     STRIPE_PUBLISHABLE_KEY,
+    MERCHANT_ID,
   },
   plugins: ["./expo-plugins/with-modify-gradle.js"],
 });

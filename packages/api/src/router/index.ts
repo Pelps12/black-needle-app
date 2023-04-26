@@ -1,5 +1,5 @@
 // src/server/trpc/router/index.ts
-import { t } from "../trpc";
+import { router } from "../trpc";
 import { appointmentRouter } from "./appointment";
 import { authRouter } from "./auth";
 import { cartRouter } from "./cart";
@@ -12,18 +12,18 @@ import { uploadRouter } from "./upload";
 import { userRouter } from "./user";
 import { waitListRouter } from "./waitlist";
 
-export const appRouter = t.router({
+export const appRouter = router({
   auth: authRouter,
-  upload: uploadRouter,
-  registration: registrationRouter,
+  //upload: uploadRouter,
+  //registration: registrationRouter,
   user: userRouter,
-  price: priceRouter,
+  //price: priceRouter,
   search: searchRouter,
-  cart: cartRouter,
+  //cart: cartRouter,
   appointment: appointmentRouter,
-  order: orderRouter,
+  //order: orderRouter,
   chat: chatRouter,
-  waitlist: waitListRouter,
+  //waitlist: waitListRouter,
 });
 
 // export type definition of API
