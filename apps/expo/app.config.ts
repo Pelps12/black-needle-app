@@ -10,6 +10,7 @@ const MERCHANT_ID = "merchant.co.sakpa";
 
 const defineConfig = (): ExpoConfig => ({
   name: "Sakpa",
+  owner: "sakpa",
   slug: "sakpa",
   scheme: "sakpa",
   version: "1.0.0",
@@ -27,7 +28,10 @@ const defineConfig = (): ExpoConfig => ({
   assetBundlePatterns: ["**/*"],
   ios: {
     supportsTablet: true,
-    bundleIdentifier: "your.bundle.identifier",
+    bundleIdentifier: "co.sakpa",
+    entitlements: {
+      "com.apple.developer.applesignin": ["Default"],
+    },
   },
   android: {
     adaptiveIcon: {
