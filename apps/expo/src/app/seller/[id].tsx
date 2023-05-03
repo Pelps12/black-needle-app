@@ -38,7 +38,7 @@ const SellerPage = () => {
 
         <View className="ml-2 w-72 flex-col items-start">
           <Text className=" text-4xl font-semibold">
-            {data?.user?.name ?? "Unknown"}
+            {categoriesEndpoint.data?.user?.name ?? "Unknown"}
           </Text>
           <Link
             className={`my-2 flex flex-row content-center items-center justify-center rounded-xl  bg-[#1dbaa7] px-3 py-1  text-black shadow-sm`}
@@ -84,19 +84,21 @@ const SellerPage = () => {
       </View>
 
       <View>
-        {activeTab == "PRICES" && data?.user?.seller?.Category && (
-          <Prices
-            prices={data?.user?.seller?.Category}
-            sellerId={data.user.id}
-          />
-        )}
+        {activeTab == "PRICES" &&
+          categoriesEndpoint.data?.user?.seller?.Category && (
+            <Prices
+              prices={categoriesEndpoint.data?.user?.seller?.Category}
+              sellerId={categoriesEndpoint.data.user.id}
+            />
+          )}
 
-        {activeTab == "CATEGORIES" && data?.user?.seller?.Category && (
-          <Categories
-            categories={data?.user?.seller.Category}
-            sellerId={data.user.id}
-          />
-        )}
+        {activeTab == "CATEGORIES" &&
+          categoriesEndpoint.data?.user?.seller?.Category && (
+            <Categories
+              categories={categoriesEndpoint.data?.user?.seller.Category}
+              sellerId={categoriesEndpoint.data.user.id}
+            />
+          )}
       </View>
     </SafeAreaView>
   );

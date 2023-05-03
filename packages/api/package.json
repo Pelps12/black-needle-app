@@ -13,8 +13,8 @@
   "dependencies": {
     "@acme/auth": "^0.1.0",
     "@acme/db": "^0.1.0",
-    "@trpc/client": "^10.20.0",
-    "@trpc/server": "^10.20.0",
+    "@trpc/client": "^10.1.0",
+    "@trpc/server": "^10.1.0",
     "ably": "^1.2.39",
     "expo-server-sdk": "^3.7.0",
     "stripe": "^12.2.0",
