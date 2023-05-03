@@ -2,15 +2,9 @@
 import { router } from "../trpc";
 import { appointmentRouter } from "./appointment";
 import { authRouter } from "./auth";
-import { cartRouter } from "./cart";
 import { chatRouter } from "./chat";
-import { orderRouter } from "./order";
-import { priceRouter } from "./price";
-import { registrationRouter } from "./registration";
 import { searchRouter } from "./search";
-import { uploadRouter } from "./upload";
 import { userRouter } from "./user";
-import { waitListRouter } from "./waitlist";
 
 export const appRouter = router({
   auth: authRouter,

@@ -1,5 +1,5 @@
 import React from "react";
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import { FlatList, RefreshControl, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
 import { useAuth } from "@clerk/clerk-react";
@@ -11,10 +11,22 @@ import { trpc } from "../../utils/trpc";
 
 const ChatIndex = () => {
   const getPreviousChats = trpc.chat.getRecentRooms.useQuery();
+  const utils = trpc.useContext();
+
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    console.log("WORKINGGGGG");
+    utils?.chat.invalidate().then(() => setRefreshing(false));
+  }, []);
 
   return (
     getPreviousChats.data && (
       <FlatList
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
         renderItem={({ item }) => <Message data={item} />}
         data={getPreviousChats.data}
         keyExtractor={(item) => item.id}

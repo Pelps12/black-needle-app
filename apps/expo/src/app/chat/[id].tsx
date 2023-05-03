@@ -48,6 +48,7 @@ const ChatPage = () => {
   const getRoom = trpc.chat.getRoom.useQuery({
     userId: idString,
   });
+  const utils = trpc.useContext();
 
   const { userId } = useAuth();
   const scrollViewRef = useRef<FlatList>(null);
@@ -71,7 +72,7 @@ const ChatPage = () => {
       staleTime: Infinity,
     },
   );
-  const [channel, ably] = useChannel(`chat:${userId}`, (message) => {
+  const [_, ably] = useChannel(`chat:${userId}`, (message) => {
     console.log(message);
     setAblyMessages((ablyMessages) => [
       ...ablyMessages,
@@ -107,6 +108,7 @@ const ChatPage = () => {
       ]);
     }
     setMessageText("");
+    utils?.chat.invalidate();
   };
 
   return (

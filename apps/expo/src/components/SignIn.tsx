@@ -5,6 +5,7 @@ import {
   SafeAreaView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import {
@@ -69,34 +70,56 @@ const SignInWithOAuth = () => {
   }, [appleFlow]);
 
   return (
-    <View className="">
+    <View className="flex h-full items-center justify-center ">
+      <View className="p-6">
+        <Image
+          source={require("../../assets/sakpa_small.png")}
+          className="h-40 w-40"
+        />
+      </View>
+      <View className="mx-3">
+       
+        <TextInput
+          placeholder="Email Address"
+          spellCheck={false}
+          className=" block h-12  w-72 rounded-xl border-2 text-xl border-[#d9d9d9] pb-2 pl-4 bg-gray-100 my-auto outline-none focus:text-gray-700"
+        />
+        <Pressable
+          className={`mx-auto my-2 flex w-72  flex-row content-center items-center justify-center rounded-xl bg-[#1dbaa7] py-4 text-black shadow-sm`}
+          onPress={handleSignInWithGooglePress}
+        >
+          <Text className="text-md  ml-2 font-semibold text-white">
+            CONTINUE
+          </Text>
+        </Pressable>
+
+        <Divider />
+      </View>
+
+      <View>
+        <AppleButton onPress={handleSignInWithApplePress}></AppleButton>
+      </View>
+
       <Pressable
-        className={`my-2 flex flex-row content-center items-center justify-center  rounded-md bg-[#d9d9d9]  py-5 text-black shadow-sm`}
+        className={`mx-auto my-2 flex w-72  flex-row content-center items-center justify-center rounded-md bg-[#d9d9d9] py-3 text-black shadow-sm`}
         onPress={handleSignInWithGooglePress}
       >
         <Image
           source={require("../../assets/OAuth/google_2.svg")}
           alt="G"
-          className="mr-2 h-12 w-12"
+          contentFit="scale-down"
+          className=" h-8 w-8"
         />
-        <Text className="ml-2 text-2xl font-semibold">
-          {" "}
-          Sign in with Google
-        </Text>
+        <Text className="ml-2 text-xl font-semibold"> Sign in with Google</Text>
       </Pressable>
-      <View>
-        <AppleAuthenticationButton
-          buttonType={AppleAuthenticationButtonType.SIGN_IN}
-          buttonStyle={AppleAuthenticationButtonStyle.BLACK}
-          cornerRadius={5}
-          onPress={() => {
-            // Handle sign-in with Apple here
-            handleSignInWithApplePress();
-          }}
-        />
-      </View>
+
+      
     </View>
   );
+};
+
+const Divider = () => {
+  return <View style={styles.divider} />;
 };
 
 const styles = StyleSheet.create({
@@ -115,5 +138,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     letterSpacing: 0.25,
     color: "white",
+  },
+  divider: {
+    borderBottomColor: "#000",
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    marginVertical: 10,
   },
 });

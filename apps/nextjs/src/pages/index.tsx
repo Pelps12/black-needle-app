@@ -74,7 +74,7 @@ function Hit({ hit }: { hit: any }) {
 	);
 }
 
-const Home: NextPage = ({ serverState, url }: HomePageProps) => {
+const Home: NextPage<HomePageProps> = ({ serverState, url }) => {
 	const [test, setTest] = useState(true);
 	const [animationParent]: any = useAutoAnimate();
 	const [count, setCount] = useState(0);

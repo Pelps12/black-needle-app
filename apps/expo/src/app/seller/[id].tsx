@@ -21,13 +21,7 @@ const SellerPage = () => {
     typeof id === "string" ? id : typeof id === "undefined" ? ":)" : id[0]!;
   const [activeTab, setActiveTab] = useState<string>("CATEGORIES");
 
-  const tabs = [
-    {
-      label: "Appointments",
-      value: "appointments",
-    },
-  ];
-  const { data } = trpc.user.getCategories.useQuery({
+  const categoriesEndpoint = trpc.user.getCategories.useQuery({
     id: idString,
   });
 
@@ -36,7 +30,7 @@ const SellerPage = () => {
       <View className="mx-3 max-w-md flex-row items-center justify-between">
         <View className="">
           <Image
-            source={data?.user?.image ?? ":)"}
+            source={categoriesEndpoint?.data?.user?.image ?? ":)"}
             alt="Pic"
             className="mr-2 h-32 w-32 rounded-full shadow-sm "
           />

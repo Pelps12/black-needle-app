@@ -1,6 +1,8 @@
 import SellersPage from '../../components/SellersPage';
-import { prisma } from '../../server/db/client';
 import { trpc } from '../../utils/trpc';
+import { appRouter } from '@acme/api';
+import { prisma } from '@acme/db';
+import { getAuth } from '@clerk/nextjs/server';
 import type { Category, Image, User } from '@prisma/client';
 import { env } from 'env/client.mjs';
 import fsPromises from 'fs/promises';
@@ -12,7 +14,10 @@ import { useRouter } from 'next/router';
 import path from 'path';
 import React, { useEffect, useState } from 'react';
 import { getServerAuthSession } from 'server/common/get-server-auth-session';
-import { appRouter } from 'server/trpc/router/index';
+
+export const config = {
+	runtime: 'experimental-edge' // for Edge API Routes only
+};
 
 /* export async function getServerSideProps() {
 	const filePath = path.join(process.cwd(), 'Gallery.json');
@@ -101,7 +106,7 @@ const Sellers: NextPage<{
 
 export default Sellers;
 
-/* export const getServerSideProps: GetServerSideProps = async (context) => {
+export const getServerSideProps: GetServerSideProps = async (context) => {
 	const uid =
 		typeof context.query.uid === 'string'
 			? context.query.uid
@@ -115,10 +120,10 @@ export default Sellers;
 			? ':)'
 			: context.query.productID[0]!;
 	if (isbot(context.req.headers['user-agent'])) {
+		const user = getAuth(context.req);
 		const client = appRouter.createCaller({
-			session: await getServerAuthSession(context),
-			prisma: prisma,
-			headers: context.req.headers
+			auth: user,
+			prisma: prisma
 		});
 		const data = await client.user.getCategories({
 			id: uid
@@ -139,4 +144,4 @@ export default Sellers;
 	return {
 		props: {} // will be passed to the page component as props
 	};
-}; */
+};

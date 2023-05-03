@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   FlatList,
   Pressable,
+  RefreshControl,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -23,6 +24,16 @@ const SellerPage = () => {
   const idString =
     typeof id === "string" ? id : typeof id === "undefined" ? ":)" : id[0]!;
   const [activeTab, setActiveTab] = useState<string>("APPOINTMENTS");
+
+  const utils = trpc.useContext();
+
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    console.log("WORKINGGGGG");
+    utils?.appointment.invalidate().then(() => setRefreshing(false));
+  }, []);
 
   const appointment = trpc.appointment.getAppointment.useQuery({
     sellerMode: false,
@@ -66,6 +77,9 @@ const SellerPage = () => {
         {activeTab == "APPOINTMENTS" && (
           <FlatList
             data={appointment.data}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
             keyExtractor={(item) => item.id}
             contentContainerStyle={{ paddingBottom: 20 }}
             ListFooterComponent={<View style={{ height: 100 }} />}

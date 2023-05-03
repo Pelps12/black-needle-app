@@ -68,6 +68,7 @@ const NotificationsProvider = ({ children }: { children: React.ReactNode }) => {
 
     notificationListener.current =
       Notifications.addNotificationReceivedListener((notification) => {
+        console.log(notification);
         setNotification(notification);
       });
 

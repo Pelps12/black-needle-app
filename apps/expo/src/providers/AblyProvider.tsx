@@ -1,8 +1,12 @@
 import React, { useEffect } from "react";
+import Toast from "react-native-toast-message";
 import Constants from "expo-constants";
 import * as SecureStore from "expo-secure-store";
-import { assertConfiguration, configureAbly } from "@ably-labs/react-hooks";
-import { useAuth } from "@clerk/clerk-expo";
+import {
+  assertConfiguration,
+  configureAbly,
+  useChannel,
+} from "@ably-labs/react-hooks";
 
 import { trpc } from "../utils/trpc";
 
@@ -16,6 +20,7 @@ const tokenStore = {
 };
 
 const AblyProvider = ({ children }: { children: React.ReactNode }) => {
+  const ref = React.useRef<any>();
   const URL = Constants.expoConfig?.extra?.PUBLIC_URL as string;
   const getAblyToken = trpc.chat.getToken.useMutation();
   useEffect(() => {
@@ -72,6 +77,7 @@ const AblyProvider = ({ children }: { children: React.ReactNode }) => {
     };
     setUpAbly();
   }, []);
+
   return <>{children}</>;
 };
 

@@ -1,7 +1,6 @@
 import React from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Constants from "expo-constants";
-import { useFonts } from "expo-font";
 import { Tabs } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import * as SplashScreen from "expo-splash-screen";
@@ -30,22 +29,6 @@ SplashScreen.preventAutoHideAsync(); //Prevent the splash screen from automatica
 // This is the main layout of the app
 // It wraps your pages with the providers they need
 const RootLayout = () => {
-  const [fontsLoaded] = useFonts({
-    MTBold: require("../../assets/fonts/static/Montserrat-Bold.ttf"),
-    MTSemi: require("../../assets/fonts/static/Montserrat-SemiBold.ttf"),
-    MTMedium: require("../../assets/fonts/static/Montserrat-Medium.ttf"),
-  });
-
-  const onLayoutRootView = React.useCallback(async () => {
-    if (fontsLoaded) {
-      await SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded]);
-
-  if (!fontsLoaded) {
-    return null;
-  }
-
   return (
     <ClerkProvider
       publishableKey={

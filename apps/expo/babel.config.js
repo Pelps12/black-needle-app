@@ -1,5 +1,3 @@
-const { trpc } = require("./src/utils/trpc");
-
 /** @type {import("@babel/core").ConfigFunction} */
 module.exports = function (trpc) {
   trpc.cache.forever();
