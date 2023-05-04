@@ -1,5 +1,5 @@
-import { assertConfiguration, configureAbly } from '@ably-labs/react-hooks';
 import { env } from '../src/env/client.mjs';
+import { assertConfiguration, configureAbly } from '@ably-labs/react-hooks';
 import { useEffect } from 'react';
 
 export const AblyProvider = ({ children }: { children: React.ReactNode }) => {
@@ -27,10 +27,10 @@ export const AblyProvider = ({ children }: { children: React.ReactNode }) => {
 			});
 			sessionStorage.setItem('ably_recovery_key', assertConfiguration().connection.recoveryKey);
 		}
-		if (ably) {
-			let channel = ably.channels.get(`chat-${ably.clientId}`);
+		/* if (ably) {
+			let channel = ably.channels.get(`chat-${ably.auth.clientId}`);
 			channel.presence.enter();
-		}
+		} */
 	}, []);
 
 	return <>{children}</>;

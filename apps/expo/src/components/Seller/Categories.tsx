@@ -7,7 +7,7 @@ import {
   type Category,
   type Price,
   type Image as PrismaImage,
-} from ".prisma/client";
+} from "@acme/db";
 
 const Categories = ({
   categories,

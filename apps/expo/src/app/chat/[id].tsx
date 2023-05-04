@@ -1,4 +1,4 @@
-import React, { Fragment, useRef, useState } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import {
   FlatList,
   Keyboard,
@@ -6,6 +6,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  SectionList,
   Text,
   TextInput,
   TouchableWithoutFeedback,
@@ -51,7 +52,8 @@ const ChatPage = () => {
   const utils = trpc.useContext();
 
   const { userId } = useAuth();
-  const scrollViewRef = useRef<FlatList>(null);
+  const scrollViewRef = useRef<SectionList>(null);
+  const endRef = useRef<FlatList>(null);
 
   const prevMessRouter = trpc.chat.getPreviousChats.useInfiniteQuery(
     {
@@ -74,17 +76,23 @@ const ChatPage = () => {
   );
   const [_, ably] = useChannel(`chat:${userId}`, (message) => {
     console.log(message);
-    setAblyMessages((ablyMessages) => [
-      ...ablyMessages,
-      {
-        isSender: false,
-        data: {
-          roomId: message.data.roomId,
-          message: message.data.message,
+    if ((message.data.roomId = getRoom.data?.room?.id)) {
+      setAblyMessages((ablyMessages) => [
+        {
+          isSender: false,
+          data: {
+            roomId: message.data.roomId,
+            message: message.data.message,
+          },
         },
-      },
-    ]);
+        ...ablyMessages,
+      ]);
+    }
   });
+
+  useEffect(() => {
+    prevMessRouter.refetch();
+  }, []);
 
   const handleSubmit = async () => {
     console.log(getRoom.isSuccess && getRoom.data.room && messageText !== "");
@@ -97,7 +105,6 @@ const ChatPage = () => {
         },
       });
       setAblyMessages([
-        ...ablyMessages,
         {
           isSender: true,
           data: {
@@ -105,97 +112,121 @@ const ChatPage = () => {
             message: messageText,
           },
         },
+        ...ablyMessages,
       ]);
     }
     setMessageText("");
-    utils?.chat.invalidate();
+    utils?.chat.getRecentRooms.invalidate();
   };
+
+  useEffect(() => {
+    console.log(prevMessRouter.data?.pages.length);
+    if (prevMessRouter.data?.pages.length === 1) {
+      const oldMessagesLength = prevMessRouter.data?.pages
+        .map((page) => page.messages.length)
+        .reduce((total, item) => total + item);
+      console.log(oldMessagesLength);
+      const ablyMessagesLength = ablyMessages.length;
+    }
+  }, [prevMessRouter.isFetched]);
+
+  useEffect(() => {
+    console.log(ablyMessages);
+  }, [ablyMessages]);
+
+  useEffect(() => {
+    return () => {
+      setAblyMessages([]);
+      console.log("SENT");
+    };
+  }, []);
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={100}
       style={{ flex: 1 }}
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <Fragment>
-          <View className="relative flex flex-row items-center border-b border-gray-300 p-3">
-            <Link href="/chat">
-              <Ionicons name="arrow-back" size={30} color="black" />
-            </Link>
+      <Fragment>
+        <View className="relative flex flex-row items-center border-b border-gray-300 p-3 pb-0">
+          <Link href="/chat">
+            <Ionicons name="arrow-back" size={30} color="black" />
+          </Link>
 
-            {getRoom.data?.user?.image ? (
-              <Image
-                className="h-16 w-16 rounded-full "
-                source={getRoom.data?.user?.image}
-                alt="username"
-              />
-            ) : (
-              <View className="h-16 w-16 rounded-full bg-[#d9d9d9]" />
-            )}
+          {getRoom.data?.user?.image ? (
+            <Image
+              className="h-16 w-16 rounded-full "
+              source={getRoom.data?.user?.image}
+              alt="username"
+            />
+          ) : (
+            <View className="h-16 w-16 rounded-full bg-[#d9d9d9]" />
+          )}
 
-            <Text className="ml-2 block text-lg font-bold text-gray-600">
-              {getRoom.data?.user?.name || "No Name"}
-            </Text>
-          </View>
-          <View style={{ flex: 1 }}>
-            <View className="space-y-2" style={{ flex: 0.9 }}>
-              {
-                <Fragment>
-                  {prevMessRouter.data?.pages && (
-                    <FlatList
-                      data={prevMessRouter.data?.pages}
-                      ref={scrollViewRef}
-                      onContentSizeChange={() =>
-                        scrollViewRef.current?.scrollToEnd({ animated: true })
-                      }
-                      onScrollToTop={() => console.log("SLOPPY TOPPY")}
-                      ItemSeparatorComponent={() => (
-                        <View className="border-b-2 border-[#ddd]" />
-                      )}
-                      renderItem={({ item: page }) => (
-                        <FlatList
-                          data={page.messages}
-                          renderItem={({ item }) => (
-                            <MessageComponent message={item} userId={userId} />
-                          )}
-                          keyExtractor={(item) => item.id.toString()}
-                          inverted={true}
-                        />
-                      )}
-                      keyExtractor={(item, idx) => idx.toString()}
-                    />
-                  )}
-                  <FlatList
-                    data={ablyMessages}
+          <Text className="ml-2 block text-lg font-bold text-gray-600">
+            {getRoom.data?.user?.name || "No Name"}
+          </Text>
+        </View>
+        <View style={{ flex: 1 }}>
+          <View className="space-y-2" style={{ flex: 0.9 }}>
+            {
+              <Fragment>
+                {prevMessRouter.data?.pages && ablyMessages && (
+                  <SectionList
+                    sections={[
+                      {
+                        data: ablyMessages,
+                        renderItem: (page) => (
+                          <AblyMessageComponent message={page.item} />
+                        ),
+                      },
+                      {
+                        data: prevMessRouter.data?.pages,
+                        renderItem: (page) => (
+                          <FlatList
+                            data={page.item.messages}
+                            renderItem={({ item }) => (
+                              <MessageComponent
+                                message={item}
+                                userId={userId}
+                              />
+                            )}
+                            ref={endRef}
+                            keyExtractor={(item) => item.id.toString()}
+                            inverted={true}
+                          />
+                        ),
+                      },
+                    ]}
+                    inverted={true}
                     contentContainerStyle={{ paddingBottom: 20 }}
-                    renderItem={({ item }) => (
-                      <AblyMessageComponent message={item} />
-                    )}
+                    onScrollToTop={() => console.log("SLOPPY TOPPY")}
+                    keyExtractor={(item, idx) => idx.toString()}
                   />
-                </Fragment>
-              }
-            </View>
-
-            <View
-              style={{ flex: 0.1 }}
-              className="flex  flex-row items-start justify-center border-t border-gray-300 px-6 py-3"
-            >
-              <TextInput
-                multiline={true}
-                value={messageText}
-                onChangeText={setMessageText}
-                numberOfLines={1}
-                placeholder="Send Message"
-                className="mx-3 block w-full rounded-full bg-gray-100 py-2 pl-4 outline-none focus:text-gray-700"
-              />
-
-              <Pressable onPress={() => handleSubmit()}>
-                <Feather name="send" size={20} color="black" />
-              </Pressable>
-            </View>
+                )}
+              </Fragment>
+            }
           </View>
-        </Fragment>
-      </TouchableWithoutFeedback>
+
+          <View
+            style={{ flex: 0.1 }}
+            className="flex  flex-row items-start justify-center border-t border-gray-300 px-6 pt-2"
+          >
+            <TextInput
+              multiline={true}
+              value={messageText}
+              onChangeText={setMessageText}
+              numberOfLines={1}
+              placeholder="Send Message"
+              className="mx-3 block w-full rounded-full bg-gray-100 py-2 pl-4 outline-none focus:text-gray-700"
+            />
+
+            <Pressable onPress={() => handleSubmit()}>
+              <Feather name="send" size={20} color="black" />
+            </Pressable>
+          </View>
+        </View>
+      </Fragment>
     </KeyboardAvoidingView>
   );
 };

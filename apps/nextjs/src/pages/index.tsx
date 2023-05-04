@@ -52,7 +52,7 @@ function Hit({ hit }: { hit: any }) {
 		<>
 			{hit.prices.map((item: any) => (
 				<Link
-					href={`/seller/${hit.sellerId}?active=PRICES&productID=${hit._id}`}
+					href={`/seller/${hit.sellerId}?active=PRICES&productID=${item.id}`}
 					key={hit._id}
 					className="group"
 				>

@@ -2,13 +2,10 @@ import React, { useEffect, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 
+import { type Category, type Price, type Image as PrismaImage } from "@acme/db";
+
 import Modal from "../Modal";
 import AppointmentModal from "./AppointmentModal";
-import {
-  type Category,
-  type Price,
-  type Image as PrismaImage,
-} from ".prisma/client";
 
 const Prices = ({
   prices,

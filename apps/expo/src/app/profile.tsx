@@ -1,5 +1,12 @@
 import React from "react";
-import { Button, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  Button,
+  Pressable,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useAuth } from "@clerk/clerk-expo";
 import { FlashList } from "@shopify/flash-list";
 
@@ -9,13 +16,13 @@ const Profile = () => {
   const { signOut, isSignedIn } = useAuth();
   const getSession = trpc.auth.getSession.useQuery();
   return (
-    <View className="rounded-lg border-2 border-gray-500 p-4">
-      <Button
-        title="Sign Out"
-        onPress={() => {
-          signOut().catch((err) => console.log(err));
-        }}
-      />
+    <View className="">
+      <Pressable
+        className={`mx-auto my-2 flex flex-row  content-center items-center justify-center rounded-lg bg-[#1dbaa7] px-5 py-3  shadow-sm`}
+        onPress={() => signOut().catch((err) => console.log(err))}
+      >
+        <Text className="text-xl font-semibold text-white">Sign Out</Text>
+      </Pressable>
     </View>
   );
 };

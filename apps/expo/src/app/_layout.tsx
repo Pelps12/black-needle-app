@@ -56,10 +56,13 @@ const RootLayout = () => {
                       header: () => <Header />,
                       headerShadowVisible: false,
                       tabBarStyle: {
-                        backgroundColor: "#D9D9D9",
-                        borderRadius: 15,
+                        backgroundColor: "#f2f2f2",
+
                         height: 90,
                         paddingTop: 10,
+                      },
+                      tabBarIconStyle: {
+                        color: "#000",
                       },
                       tabBarActiveTintColor: "#72a2f9",
                     }}
@@ -148,6 +151,9 @@ const RootLayout = () => {
                       options={{
                         href: null,
                         title: "ChatBox",
+                        tabBarStyle: {
+                          display: "none",
+                        },
                         tabBarIcon: ({ color }) => (
                           <MaterialIcons
                             name="schedule"
@@ -156,6 +162,15 @@ const RootLayout = () => {
                           />
                         ),
                       }}
+                    />
+
+                    <Tabs.Screen
+                      name="modal"
+                      options={
+                        {
+                          // Set the presentation mode to modal for our modal route.
+                        }
+                      }
                     />
                   </Tabs>
 

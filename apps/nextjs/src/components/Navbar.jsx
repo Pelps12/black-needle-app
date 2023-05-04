@@ -3,7 +3,7 @@ import { trpc } from '../utils/trpc';
 import Modal from './Modal';
 import ShoppingCart from './ShoppingCart';
 import { assertConfiguration } from '@ably-labs/react-hooks';
-import { useUser } from '@clerk/nextjs';
+import { useUser, useAuth } from '@clerk/nextjs';
 import { motion } from 'framer-motion';
 import Head from 'next/head';
 import Image from 'next/image';
@@ -11,7 +11,8 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 const Navbar = () => {
-	const { user, isSignedIn, signOut, signIn, isLoaded } = useUser();
+	const { user, isSignedIn, signIn, isLoaded } = useUser();
+	const { signOut } = useAuth();
 	const [isOpen, setIsOpen] = useState(false);
 	const [isCart, setIsCart] = useState(false);
 	const products = trpc.cart.getCart.useQuery(undefined, {
