@@ -29,7 +29,7 @@ const getBaseUrl = () => {
    * baseUrl to your production API URL.
    */
   const localhost = Constants.manifest?.debuggerHost?.split(":")[0];
-  return "https://checks-cnn-truth-fog.trycloudflare.com";
+  return "https://babe-apt-delight-visual.trycloudflare.com";
   if (!localhost) {
     // return "https://your-production-url.com";
     throw new Error(

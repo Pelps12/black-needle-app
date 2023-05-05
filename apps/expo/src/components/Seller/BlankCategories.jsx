@@ -1,48 +1,113 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
-import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  FlatList,
+  Pressable,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import { Camera } from "expo-camera";
 import { Image } from "expo-image";
+import * as ImagePicker from "expo-image-picker";
+import * as MediaLibrary from "expo-media-library";
 import { useAuth } from "@clerk/clerk-expo";
 import { Feather } from "@expo/vector-icons";
 
 import Modal from "../Modal";
 
-const BlankCategories = ({ categories }) => {
+const BlankCategories = ({ setAddCategoryButton, categories }) => {
   return (
     <>
-      <BlankCategory categories={categories}></BlankCategory>
+      <BlankCategory
+        setAddCategoryButton={setAddCategoryButton}
+        categories={categories}
+      ></BlankCategory>
     </>
   );
 };
 
 // here
-const BlankCategory = ({ categories }) => {
+const BlankCategory = ({ setAddCategoryButton, categories }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [pressedImage, setPressedImage] = useState("");
+  const [categoryTitle, onChangecategoryTitle] = React.useState("");
+  const cameraRef = useRef();
+  const [hasCameraPermission, setHasCameraPermission] = useState();
+  const [hasMediaLibaryPermission, setHasMediaLibaryPermission] = useState();
+
+  useEffect(() => {
+    (async () => {
+      const cameraPermissions = await Camera.requestCameraPermissionsAsync();
+      const mediaLibraryPermissions =
+        await MediaLibrary.requestPermissionsAsync();
+      setHasCameraPermission(cameraPermissions.status === "granted");
+      setHasMediaLibaryPermission(mediaLibraryPermissions.status === "granted");
+    })();
+  }, []);
+  if (hasCameraPermission === undefined) {
+    return <Text>Requesting Permissions...</Text>;
+  } else if (!hasCameraPermission) {
+    return <Text>Werey Grant am</Text>;
+  }
   const [addFormData, setAddFormData] = useState({
     id: (categories?.length || 0) + 1,
     name: "",
     Image: [
       {
         id: 1,
-        link: "https://ucarecdn.com/8fa4a0f9-dd32-42b8-8574-f27a0a254c72/",
-      },
-      {
-        id: 2,
-        link: "https://ucarecdn.com/8fa4a0f9-dd32-42b8-8574-f27a0a254c72/",
+        link: require("../../../assets/placeholder(3).svg"),
       },
       {
         id: 3,
-        link: "https://ucarecdn.com/8fa4a0f9-dd32-42b8-8574-f27a0a254c72/",
+        link: require("../../../assets/placeholder(3).svg"),
+      },
+      {
+        id: 3,
+        link: require("../../../assets/placeholder(3).svg"),
       },
       {
         id: 4,
-        link: "https://ucarecdn.com/8fa4a0f9-dd32-42b8-8574-f27a0a254c72/",
+        link: require("../../../assets/placeholder(3).svg"),
       },
     ],
   });
+  const styles = StyleSheet.create({
+    container: {
+      marginTop: -40,
+      flexDirection: "row",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+    },
+    button: {
+      backgroundColor: "black",
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      borderRadius: 9,
+    },
+    buttonText: {
+      color: "white",
+      fontWeight: "bold",
+      fontSize: 16,
+    },
+  });
+
   return (
     <>
       <View className="mx-auto">
+        <SafeAreaView>
+          <TextInput
+            onChangeText={onChangecategoryTitle}
+            value={categoryTitle}
+            placeholder="useless placeholder"
+            keyboardType="default"
+            className="w-48 border-2"
+          />
+        </SafeAreaView>
         <FlatList
           data={addFormData.Image}
           className="mx-auto"
@@ -60,13 +125,27 @@ const BlankCategory = ({ categories }) => {
                   source={item.link}
                   alt="Image"
                   style={{ width: 176, height: 176 }}
-                  className="m-2 h-44 w-44 rounded-xl"
+                  className="m-2 h-44 w-44 "
                 />
               </Pressable>
             </>
           )}
           numColumns={2}
         />
+      </View>
+      <View style={styles.container}>
+        <Pressable className="mx-4" style={styles.button}>
+          <Text style={styles.buttonText}>Save</Text>
+        </Pressable>
+        {/* <Pressable
+          onPress={() => {
+            setAddCategoryButton(false);
+          }}
+          className="mx-4"
+          style={styles.button}
+        >
+          <Text style={styles.buttonText}>Cancel</Text>
+        </Pressable> */}
       </View>
     </>
   );

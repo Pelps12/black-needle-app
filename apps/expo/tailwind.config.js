@@ -12,5 +12,6 @@
 const config = {
   content: ["./src/**/*.{js,ts,jsx,tsx}"],
 };
-//
+//  Alright no wahala
+//Try restarting on more time
 module.exports = config;

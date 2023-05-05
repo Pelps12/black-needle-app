@@ -13,7 +13,7 @@ const Categories = ({
   categories,
   sellerId,
 }: {
-  categories: (PrismaCategory & {
+  categories: (Category & {
     Image: PrismaImage[];
     prices: Price[];
   })[];
@@ -26,7 +26,7 @@ const Categories = ({
       {isSignedIn && userId === sellerId ? (
         <Pressable
           onPress={() => {
-            setAddCategoryButton(true);
+            setAddCategoryButton(!addCategoryButton);
           }}
         >
           <Feather
@@ -45,14 +45,17 @@ const Categories = ({
           data={categories}
           contentContainerStyle={{ paddingBottom: 20 }}
           ListFooterComponent={<View style={{ height: 350 }} />}
-          //Use flatlist. TO get the grid, do numCOlums = 2
+          //Use flatlist. TO get the grid, do numCOlums = 2.
           ListHeaderComponent={
             addCategoryButton ? (
-              <BlankCategories categories={categories}></BlankCategories>
+              <BlankCategories
+                setAddCategoryButton={setAddCategoryButton}
+                categories={categories}
+              ></BlankCategories>
             ) : (
               <></>
             )
-          } //Sure.
+          }
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <Category category={item} sellerId={sellerId} />
@@ -67,7 +70,7 @@ const Category = ({
   category,
   sellerId,
 }: {
-  category: PrismaCategory & {
+  category: Category & {
     Image: PrismaImage[];
     prices: Price[]; //take a look at my flatlist in blankcategory.jsx
   };
@@ -89,7 +92,6 @@ const Category = ({
           className="m-2 mx-auto h-96 w-96 rounded-xl"
         />
       </Modal>
-      //
       <FlatList
         data={category.Image}
         className="mx-auto"

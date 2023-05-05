@@ -48,7 +48,15 @@ const defineConfig = (): ExpoConfig => ({
     STRIPE_PUBLISHABLE_KEY,
     MERCHANT_ID,
   },
-  plugins: ["./expo-plugins/with-modify-gradle.js"],
+  plugins: [
+    "./expo-plugins/with-modify-gradle.js",
+    "expo-media-library",
+    {
+      photosPermission: "Allow $(PRODUCT_NAME) to access your photos.",
+      savePhotosPermission: "Allow $(PRODUCT_NAME) to save photos.",
+      isAccessMediaLocationEnabled: "true",
+    },
+  ],
 });
 
 export default defineConfig;
