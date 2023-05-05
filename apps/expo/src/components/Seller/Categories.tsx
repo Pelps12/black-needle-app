@@ -4,11 +4,7 @@ import { Image } from "expo-image";
 import { useAuth } from "@clerk/clerk-expo";
 import { Feather } from "@expo/vector-icons";
 
-import {
-  type Price,
-  type Category as PrismaCategory,
-  type Image as PrismaImage,
-} from "@acme/db";
+import { type Category, type Price, type Image as PrismaImage } from "@acme/db";
 
 import Modal from "../Modal";
 import BlankCategories from "./BlankCategories";
