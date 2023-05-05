@@ -4,7 +4,20 @@ import { useRouter } from 'next/router';
 const LoginModal = () => {
 	const router = useRouter();
 	return (
-		<>{router.isReady && <SignIn path={router.pathname} routing="path" signUpUrl="/sign-up" />}</>
+		<>
+			{router.isReady && (
+				<SignIn
+					path={router.pathname}
+					routing="path"
+					signUpUrl="/sign-up"
+					appearance={{
+						variables: {
+							colorPrimary: '#1dbaa7'
+						}
+					}}
+				/>
+			)}
+		</>
 	);
 };
 export default LoginModal;

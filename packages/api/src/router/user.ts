@@ -1,7 +1,12 @@
 import { TRPCError } from "@trpc/server";
+import Stripe from "stripe";
 import { z } from "zod";
 
 import { protectedProcedure, publicProcedure, router } from "../trpc";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
+  apiVersion: "2022-11-15",
+});
 
 export const userRouter = router({
   getCategories: publicProcedure
@@ -47,5 +52,93 @@ export const userRouter = router({
           token: input.expoToken,
         },
       });
+    }),
+
+  createSeller: protectedProcedure
+    .input(
+      z.object({
+        phone_number: z.string(),
+        school: z.string(),
+        services: z.array(z.string()),
+        description: z.string().optional(),
+        downPaymentPercentage: z.number().optional(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const _ = input.services.map((service) => {
+        console.log(service);
+        return {
+          sellerId: ctx.auth.userId,
+          serviceName: service,
+        };
+      });
+      console.log(_);
+      const seller = await ctx.prisma.seller.findFirst({
+        where: {
+          id: ctx.auth.userId,
+        },
+      });
+      let accountId: string;
+      if (seller?.subAccountID) {
+        accountId = seller.subAccountID;
+      } else {
+        //Create a stripe account
+        const account = await stripe.accounts.create({
+          country: "US",
+          type: "express",
+          ...(ctx.auth.user?.emailAddresses
+            ? { email: ctx.auth.user?.emailAddresses[0]?.emailAddress }
+            : {}),
+          business_type: "individual",
+          individual: {
+            ...(ctx.auth.user?.emailAddresses
+              ? { email: ctx.auth.user?.emailAddresses[0]?.emailAddress }
+              : {}),
+          },
+          settings: {
+            payouts: {
+              schedule: {
+                interval: "manual",
+              },
+            },
+          },
+          metadata: {
+            userId: ctx.auth.userId,
+          },
+        });
+        accountId = account.id;
+        await ctx.prisma.seller.create({
+          data: {
+            id: ctx.auth.userId,
+            phoneNumber: "cc",
+            school: input.school,
+            services: {
+              create: input.services.map((service) => {
+                console.log(service);
+                return {
+                  serviceName: service,
+                };
+              }),
+            },
+            downPaymentPercentage: input.downPaymentPercentage
+              ? input.downPaymentPercentage / 100.0
+              : undefined,
+            subAccountID: account.id,
+          },
+        });
+      }
+
+      //Set users role to seller and create onboarding link for stripe account
+      const [accountLink] = await Promise.all([
+        stripe.accountLinks.create({
+          account: accountId,
+          refresh_url: `${process.env.NEXT_PUBLIC_URL}/seller/register?refresh=true`,
+          return_url: `${process.env.NEXT_PUBLIC_URL}/seller/register?return=true`,
+          type: "account_onboarding",
+        }),
+      ]);
+      return {
+        accountLink,
+      };
     }),
 });

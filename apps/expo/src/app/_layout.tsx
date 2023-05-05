@@ -93,21 +93,6 @@ const RootLayout = () => {
                     />
 
                     <Tabs.Screen
-                      name="post/[id]"
-                      options={{
-                        href: null,
-                        title: "Schedule2",
-                        tabBarIcon: ({ color }) => (
-                          <MaterialIcons
-                            name="schedule"
-                            size={24}
-                            color={color}
-                          />
-                        ),
-                      }}
-                    />
-
-                    <Tabs.Screen
                       name="schedule"
                       options={{
                         title: "Schedule",
@@ -165,12 +150,11 @@ const RootLayout = () => {
                     />
 
                     <Tabs.Screen
-                      name="modal"
-                      options={
-                        {
-                          // Set the presentation mode to modal for our modal route.
-                        }
-                      }
+                      name="seller/register"
+                      options={{
+                        title: "Seller",
+                        href: null,
+                      }}
                     />
                   </Tabs>
 
