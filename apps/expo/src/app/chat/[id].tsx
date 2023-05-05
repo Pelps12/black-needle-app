@@ -5,6 +5,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  RefreshControl,
   ScrollView,
   SectionList,
   Text,
@@ -36,6 +37,7 @@ const ChatPage = () => {
     typeof id === "string" ? id : typeof id === "undefined" ? ":)" : id[0]!;
 
   const [messageText, setMessageText] = useState<string>("");
+  const [refreshing, setRefreshing] = React.useState(false);
   const [ablyMessages, setAblyMessages] = useState<
     {
       isSender: boolean;
@@ -75,7 +77,7 @@ const ChatPage = () => {
     },
   );
   const [_, ably] = useChannel(`chat:${userId}`, (message) => {
-    console.log(message);
+    console.log(getRoom.data?.room?.id);
     if ((message.data.roomId = getRoom.data?.room?.id)) {
       setAblyMessages((ablyMessages) => [
         {
@@ -134,6 +136,11 @@ const ChatPage = () => {
     console.log(ablyMessages);
   }, [ablyMessages]);
 
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    prevMessRouter.fetchNextPage().then(() => setRefreshing(false));
+  }, []);
+
   useEffect(() => {
     return () => {
       setAblyMessages([]);
@@ -173,6 +180,12 @@ const ChatPage = () => {
               <Fragment>
                 {prevMessRouter.data?.pages && ablyMessages && (
                   <SectionList
+                    refreshControl={
+                      <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                      />
+                    }
                     sections={[
                       {
                         data: ablyMessages,

@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Button,
   Pressable,
   SafeAreaView,
   StyleSheet,
@@ -8,11 +7,6 @@ import {
   TextInput,
   View,
 } from "react-native";
-import {
-  AppleAuthenticationButton,
-  AppleAuthenticationButtonStyle,
-  AppleAuthenticationButtonType,
-} from "expo-apple-authentication";
 import { Image } from "expo-image";
 import { useOAuth } from "@clerk/clerk-expo";
 
@@ -78,11 +72,10 @@ const SignInWithOAuth = () => {
         />
       </View>
       <View className="mx-3">
-       
         <TextInput
           placeholder="Email Address"
           spellCheck={false}
-          className=" block h-12  w-72 rounded-xl border-2 text-xl border-[#d9d9d9] pb-2 pl-4 bg-gray-100 my-auto outline-none focus:text-gray-700"
+          className=" my-auto block  h-12 w-72 rounded-xl border-2 border-[#d9d9d9] bg-gray-100 pb-2 pl-4 text-xl outline-none focus:text-gray-700"
         />
         <Pressable
           className={`mx-auto my-2 flex w-72  flex-row content-center items-center justify-center rounded-xl bg-[#1dbaa7] py-4 text-black shadow-sm`}
@@ -112,8 +105,6 @@ const SignInWithOAuth = () => {
         />
         <Text className="ml-2 text-xl font-semibold"> Sign in with Google</Text>
       </Pressable>
-
-      
     </View>
   );
 };

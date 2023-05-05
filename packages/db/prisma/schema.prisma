@@ -79,7 +79,7 @@ model UserNotificationToken {
 
 model Seller {
   id                    String               @id @default(cuid())
-  phoneNumber           String
+  phoneNumber           String?
   school                String
   latitude              Float?
   longitude             Float?
