@@ -10,7 +10,7 @@
 // } satisfies Config;
 
 const config = {
-  content: ["./src/**/*.{ts,tsx}"],
+  content: ["./src/**/*.{js,ts,jsx,tsx}"],
 };
-
+//
 module.exports = config;

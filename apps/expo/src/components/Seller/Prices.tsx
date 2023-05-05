@@ -2,13 +2,10 @@ import React, { useEffect, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 
+import { type Category, type Price, type Image as PrismaImage } from "@acme/db";
+
 import Modal from "../Modal";
 import AppointmentModal from "./AppointmentModal";
-import {
-  type Category,
-  type Price,
-  type Image as PrismaImage,
-} from ".prisma/client";
 
 const Prices = ({
   prices,
@@ -93,7 +90,7 @@ const PriceComponent = ({
           closeModal={() => setModalVisible(false)}
         />
       </Modal>
-      <Image source={image?.link ?? ":)"} className="h-40 w-40"></Image>
+      <Image source={image?.link ?? ":)"} className="h-40 w-40" />
       <View className="flex items-end">
         <Text className="text-right text-xl font-semibold">{price.name}</Text>
         <Text className="text-right">${price.amount}</Text>
