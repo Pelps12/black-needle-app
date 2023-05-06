@@ -71,7 +71,7 @@ const AblyProvider = ({ children }: { children: React.ReactNode }) => {
         }
       }
       if (ably) {
-        const channel = ably.channels.get(`chat-${ably.clientId}`);
+        const channel = ably.channels.get(`chat-${ably.auth.clientId}`);
         channel.presence.enter();
       }
     };

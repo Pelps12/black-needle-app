@@ -77,7 +77,7 @@ const ChatPage = () => {
     },
   );
   const [_, ably] = useChannel(`chat:${userId}`, (message) => {
-    console.log(getRoom.data?.room?.id);
+    console.log(getRoom.data?.room?.id, "HY");
     if ((message.data.roomId = getRoom.data?.room?.id)) {
       setAblyMessages((ablyMessages) => [
         {
