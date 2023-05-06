@@ -1,13 +1,22 @@
+import { trpc } from '../utils/trpc';
 import { formatDistance, formatDistanceStrict } from 'date-fns';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { NextPage } from 'next/types';
 import React from 'react';
-import { trpc } from '../utils/trpc';
 
 const ChatSidebar: NextPage = () => {
 	const router = useRouter();
 	const roomsEndpoint = trpc.chat.getRecentRooms.useQuery();
+
+	const suggestionMut = trpc.upload.getPresignedUrl.useMutation();
+
+	const handleClick = () => {
+		suggestionMut.mutate({
+			type: 'PUT',
+			roomId: 'cldcra91i0000mo0ffkxiye76'
+		});
+	};
 
 	return (
 		<div className="border-r border-gray-300 lg:col-span-1">
@@ -48,6 +57,10 @@ const ChatSidebar: NextPage = () => {
 								</div>
 							</div>
 						))}
+
+					<button className="btn" onClick={() => handleClick()}>
+						CLICK
+					</button>
 				</div>
 			</div>
 		</div>

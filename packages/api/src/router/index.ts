@@ -4,11 +4,12 @@ import { appointmentRouter } from "./appointment";
 import { authRouter } from "./auth";
 import { chatRouter } from "./chat";
 import { searchRouter } from "./search";
+import { uploadRouter } from "./upload";
 import { userRouter } from "./user";
 
 export const appRouter = router({
   auth: authRouter,
-  //upload: uploadRouter,
+  upload: uploadRouter,
   //registration: registrationRouter,
   user: userRouter,
   //price: priceRouter,

@@ -154,6 +154,10 @@ const Navbar = () => {
 									<li>
 										<p onClick={handleLogout}>Logout</p>
 									</li>
+
+									<li>
+										<Link href="/test">Test</Link>
+									</li>
 								</ul>
 							</>
 						)}

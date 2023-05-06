@@ -122,7 +122,6 @@ export const chatRouter = router({
           sendAt: "desc",
         },
       });
-      console.log(messages);
 
       let nextCursor: typeof cursor | undefined = undefined;
       if (messages.length > limit) {

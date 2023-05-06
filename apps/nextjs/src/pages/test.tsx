@@ -1,16 +1,18 @@
-import { autocomplete, AutocompleteOptions } from '@algolia/autocomplete-js';
-import { BaseItem } from '@algolia/autocomplete-core';
-import React, { createElement, Fragment, useEffect, useRef } from 'react';
-import { createRoot } from 'react-dom/client';
 import { trpc } from '@utils/trpc';
-import { SearchSuggest } from '@elastic/elasticsearch/lib/api/types';
-import { env } from 'env/client.mjs';
 
 const Test = () => {
 	const suggestionMut = trpc.upload.getPresignedUrl.useMutation();
+
+	const handleClick = () => {
+		suggestionMut.mutate({
+			type: 'GET',
+			roomId: 'cldcra91i0000mo0ffkxiye76',
+			key: 'chat/b248cbcb-3c92-4fa4-a952-dfc9d97adc6b.JPG'
+		});
+	};
 	return (
 		<>
-			<button className="btn" onClick={() => suggestionMut.mutate({})}>
+			<button className="btn" onClick={() => handleClick()}>
 				CLICK
 			</button>
 

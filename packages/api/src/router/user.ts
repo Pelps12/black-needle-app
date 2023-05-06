@@ -9,6 +9,32 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
 });
 
 export const userRouter = router({
+  createCategory: protectedProcedure
+    .input(
+      z.object({
+        name: z.string(),
+        isNew: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      if (ctx.auth.user?.publicMetadata.role !== "SELLER") {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Register as a seller",
+        });
+      }
+      const category = await ctx.prisma.category.create({
+        data: {
+          name: input.name,
+          sellerId: ctx.auth.userId,
+        },
+        include: {
+          Image: true,
+        },
+      });
+
+      return category;
+    }),
   getCategories: publicProcedure
     .input(
       z.object({
