@@ -13,7 +13,7 @@ export const userRouter = router({
     .input(
       z.object({
         name: z.string(),
-        isNew: z.string().optional(),
+        images: z.string().array(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -23,13 +23,20 @@ export const userRouter = router({
           message: "Register as a seller",
         });
       }
+
       const category = await ctx.prisma.category.create({
         data: {
           name: input.name,
           sellerId: ctx.auth.userId,
-        },
-        include: {
-          Image: true,
+          Image: {
+            createMany: {
+              data: input.images.map((img) => {
+                return {
+                  link: img,
+                };
+              }),
+            },
+          },
         },
       });
 
