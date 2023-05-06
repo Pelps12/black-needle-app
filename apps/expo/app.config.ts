@@ -49,13 +49,13 @@ const defineConfig = (): ExpoConfig => ({
     MERCHANT_ID,
   },
   plugins: [
-    "./expo-plugins/with-modify-gradle.js",
-    "expo-media-library",
-    {
-      photosPermission: "Allow $(PRODUCT_NAME) to access your photos.",
-      savePhotosPermission: "Allow $(PRODUCT_NAME) to save photos.",
-      isAccessMediaLocationEnabled: "true",
-    },
+    [
+      "expo-image-picker",
+      {
+        photosPermission:
+          "The app accesses your photos to let you share them with your friends.",
+      },
+    ],
   ],
 });
 

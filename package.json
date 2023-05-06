@@ -23,6 +23,7 @@
     "@manypkg/cli": "^0.20.0",
     "@types/prettier": "^2.7.2",
     "@types/react": "~18.0.38",
+    "eas-cli": "^3.11.0",
     "expo-splash-screen": "~0.18.2",
     "prettier": "^2.8.8",
     "prettier-plugin-tailwindcss": "^0.2.8",

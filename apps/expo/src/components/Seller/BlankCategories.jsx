@@ -1,5 +1,6 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import {
+  Button,
   FlatList,
   Pressable,
   SafeAreaView,
@@ -8,10 +9,8 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { Camera } from "expo-camera";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
-import * as MediaLibrary from "expo-media-library";
 import { useAuth } from "@clerk/clerk-expo";
 import { Feather } from "@expo/vector-icons";
 
@@ -31,28 +30,27 @@ const BlankCategories = ({ setAddCategoryButton, categories }) => {
 // here
 const BlankCategory = ({ setAddCategoryButton, categories }) => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [pressedImage, setPressedImage] = useState("");
   const [categoryTitle, onChangecategoryTitle] = React.useState("");
-  const cameraRef = useRef();
-  const [hasCameraPermission, setHasCameraPermission] = useState();
-  const [hasMediaLibaryPermission, setHasMediaLibaryPermission] = useState();
+  const [selectedImage, setImage] = useState("");
+  const [disableSaveButton, setDisableSaveButton] = useState(true);
+  const [numberOfImages, setNumberOfImages] = useState(0);
 
-  useEffect(() => {
-    (async () => {
-      const cameraPermissions = await Camera.requestCameraPermissionsAsync();
-      const mediaLibraryPermissions =
-        await MediaLibrary.requestPermissionsAsync();
-      setHasCameraPermission(cameraPermissions.status === "granted");
-      setHasMediaLibaryPermission(mediaLibraryPermissions.status === "granted");
-    })();
-  }, []);
-  if (hasCameraPermission === undefined) {
-    return <Text>Requesting Permissions...</Text>;
-  } else if (!hasCameraPermission) {
-    return <Text>Werey Grant am</Text>;
-  }
+  const pickImageAsync = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      return result.assets[0].uri;
+    } else {
+      alert("You did not select any image.");
+    }
+  };
   const [addFormData, setAddFormData] = useState({
-    id: (categories?.length || 0) + 1,
+    // id: (categories?.length || 0) + 1,
     name: "",
     Image: [
       {
@@ -60,7 +58,7 @@ const BlankCategory = ({ setAddCategoryButton, categories }) => {
         link: require("../../../assets/placeholder(3).svg"),
       },
       {
-        id: 3,
+        id: 2,
         link: require("../../../assets/placeholder(3).svg"),
       },
       {
@@ -73,6 +71,67 @@ const BlankCategory = ({ setAddCategoryButton, categories }) => {
       },
     ],
   });
+
+  useEffect(() => {
+    console.log("Number of images: " + numberOfImages);
+    setNumberOfImages(numberOfImages);
+  }, [numberOfImages]);
+  // check if imageurl is not null
+  const imageUploading = async (item) => {
+    // alert(item);
+
+    const imageUrl = await pickImageAsync();
+    if (imageUrl) {
+      const updatedFormData = {
+        ...addFormData,
+        Image: addFormData.Image.map((img) => {
+          if (img.id === item) {
+            return {
+              ...img,
+              link: imageUrl,
+            };
+          } else {
+            return img;
+          }
+        }),
+      };
+
+      setAddFormData(updatedFormData);
+    }
+  };
+  const imageUpload = async (files) => {
+    const formData = new FormData();
+    formData.append("UPLOADCARE_PUB_KEY", env.NEXT_PUBLIC_UPLOADCARE_PUB_KEY);
+    formData.append("UPLOADCARE_STORE", "auto");
+    formData.append("metadata[user]", uid);
+    files.forEach((file, index) =>
+      formData.append(`my_file(${index}).jpg`, file),
+    );
+
+    for (const value of formData.values()) {
+      console.log(value);
+    }
+
+    const response = await fetch("https://upload.uploadcare.com/base/", {
+      method: "POST",
+      body: formData,
+    });
+    return response;
+  };
+  const checkInputBoxChange = (newTitle) => {
+    onChangecategoryTitle(newTitle);
+    if (newTitle.length > 0) {
+      setDisableSaveButton(false);
+    } else {
+      setDisableSaveButton(true);
+    }
+    const newCategory = { ...addFormData };
+    newCategory.name = newTitle;
+
+    setAddFormData(newCategory);
+  };
+
+  const submitImageAndTitle = () => {};
   const styles = StyleSheet.create({
     container: {
       marginTop: -40,
@@ -84,7 +143,7 @@ const BlankCategory = ({ setAddCategoryButton, categories }) => {
       paddingVertical: 8,
     },
     button: {
-      backgroundColor: "black",
+      backgroundColor: disableSaveButton ? "#607D8B" : "black",
       paddingHorizontal: 16,
       paddingVertical: 8,
       borderRadius: 9,
@@ -98,12 +157,22 @@ const BlankCategory = ({ setAddCategoryButton, categories }) => {
 
   return (
     <>
+      {/* <View>
+        <View>
+          <Button
+            color="primary"
+            title="Choose a photo"
+            onPress={pickImageAsync}
+          />
+          <Button title="Use this photo" />
+        </View>
+      </View> */}
       <View className="mx-auto">
         <SafeAreaView>
           <TextInput
-            onChangeText={onChangecategoryTitle}
+            onChangeText={(newTitle) => checkInputBoxChange(newTitle)}
             value={categoryTitle}
-            placeholder="useless placeholder"
+            placeholder="Category Name"
             keyboardType="default"
             className="w-48 border-2"
           />
@@ -115,12 +184,7 @@ const BlankCategory = ({ setAddCategoryButton, categories }) => {
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
             <>
-              <Pressable
-                onPress={() => {
-                  setModalVisible(true);
-                  setPressedImage(item.link);
-                }}
-              >
+              <Pressable onPress={() => imageUploading(item.id)}>
                 <Image
                   source={item.link}
                   alt="Image"
@@ -133,19 +197,15 @@ const BlankCategory = ({ setAddCategoryButton, categories }) => {
           numColumns={2}
         />
       </View>
-      <View style={styles.container}>
-        <Pressable className="mx-4" style={styles.button}>
-          <Text style={styles.buttonText}>Save</Text>
-        </Pressable>
-        {/* <Pressable
-          onPress={() => {
-            setAddCategoryButton(false);
-          }}
+      <View>
+        <Pressable
+          disabled={disableSaveButton}
           className="mx-4"
           style={styles.button}
+          onPress={submitImageAndTitle}
         >
-          <Text style={styles.buttonText}>Cancel</Text>
-        </Pressable> */}
+          <Text style={styles.buttonText}>Save</Text>
+        </Pressable>
       </View>
     </>
   );
