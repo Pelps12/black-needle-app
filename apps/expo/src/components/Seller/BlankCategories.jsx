@@ -9,11 +9,14 @@ import {
   TextInput,
   View,
 } from "react-native";
+import Constants from "expo-constants";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { useAuth } from "@clerk/clerk-expo";
-import { Feather } from "@expo/vector-icons";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 
+import dataURItoBlob from "../../utils/dataURItoBlob";
+import { trpc } from "../../utils/trpc";
 import Modal from "../Modal";
 
 const BlankCategories = ({ setAddCategoryButton, categories }) => {
@@ -36,6 +39,7 @@ const BlankCategory = ({ setAddCategoryButton, categories }) => {
   const [selectedImage, setImage] = useState("");
   const [disableSaveButton, setDisableSaveButton] = useState(true);
   const [numberOfImages, setNumberOfImages] = useState(0);
+  const createCate = trpc.user.createCategory.useMutation();
 
   const pickImageAsync = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -44,7 +48,7 @@ const BlankCategory = ({ setAddCategoryButton, categories }) => {
     });
 
     if (!result.canceled) {
-      return result.assets[0].uri;
+      return result.assets[0];
     } else {
       alert("You did not select any image.");
     }
@@ -100,21 +104,41 @@ const BlankCategory = ({ setAddCategoryButton, categories }) => {
     }
   };
   const imageUpload = async (files) => {
+    console.log("Welcome");
     const formData = new FormData();
-    formData.append("UPLOADCARE_PUB_KEY", env.NEXT_PUBLIC_UPLOADCARE_PUB_KEY);
-    formData.append("UPLOADCARE_STORE", "auto");
-    formData.append("metadata[user]", uid);
-    files.forEach((file, index) =>
-      formData.append(`my_file(${index}).jpg`, file),
+    formData.append(
+      "UPLOADCARE_PUB_KEY",
+      Constants.expoConfig?.extra?.NEXT_PUBLIC_UPLOADCARE_PUB_KEY,
     );
+    formData.append("UPLOADCARE_STORE", "auto");
 
-    for (const value of formData.values()) {
-      console.log(value);
-    }
+    // formData.append("metadata[user]", uid);
+    console.log("Are you there");
+    files.forEach((file, index) => {
+      let uriParts = file.uri.split(".");
+      let fileType = uriParts[uriParts.length - 1];
+      console.log("Inside");
+      console.log(file);
+      console.log(file.uri);
+      console.log(file.name);
+      console.log(`image/${fileType}`);
+      formData.append(`my_file(${index}).jpg`, {
+        uri: file.uri,
+        name: "John",
+        type: `image/${fileType}`,
+      });
+    });
+    console.log("Yes i am");
 
+    console.log("sleep");
+    console.log(formData);
+    console.log("Ojo");
     const response = await fetch("https://upload.uploadcare.com/base/", {
       method: "POST",
       body: formData,
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
     });
     return response;
   };
@@ -131,7 +155,43 @@ const BlankCategory = ({ setAddCategoryButton, categories }) => {
     setAddFormData(newCategory);
   };
 
-  const submitImageAndTitle = () => {};
+  const submitImageAndTitle = async () => {
+    console.log("head");
+    addFormData.Image.map((image) => console.log(image.link));
+    const getFileObjects = async () => {
+      return Promise.all(
+        addFormData.Image.map((image) => dataURItoBlob(image.link.uri)),
+      );
+    };
+
+    const files = await getFileObjects();
+    console.log(files);
+    console.log("leg");
+    if (files.length > 0) {
+      console.log("About to log file");
+      console.log(files);
+      console.log("Afterr");
+      const response = await imageUpload(
+        addFormData.Image.map((image) => image.link),
+      );
+      if (response.ok) {
+        console.log(response);
+        console.log("bellyHUU");
+        const result = await response.json();
+        console.log(result);
+        console.log("hellyyHUU");
+        createCate.mutateAsync({
+          name: addFormData.name,
+          images: Object.keys(result).map(
+            (image) => `https://ucarecdn.com/${result[image]}/`,
+          ),
+        });
+      } else {
+        console.log(await response.text(), response.status);
+      }
+      console.log("nose");
+    }
+  };
   const styles = StyleSheet.create({
     container: {
       marginTop: -40,
@@ -144,9 +204,13 @@ const BlankCategory = ({ setAddCategoryButton, categories }) => {
     },
     button: {
       backgroundColor: disableSaveButton ? "#607D8B" : "black",
+      marginLeft: 150,
       paddingHorizontal: 16,
       paddingVertical: 8,
       borderRadius: 9,
+      width: 90,
+      alignItems: "center",
+      justifyContent: "center",
     },
     buttonText: {
       color: "white",
@@ -186,7 +250,7 @@ const BlankCategory = ({ setAddCategoryButton, categories }) => {
             <>
               <Pressable onPress={() => imageUploading(item.id)}>
                 <Image
-                  source={item.link}
+                  source={item.link.uri ? item.link.uri : item.link}
                   alt="Image"
                   style={{ width: 176, height: 176 }}
                   className="m-2 h-44 w-44 "

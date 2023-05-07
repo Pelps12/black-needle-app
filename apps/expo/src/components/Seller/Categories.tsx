@@ -2,7 +2,7 @@ import React, { Fragment, useEffect, useRef, useState } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { useAuth } from "@clerk/clerk-expo";
-import { Feather } from "@expo/vector-icons";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { type Category, type Price, type Image as PrismaImage } from "@acme/db";
 
@@ -29,12 +29,22 @@ const Categories = ({
             setAddCategoryButton(!addCategoryButton);
           }}
         >
-          <Feather
-            name="plus-circle"
-            style={{ marginLeft: 350 }}
-            size={24}
-            color="black"
-          />
+          {!addCategoryButton && (
+            <Feather
+              name="plus-circle"
+              style={{ marginLeft: 350 }}
+              size={24}
+              color="black"
+            />
+          )}
+          {addCategoryButton && (
+            <MaterialCommunityIcons
+              style={{ marginLeft: 350 }}
+              name="cancel"
+              size={24}
+              color="black"
+            />
+          )}
         </Pressable>
       ) : null}
 
