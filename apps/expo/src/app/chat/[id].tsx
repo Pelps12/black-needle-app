@@ -80,6 +80,7 @@ const ChatPage = () => {
     console.log(getRoom.data?.room?.id, "HY");
     if ((message.data.roomId = getRoom.data?.room?.id)) {
       setAblyMessages((ablyMessages) => [
+        ...ablyMessages,
         {
           isSender: false,
           data: {
@@ -87,7 +88,6 @@ const ChatPage = () => {
             message: message.data.message,
           },
         },
-        ...ablyMessages,
       ]);
     }
   });
@@ -107,6 +107,7 @@ const ChatPage = () => {
         },
       });
       setAblyMessages([
+        ...ablyMessages,
         {
           isSender: true,
           data: {
@@ -114,7 +115,6 @@ const ChatPage = () => {
             message: messageText,
           },
         },
-        ...ablyMessages,
       ]);
     }
     setMessageText("");
@@ -176,49 +176,40 @@ const ChatPage = () => {
         </View>
         <View style={{ flex: 1 }}>
           <View className="space-y-2" style={{ flex: 0.9 }}>
-            {
-              <Fragment>
-                {prevMessRouter.data?.pages && ablyMessages && (
-                  <SectionList
-                    refreshControl={
-                      <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={onRefresh}
+            {prevMessRouter.data?.pages && ablyMessages && (
+              <SectionList
+                onEndReached={() => prevMessRouter.fetchNextPage()}
+                sections={[
+                  {
+                    data: prevMessRouter.data?.pages,
+                    renderItem: (page) => (
+                      <FlatList
+                        data={page.item.messages}
+                        renderItem={({ item }) => (
+                          <MessageComponent message={item} userId={userId} />
+                        )}
+                        ref={endRef}
+                        keyExtractor={(item) => item.id.toString()}
+                        inverted={true}
                       />
-                    }
-                    sections={[
-                      {
-                        data: ablyMessages,
-                        renderItem: (page) => (
-                          <AblyMessageComponent message={page.item} />
-                        ),
-                      },
-                      {
-                        data: prevMessRouter.data?.pages,
-                        renderItem: (page) => (
-                          <FlatList
-                            data={page.item.messages}
-                            renderItem={({ item }) => (
-                              <MessageComponent
-                                message={item}
-                                userId={userId}
-                              />
-                            )}
-                            ref={endRef}
-                            keyExtractor={(item) => item.id.toString()}
-                            inverted={true}
-                          />
-                        ),
-                      },
-                    ]}
-                    inverted={true}
-                    contentContainerStyle={{ paddingBottom: 20 }}
-                    onScrollToTop={() => console.log("SLOPPY TOPPY")}
-                    keyExtractor={(item, idx) => idx.toString()}
-                  />
-                )}
-              </Fragment>
-            }
+                    ),
+                  },
+                  {
+                    data: ablyMessages,
+                    renderItem: (page) => (
+                      <AblyMessageComponent message={page.item} />
+                    ),
+                  },
+                ]}
+                contentContainerStyle={{
+                  paddingBottom: 20,
+                  flexDirection: "column-reverse",
+                }}
+                inverted={true}
+                onScrollToTop={() => console.log("SLOPPY TOPPY")}
+                keyExtractor={(item, idx) => idx.toString()}
+              />
+            )}
           </View>
 
           <View
@@ -231,10 +222,10 @@ const ChatPage = () => {
               onChangeText={setMessageText}
               numberOfLines={1}
               placeholder="Send Message"
-              className="mx-3 block w-full rounded-full bg-gray-100 py-2 pl-4 outline-none focus:text-gray-700"
+              className="mx-3 w-full rounded-full border border-[#d9d9d9] bg-gray-100 py-2 pl-4 outline-none "
             />
 
-            <Pressable onPress={() => handleSubmit()}>
+            <Pressable onPress={() => handleSubmit()} className="">
               <Feather name="send" size={20} color="black" />
             </Pressable>
           </View>
