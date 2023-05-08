@@ -40,13 +40,14 @@ const SellerPage = () => {
           <Text className=" text-4xl font-semibold">
             {categoriesEndpoint.data?.user?.name ?? "Unknown"}
           </Text>
-          <Link
-            className={`my-2 flex flex-row content-center items-center justify-center rounded-xl  bg-[#1dbaa7] px-3 py-1  text-black shadow-sm`}
-            href={`/chat/${idString}`}
-          >
-            <Text className=" text-center text-xl font-semibold text-white">
-              CHAT
-            </Text>
+          <Link className="my-2" href={`/chat/${idString}`}>
+            <View
+              className={` flex flex-row content-center items-center justify-center rounded-lg  bg-[#1dbaa7] px-3 py-1  text-black `}
+            >
+              <Text className=" text-center text-xl font-semibold text-white">
+                Chat
+              </Text>
+            </View>
           </Link>
         </View>
       </View>

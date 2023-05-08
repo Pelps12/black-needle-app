@@ -1,3 +1,4 @@
+import { clerkClient } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
 import Stripe from "stripe";
 import { z } from "zod";
@@ -17,7 +18,10 @@ export const userRouter = router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      if (ctx.auth.user?.publicMetadata.role !== "SELLER") {
+      const { publicMetadata } = await clerkClient.users.getUser(
+        ctx.auth.userId,
+      );
+      if (publicMetadata.role !== "SELLER") {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "Register as a seller",
