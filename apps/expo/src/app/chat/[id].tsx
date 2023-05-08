@@ -96,6 +96,10 @@ const ChatPage = () => {
     prevMessRouter.refetch();
   }, []);
 
+  useEffect(() => {
+    getRoom.refetch();
+  }, [idString]);
+
   const handleSubmit = async () => {
     console.log(getRoom.isSuccess && getRoom.data.room && messageText !== "");
     if (getRoom.isSuccess && getRoom.data.room && messageText !== "") {
@@ -179,6 +183,7 @@ const ChatPage = () => {
             {prevMessRouter.data?.pages && ablyMessages && (
               <SectionList
                 onEndReached={() => prevMessRouter.fetchNextPage()}
+                className="px-3"
                 sections={[
                   {
                     data: prevMessRouter.data?.pages,
@@ -251,7 +256,7 @@ const MessageComponent = ({
       } my-2`}
     >
       <View
-        className={`relative max-w-xs rounded ${
+        className={`relative max-w-xs rounded-lg ${
           message.userId === userId ? "bg-[#1dbaa7]" : "bg-white"
         } px-4 py-2 text-gray-700 shadow`}
       >
@@ -269,7 +274,7 @@ const AblyMessageComponent = ({ message }: { message: AblyMessage }) => {
       } my-2`}
     >
       <View
-        className={`relative max-w-xs rounded ${
+        className={`relative max-w-xs rounded-lg ${
           message.isSender ? "bg-[#1dbaa7]" : "bg-white"
         } px-4 py-2 text-gray-700 shadow`}
       >
