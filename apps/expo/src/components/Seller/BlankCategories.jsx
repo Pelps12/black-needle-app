@@ -180,12 +180,15 @@ const BlankCategory = ({ setAddCategoryButton, categories }) => {
         const result = await response.json();
         console.log(result);
         console.log("hellyyHUU");
-        createCate.mutateAsync({
-          name: addFormData.name,
-          images: Object.keys(result).map(
-            (image) => `https://ucarecdn.com/${result[image]}/`,
-          ),
-        });
+        createCate
+          .mutateAsync({
+            name: addFormData.name,
+            images: Object.keys(result).map(
+              (image) => `https://ucarecdn.com/${result[image]}/`,
+            ),
+          })
+          .then((data) => trpc.useContext().user.getCategories.refetch())
+          .catch((err) => console.log(err.message));
       } else {
         console.log(await response.text(), response.status);
       }
