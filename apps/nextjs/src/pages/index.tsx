@@ -28,7 +28,8 @@ import {
 	RefinementList,
 	SearchBox,
 	InstantSearchServerState,
-	InstantSearchSSRProvider
+	InstantSearchSSRProvider,
+	useHits
 } from 'react-instantsearch-hooks-web';
 import { useInView } from 'react-intersection-observer';
 import AsyncSelect from 'react-select/async-creatable';
@@ -47,16 +48,27 @@ type HomePageProps = {
 
 const searchClient = algoliasearch('MXKJ7URABT', 'ecd72cebe5c87facc09e9e9884038e0a');
 
+const CustomHits = () => {
+	const { hits } = useHits();
+	return (
+		<div className="grid grid-cols-3  gap-5">
+			{hits.map((hit) => (
+				<Hit hit={hit} />
+			))}
+		</div>
+	);
+};
+
 function Hit({ hit }: { hit: any }) {
 	return (
 		<>
 			{hit.prices.map((item: any) => (
 				<Link
 					href={`/seller/${hit.sellerId}?active=PRICES&productID=${item.id}`}
-					key={hit._id}
+					key={hit.id}
 					className="group"
 				>
-					<div className=" my-2 items-start flex flex-col">
+					<div className=" my-2 ">
 						<Image
 							className="min-w-full max-w-xs md:max-w-md max-h-full shadow-lg object-cover rounded-lg h-[30vh] w-40 md:w-60 md:h-72  object-center mx-auto"
 							alt="Picture f the "
@@ -183,8 +195,7 @@ const Home: NextPage<HomePageProps> = ({ serverState, url }) => {
 								resetIcon: 'hidden'
 							}}
 						/>
-
-						<Hits hitComponent={Hit} />
+						<CustomHits />
 					</main>
 					{/* {resultMut.isSuccess && (
 				

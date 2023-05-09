@@ -1,137 +1,123 @@
-import { TRPCError } from '@trpc/server';
-import { z } from 'zod';
-import { env } from '../../../env/server.mjs';
-import { authedProcedure, t } from '../trpc';
-import { mixpanel } from '@utils/mixpanel';
-import { randomUUID } from 'crypto';
-import UAParser from 'ua-parser-js';
-import { esClient as client } from '@utils/elastic';
+import { randomUUID } from "crypto";
+import { TRPCError } from "@trpc/server";
+import algoliasearch from "algoliasearch";
+import { z } from "zod";
 
-export const priceRouter = t.router({
-	createPrice: authedProcedure
-		.input(
-			z.object({
-				categoryId: z.string(),
-				amount: z.number(),
-				name: z.string(),
-				type: z.enum(['GOOD', 'SERVICE']),
-				duration: z.number().optional()
-			})
-		)
-		.mutation(async ({ input, ctx }) => {
-			const ua = UAParser(ctx.headers['user-agent']);
-			const ip = ctx.headers['x-forwarded-for'] || '127.0.0.1';
-			const ipString = typeof ip === 'string' ? ip : typeof ip === 'undefined' ? ':)' : ip[0]!;
+import { protectedProcedure, publicProcedure, router } from "../trpc";
 
-			const category = await ctx.prisma.category.findFirst({
-				where: {
-					id: input.categoryId
-				},
-				include: {
-					seller: true,
-					Image: true
-				}
-			});
-			if (!category) {
-				throw new TRPCError({
-					code: 'BAD_REQUEST',
-					message: "Category doesn't exist"
-				});
-			}
+const client = algoliasearch(
+  process.env.NEXT_PUBLIC_ALGOLIA_APP_ID ?? "",
+  process.env.ALGOLIA_SECRET_KEY ?? "",
+);
 
-			if (category.seller && category.sellerId === ctx.session.user.id) {
-				const price = await ctx.prisma.price.create({
-					data: {
-						name: input.name,
-						amount: input.amount,
-						categoryId: input.categoryId,
-						type: input.type,
-						duration: input.duration
-					}
-				});
+export const priceRouter = router({
+  createPrice: protectedProcedure
+    .input(
+      z.object({
+        categoryId: z.string(),
+        amount: z.number(),
+        name: z.string(),
+        type: z.enum(["GOOD", "SERVICE"]),
+        duration: z.number().optional(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const category = await ctx.prisma.category.findFirst({
+        where: {
+          id: input.categoryId,
+        },
+        include: {
+          seller: true,
+          Image: true,
+          prices: true,
+        },
+      });
+      if (!category) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Category doesn't exist",
+        });
+      }
 
-				client.index({
-					index: 'products',
-					id: price.id,
-					body: {
-						name: price.name,
-						'seller-id': category.sellerId,
-						amount: price.amount,
-						'category-name': category.name,
-						'category-id': category.id,
-						school: category.seller.school,
-						'seller-icon': ctx.session.user.image,
-						image: category.Image[0]?.link || ':)' //Gets random image from sellers category
-					}
-				});
+      if (category.seller && category.sellerId === ctx.auth.userId) {
+        const price = await ctx.prisma.price.create({
+          data: {
+            name: input.name,
+            amount: input.amount,
+            categoryId: input.categoryId,
+            type: input.type,
+            duration: input.duration,
+          },
+        });
 
-				mixpanel.track('Listing Posted', {
-					distinct_id: ctx.session.user.id,
-					$insert_id: randomUUID(),
-					amount: price.amount,
-					ip: ipString,
-					$os: ua.os.name,
-					$browser: ua.browser.name,
-					$browser_version: ua.browser.version
-				});
+        const newPrices = [...category.prices, price];
 
-				return {
-					price
-				};
-			} else {
-				throw new TRPCError({
-					code: 'UNAUTHORIZED'
-				});
-			}
-		}),
-	updatePrice: authedProcedure
-		.input(
-			z.object({
-				priceId: z.string(),
-				amount: z.number().optional(),
-				name: z.string().optional(),
-				categoryId: z.string().optional(),
-				type: z.enum(['GOOD', 'SERVICE']).optional()
-			})
-		)
-		.mutation(async ({ input, ctx }) => {
-			const price = await ctx.prisma.price.findFirst({
-				where: {
-					id: input.priceId
-				},
-				include: {
-					category: true
-				}
-			});
-			if (!price) {
-				throw new TRPCError({
-					code: 'BAD_REQUEST',
-					message: "Category doesn't exist"
-				});
-			}
+        const algoliaIndex = client.initIndex(
+          process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME ?? "",
+        );
 
-			if (price.category.sellerId === ctx.session.user.id) {
-				const updatedPrice = await ctx.prisma.price.update({
-					where: {
-						id: input.priceId
-					},
-					data: {
-						name: input.name,
-						amount: input.amount,
-						categoryId: input.categoryId || price.categoryId,
-						type: input.type
-					},
-					include: {
-						category: {
-							include: {
-								Image: true,
-								seller: true
-							}
-						}
-					}
-				});
+        algoliaIndex.partialUpdateObject({
+          prices: newPrices,
+          objectID: category.id,
+        });
 
-				client.update({
+        return {
+          price,
+        };
+      } else {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+        });
+      }
+    }),
+  updatePrice: protectedProcedure
+    .input(
+      z.object({
+        priceId: z.string(),
+        amount: z.number().optional(),
+        name: z.string().optional(),
+        categoryId: z.string().optional(),
+        type: z.enum(["GOOD", "SERVICE"]).optional(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const price = await ctx.prisma.price.findFirst({
+        where: {
+          id: input.priceId,
+        },
+        include: {
+          category: true,
+        },
+      });
+      if (!price) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Category doesn't exist",
+        });
+      }
+
+      if (price.category.sellerId === ctx.auth.userId) {
+        const updatedPrice = await ctx.prisma.price.update({
+          where: {
+            id: input.priceId,
+          },
+          data: {
+            name: input.name,
+            amount: input.amount,
+            categoryId: input.categoryId || price.categoryId,
+            type: input.type,
+          },
+          include: {
+            category: {
+              include: {
+                Image: true,
+                seller: true,
+              },
+            },
+          },
+        });
+
+        /* client.update({
 					index: 'products',
 					id: price.id,
 					doc: {
@@ -144,57 +130,57 @@ export const priceRouter = t.router({
 						'seller-icon': ctx.session.user.image,
 						image: updatedPrice.category.Image[0]?.link || ':)' //Gets random image from sellers category
 					}
-				});
+				}); */
 
-				return {
-					updatedPrice
-				};
-			} else {
-				throw new TRPCError({
-					code: 'UNAUTHORIZED'
-				});
-			}
-		}),
-	deletePrice: authedProcedure
-		.input(
-			z.object({
-				priceId: z.string()
-			})
-		)
-		.mutation(async ({ input, ctx }) => {
-			const price = await ctx.prisma.price.findFirst({
-				where: {
-					id: input.priceId
-				},
-				include: {
-					category: true
-				}
-			});
-			if (!price) {
-				throw new TRPCError({
-					code: 'BAD_REQUEST',
-					message: "Category doesn't exist"
-				});
-			}
+        return {
+          updatedPrice,
+        };
+      } else {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+        });
+      }
+    }),
+  deletePrice: protectedProcedure
+    .input(
+      z.object({
+        priceId: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const price = await ctx.prisma.price.findFirst({
+        where: {
+          id: input.priceId,
+        },
+        include: {
+          category: true,
+        },
+      });
+      if (!price) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Category doesn't exist",
+        });
+      }
 
-			if (price.category.sellerId === ctx.session.user.id) {
-				const deletedPrice = await ctx.prisma.price.delete({
-					where: {
-						id: input.priceId
-					}
-				});
-
+      if (price.category.sellerId === ctx.auth.userId) {
+        const deletedPrice = await ctx.prisma.price.delete({
+          where: {
+            id: input.priceId,
+          },
+        });
+        /* 
 				client.delete({
 					index: 'products',
 					id: deletedPrice.id
-				});
-				return {
-					deletedPrice
-				};
-			} else {
-				throw new TRPCError({
-					code: 'UNAUTHORIZED'
-				});
-			}
-		})
+				}); */
+        return {
+          deletedPrice,
+        };
+      } else {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+        });
+      }
+    }),
 });

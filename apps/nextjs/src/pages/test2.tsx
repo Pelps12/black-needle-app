@@ -6,7 +6,7 @@ import React, { useEffect, useState } from 'react';
 const Test2 = () => {
 	const { userId, isSignedIn } = useAuth();
 
-	const trpcEndpt = trpc.user.createNewAvailability.useMutation();
+	const trpcEndpt = trpc.search.algoliaTransform.useMutation();
 	// useEffect(() => {
 	// 	if (isSignedIn) {
 	// 		const test = async () => {
@@ -29,11 +29,10 @@ const Test2 = () => {
 		<>
 			<button
 				onClick={() =>
-					trpcEndpt.mutate({
-						from: 43200,
-						to: 66600,
-						day: 'SATURDAY',
-						sellerId: 'cld3vszt20000l60fahbl4fp6'
+					trpcEndpt.mutate(undefined, {
+						onSuccess(data) {
+							console.log(data);
+						}
 					})
 				}
 			></button>

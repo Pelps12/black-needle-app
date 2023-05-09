@@ -22,7 +22,8 @@ export const server = z.object({
 	CLERK_SECRET_KEY: z.string(),
 	EXPO_ACCESS_TOKEN: z.string(),
 	ABLY_API_KEY: z.string(),
-	ABLY_HASH: z.string()
+	ABLY_HASH: z.string(),
+	ALGOLIA_SECRET_KEY: z.string()
 });
 
 /**
@@ -31,7 +32,10 @@ export const server = z.object({
  */
 export const client = z.object({
 	// NEXT_PUBLIC_CLIENTVAR: z.string().min(1),
-	NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string()
+	NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string(),
+	NEXT_PUBLIC_ALGOLIA_APP_ID: z.string(),
+	NEXT_PUBLIC_ALGOLIA_API_KEY: z.string(),
+	NEXT_PUBLIC_ALGOLIA_INDEX_NAME: z.string()
 });
 
 /**
@@ -51,7 +55,12 @@ const processEnv = {
 	CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
 	EXPO_ACCESS_TOKEN: process.env.EXPO_ACCESS_TOKEN,
 	ABLY_API_KEY: process.env.ABLY_API_KEY,
-	ABLY_HASH: process.env.ABLY_HASH
+	ABLY_HASH: process.env.ABLY_HASH,
+	NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
+	NEXT_PUBLIC_ALGOLIA_APP_ID: process.env.NEXT_PUBLIC_ALGOLIA_APP_ID,
+	NEXT_PUBLIC_ALGOLIA_API_KEY: process.env.NEXT_PUBLIC_ALGOLIA_API_KEY,
+	NEXT_PUBLIC_ALGOLIA_INDEX_NAME: process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME,
+	ALGOLIA_SECRET_KEY: process.env.ALGOLIA_SECRET_KEY
 };
 
 // Don't touch the part below

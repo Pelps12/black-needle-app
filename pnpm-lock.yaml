@@ -387,6 +387,9 @@ importers:
       ably:
         specifier: ^1.2.39
         version: 1.2.39
+      algoliasearch:
+        specifier: ^4.17.0
+        version: 4.17.0
       expo-server-sdk:
         specifier: ^3.7.0
         version: 3.7.0
