@@ -56,7 +56,6 @@ const ChatPage = () => {
   const { userId } = useAuth();
   const scrollViewRef = useRef<SectionList>(null);
   const endRef = useRef<FlatList>(null);
-
   const prevMessRouter = trpc.chat.getPreviousChats.useInfiniteQuery(
     {
       limit: 20,
@@ -102,6 +101,7 @@ const ChatPage = () => {
 
   const handleSubmit = async () => {
     console.log(getRoom.isSuccess && getRoom.data.room && messageText !== "");
+
     if (getRoom.isSuccess && getRoom.data.room && messageText !== "") {
       await ably.channels.get(`chat:${id}`).publish({
         name: "message",

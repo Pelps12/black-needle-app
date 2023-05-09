@@ -49,14 +49,10 @@ export const chatRouter = router({
     .input(
       z.object({
         userId: z.string(),
-        limit: z.number().min(1).max(100).nullish(),
-        cursor: z.string().nullish(),
       }),
     )
     .query(async ({ input, ctx }) => {
       console.log(ctx.auth.userId, input.userId);
-      const limit = input.limit ?? 50;
-      const { cursor } = input;
       const [room, user] = await Promise.all([
         ctx.prisma.room.findFirst({
           where: {

@@ -1,5 +1,6 @@
 import { clerkClient } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
+import algoliasearch from "algoliasearch";
 import Stripe from "stripe";
 import { z } from "zod";
 
@@ -8,6 +9,14 @@ import { protectedProcedure, publicProcedure, router } from "../trpc";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
   apiVersion: "2022-11-15",
 });
+
+const client = algoliasearch(
+  process.env.NEXT_PUBLIC_ALGOLIA_APP_ID ?? "",
+  process.env.ALGOLIA_SECRET_KEY ?? "",
+);
+const algoliaIndex = client.initIndex(
+  process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME ?? "",
+);
 
 export const userRouter = router({
   createCategory: protectedProcedure
@@ -27,6 +36,13 @@ export const userRouter = router({
           message: "Register as a seller",
         });
       }
+      console.log(
+        input.images.map((img) => {
+          return {
+            link: img,
+          };
+        }),
+      );
 
       const category = await ctx.prisma.category.create({
         data: {
@@ -42,6 +58,18 @@ export const userRouter = router({
             },
           },
         },
+        include: {
+          Image: true,
+        },
+      });
+
+      const { objectID } = await algoliaIndex.saveObject({
+        objectID: category.id,
+        name: category.name,
+        sellerId: ctx.auth.userId,
+        type: category.type,
+        prices: [],
+        Image: category.Image,
       });
 
       return category;
@@ -78,47 +106,46 @@ export const userRouter = router({
   deleteCategory: protectedProcedure
     .input(
       z.object({
-        categoryId: z.string().cuid({ message: "Invalid ID" }),
+        id: z.string(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const category = await ctx.prisma.category.findFirst({
+      const { publicMetadata } = await clerkClient.users.getUser(
+        ctx.auth.userId,
+      );
+
+      //Make sure the category belongs to the user
+      const category = await ctx.prisma.category.findFirstOrThrow({
         where: {
-          id: input.categoryId,
+          id: input.id,
+          sellerId: ctx.auth.userId,
         },
         include: {
           Image: true,
         },
       });
 
-      if (!category) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-        });
-      }
-      if (category.sellerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-        });
-      }
-      const result = await fetch("https://api.uploadcare.com/files/storage/", {
-        method: "DELETE",
-        body: JSON.stringify(
-          category.Image.map((image) => image.link.split("/")[3]),
-        ),
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Uploadcare.Simple ${process.env.NEXT_PUBLIC_UPLOADCARE_PUB_KEY}:${process.env.UPLOADCARE_SECRET_KEY}`,
-          Accept: "application/vnd.uploadcare-v0.7+json",
-        },
-      });
-      console.log(await result.json());
+      const [_, deletedCategory, uploadcareResponse] = await Promise.all([
+        algoliaIndex.deleteObject(input.id),
+        ctx.prisma.category.delete({
+          where: {
+            id: input.id,
+          },
+        }),
+        fetch("https://api.uploadcare.com/files/storage/", {
+          method: "DELETE",
+          body: JSON.stringify(
+            category.Image.map((image) => image.link.split("/")[3]),
+          ),
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Uploadcare.Simple ${process.env.NEXT_PUBLIC_UPLOADCARE_PUB_KEY}:${process.env.UPLOADCARE_SECRET_KEY}`,
+            Accept: "application/vnd.uploadcare-v0.7+json",
+          },
+        }),
+      ]);
 
-      const deletedCategory = await ctx.prisma.category.delete({
-        where: {
-          id: input.categoryId,
-        },
-      });
+      return deletedCategory;
     }),
   setExpoToken: protectedProcedure
     .input(

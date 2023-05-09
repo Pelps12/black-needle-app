@@ -1,42 +1,43 @@
-import { trpc } from '@utils/trpc';
+import { useLoginStore } from '../utils/loginModalStore';
+import { trpc } from '../utils/trpc';
+import { useAuth } from '@clerk/nextjs';
+import React, { useEffect, useState } from 'react';
 
 const Test = () => {
-	const suggestionMut = trpc.upload.getPresignedUrl.useMutation();
+	const { userId, isSignedIn } = useAuth();
 
-	const handleClick = () => {
-		suggestionMut.mutate({
-			type: 'GET',
-			roomId: 'cldcra91i0000mo0ffkxiye76',
-			key: 'chat/b248cbcb-3c92-4fa4-a952-dfc9d97adc6b.JPG'
-		});
-	};
+	const trpcEndpt = trpc.search.algoliaTransform.useMutation();
+	// useEffect(() => {
+	// 	if (isSignedIn) {
+	// 		const test = async () => {
+	// 			const response = await fetch('http://localhost:8787/test', {
+	// 				method: 'POST',
+	// 				body: JSON.stringify({ session: session }),
+	// 				headers: {
+	// 					'Content-Type': 'application/json'
+	// 				}
+	// 			});
+	// 			const result = await response.json();
+	// 			console.log(result);
+	// 		};
+	// 		try {
+	// 			test();
+	// 		} catch (err) {}
+	// 	}
+	// }, [session]);
 	return (
 		<>
-			<button className="btn" onClick={() => handleClick()}>
-				CLICK
-			</button>
-
-			<img src={suggestionMut.data} alt="" />
-			{/* <AutoComplete
-				openOnFocus={true}
-				options={{
-					getSources: async ({ query }) => [
-						{
-							sourceId: 'categories',
-							getItems: async ({ query }) => {
-								const result = await suggestionMut.mutateAsync({
-									category: query
-								});
-								const result2 = result ? result['category-suggest-fuzzy']?.map(val => val.options) ?? [] : [];
-								return result2
-							},
-							getItemUrl: ({ item }) => {
-								return `${env.NEXT_PUBLIC_URL}/?query=${getStringFromESResult(item)}`
-							}
+			<button
+				onClick={() =>
+					trpcEndpt.mutate(undefined, {
+						onSuccess(data) {
+							console.log(data);
 						}
-					]
-				}}
-			/> */}
+					})
+				}
+			>
+				NAME
+			</button>
 		</>
 	);
 };
