@@ -1,11 +1,22 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
-import { FlatList, Pressable, Text, View } from "react-native";
+import {
+  FlatList,
+  Pressable,
+  Text,
+  TouchableHighlight,
+  View,
+} from "react-native";
 import { Image } from "expo-image";
 import { useAuth } from "@clerk/clerk-expo";
-import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  Feather,
+  MaterialCommunityIcons,
+  MaterialIcons,
+} from "@expo/vector-icons";
 
 import { type Category, type Price, type Image as PrismaImage } from "@acme/db";
 
+import { trpc } from "../../utils/trpc";
 import Modal from "../Modal";
 import BlankCategories from "./BlankCategories";
 
@@ -32,14 +43,14 @@ const Categories = ({
           {!addCategoryButton && (
             <Feather
               name="plus-circle"
-              style={{ marginLeft: 350 }}
+              style={{ marginLeft: 350, marginBottom: 5 }}
               size={24}
               color="black"
             />
           )}
           {addCategoryButton && (
             <MaterialCommunityIcons
-              style={{ marginLeft: 350 }}
+              style={{ marginLeft: 350, marginBottom: 5 }}
               name="cancel"
               size={24}
               color="black"
@@ -59,6 +70,7 @@ const Categories = ({
           ListHeaderComponent={
             addCategoryButton ? (
               <BlankCategories
+                sellerId={sellerId}
                 setAddCategoryButton={setAddCategoryButton}
                 categories={categories}
               ></BlankCategories>
@@ -88,10 +100,44 @@ const Category = ({
 }) => {
   const [modalVisible, setModalVisible] = React.useState(false);
   const [pressedImage, setPressedImage] = React.useState<string>();
+  const catDelete = trpc.user.deleteCategory.useMutation();
   return (
     <View className="mx-auto">
       <Text className="mx-auto text-4xl font-semibold">{category.name}</Text>
-      <Modal
+
+      <View className="-mt-8">
+        <Pressable
+          onPress={() => {
+            console.log(category.name);
+          }}
+        >
+          <Feather
+            style={{ marginLeft: 348 }}
+            name="edit-2"
+            size={24}
+            color="black"
+          />
+        </Pressable>
+      </View>
+
+      <View className="mt-2">
+        <Pressable
+          onPress={() => {
+            catDelete.mutate({
+              categoryId: category.id,
+            });
+          }}
+        >
+          <MaterialCommunityIcons
+            style={{ marginLeft: 345 }}
+            name="delete-outline"
+            size={24}
+            color="black"
+          />
+        </Pressable>
+      </View>
+
+      {/* <Modal
         modalVisible={modalVisible}
         setModalVisible={setModalVisible}
         className=""
@@ -101,7 +147,7 @@ const Category = ({
           alt="Image"
           className="m-2 mx-auto h-96 w-96 rounded-xl"
         />
-      </Modal>
+      </Modal> */}
       <FlatList
         data={category.Image}
         className="mx-auto"
@@ -109,18 +155,37 @@ const Category = ({
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <>
-            <Pressable
-              onPress={() => {
-                setModalVisible(true);
-                setPressedImage(item.link);
-              }}
-            >
-              <Image
-                source={item.link}
-                alt="Image"
-                className="m-2 h-44 w-44 "
-              />
-            </Pressable>
+            <View style={{ position: "relative" }}>
+              <Pressable
+                onPress={() => {
+                  setModalVisible(true);
+                  setPressedImage(item.link);
+                }}
+              >
+                <Image
+                  source={item.link}
+                  alt="Image"
+                  className="m-2 h-44 w-44 "
+                />
+              </Pressable>
+              <View style={{ position: "absolute", top: 0, right: 0 }}>
+                <TouchableHighlight
+                  onPress={() => {
+                    console.log("item.id");
+                  }}
+                  style={{
+                    backgroundColor: "red",
+                    borderTopLeftRadius: 100,
+                    borderTopRightRadius: 100,
+                    borderBottomLeftRadius: 100,
+                    overflow: "hidden",
+                    borderBottomRightRadius: 100,
+                  }}
+                >
+                  <Text className="  h-5 w-5 text-center text-white   ">X</Text>
+                </TouchableHighlight>
+              </View>
+            </View>
           </>
         )}
         numColumns={2}

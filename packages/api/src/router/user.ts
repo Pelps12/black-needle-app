@@ -75,7 +75,51 @@ export const userRouter = router({
         user,
       };
     }),
+  deleteCategory: protectedProcedure
+    .input(
+      z.object({
+        categoryId: z.string().cuid({ message: "Invalid ID" }),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const category = await ctx.prisma.category.findFirst({
+        where: {
+          id: input.categoryId,
+        },
+        include: {
+          Image: true,
+        },
+      });
 
+      if (!category) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+        });
+      }
+      if (category.sellerId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+        });
+      }
+      const result = await fetch("https://api.uploadcare.com/files/storage/", {
+        method: "DELETE",
+        body: JSON.stringify(
+          category.Image.map((image) => image.link.split("/")[3]),
+        ),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Uploadcare.Simple ${process.env.NEXT_PUBLIC_UPLOADCARE_PUB_KEY}:${process.env.UPLOADCARE_SECRET_KEY}`,
+          Accept: "application/vnd.uploadcare-v0.7+json",
+        },
+      });
+      console.log(await result.json());
+
+      const deletedCategory = await ctx.prisma.category.delete({
+        where: {
+          id: input.categoryId,
+        },
+      });
+    }),
   setExpoToken: protectedProcedure
     .input(
       z.object({

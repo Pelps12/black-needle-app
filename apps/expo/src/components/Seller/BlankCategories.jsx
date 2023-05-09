@@ -19,10 +19,11 @@ import dataURItoBlob from "../../utils/dataURItoBlob";
 import { trpc } from "../../utils/trpc";
 import Modal from "../Modal";
 
-const BlankCategories = ({ setAddCategoryButton, categories }) => {
+const BlankCategories = ({ sellerId, setAddCategoryButton, categories }) => {
   return (
     <>
       <BlankCategory
+        sellerId={sellerId}
         setAddCategoryButton={setAddCategoryButton}
         categories={categories}
       ></BlankCategory>
@@ -31,7 +32,7 @@ const BlankCategories = ({ setAddCategoryButton, categories }) => {
 };
 
 // here
-const BlankCategory = ({ setAddCategoryButton, categories }) => {
+const BlankCategory = ({ sellerId, setAddCategoryButton, categories }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [pressedImage, setPressedImage] = useState("");
@@ -40,6 +41,15 @@ const BlankCategory = ({ setAddCategoryButton, categories }) => {
   const [disableSaveButton, setDisableSaveButton] = useState(true);
   const [numberOfImages, setNumberOfImages] = useState(0);
   const createCate = trpc.user.createCategory.useMutation();
+  const getCat = trpc.user.getCategories.useQuery(
+    {
+      id: sellerId,
+    },
+    // {
+    //   refetchInterval: undefined,
+    //   enabled: false,
+    // },
+  );
 
   const pickImageAsync = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -180,15 +190,19 @@ const BlankCategory = ({ setAddCategoryButton, categories }) => {
         const result = await response.json();
         console.log(result);
         console.log("hellyyHUU");
-        createCate
-          .mutateAsync({
-            name: addFormData.name,
-            images: Object.keys(result).map(
-              (image) => `https://ucarecdn.com/${result[image]}/`,
-            ),
-          })
-          .then((data) => trpc.useContext().user.getCategories.refetch())
-          .catch((err) => console.log(err.message));
+        await createCate.mutateAsync({
+          name: addFormData.name,
+          images: Object.keys(result).map(
+            (image) => `https://ucarecdn.com/${result[image]}/`,
+          ),
+        });
+        const { data, isSuccess } = await getCat.refetch();
+        if (isSuccess) {
+          console.log(data);
+        }
+        // trpc.useContext()?.user.getCategories.invalidate();
+        // .then((data) => trpc.useContext().user.getCategories.refetch())
+        // .catch((err) => console.log(err.message));
       } else {
         console.log(await response.text(), response.status);
       }
