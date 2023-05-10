@@ -32,6 +32,7 @@ const Categories = ({
 }) => {
   const { userId, isSignedIn } = useAuth();
   const [addCategoryButton, setAddCategoryButton] = useState(false);
+  const endRef = useRef<FlatList>(null);
   return (
     <>
       {isSignedIn && userId === sellerId ? (
@@ -66,10 +67,12 @@ const Categories = ({
           data={categories}
           contentContainerStyle={{ paddingBottom: 20 }}
           ListFooterComponent={<View style={{ height: 350 }} />}
+          ref={endRef}
           //Use flatlist. TO get the grid, do numCOlums = 2.
           ListHeaderComponent={
             addCategoryButton ? (
               <BlankCategories
+                endRef={endRef}
                 sellerId={sellerId}
                 setAddCategoryButton={setAddCategoryButton}
                 categories={categories}
@@ -100,43 +103,55 @@ const Category = ({
 }) => {
   const [modalVisible, setModalVisible] = React.useState(false);
   const [pressedImage, setPressedImage] = React.useState<string>();
+  const [editButton, setEditButton] = React.useState(false);
   const catDelete = trpc.user.deleteCategory.useMutation();
+  const getCat = trpc.user.getCategories.useQuery(
+    {
+      id: sellerId,
+    },
+    // {
+    //   refetchInterval: undefined,
+    //   enabled: false,
+    // },
+  );
   return (
     <View className="mx-auto">
       <Text className="mx-auto text-4xl font-semibold">{category.name}</Text>
+      <View className="flex-row justify-end ">
+        <View className="mr-2">
+          <Pressable
+            onPress={() => {
+              console.log(category.name);
+              setEditButton(!editButton);
+            }}
+          >
+            <Feather style={{}} name="edit-2" size={24} color="black" />
+          </Pressable>
+        </View>
 
-      <View className="-mt-8">
-        <Pressable
-          onPress={() => {
-            console.log(category.name);
-          }}
-        >
-          <Feather
-            style={{ marginLeft: 348 }}
-            name="edit-2"
-            size={24}
-            color="black"
-          />
-        </Pressable>
+        <View className="">
+          <Pressable
+            onPress={async () => {
+              console.log("Pressed");
+              await catDelete.mutateAsync({
+                id: category.id,
+              });
+
+              const { data, isSuccess } = await getCat.refetch();
+              if (isSuccess) {
+                console.log(data);
+              }
+            }}
+          >
+            <MaterialCommunityIcons
+              style={{}}
+              name="delete-outline"
+              size={24}
+              color="black"
+            />
+          </Pressable>
+        </View>
       </View>
-
-      <View className="mt-2">
-        <Pressable
-          onPress={() => {
-            catDelete.mutate({
-              categoryId: category.id,
-            });
-          }}
-        >
-          <MaterialCommunityIcons
-            style={{ marginLeft: 345 }}
-            name="delete-outline"
-            size={24}
-            color="black"
-          />
-        </Pressable>
-      </View>
-
       {/* <Modal
         modalVisible={modalVisible}
         setModalVisible={setModalVisible}
@@ -169,21 +184,25 @@ const Category = ({
                 />
               </Pressable>
               <View style={{ position: "absolute", top: 0, right: 0 }}>
-                <TouchableHighlight
-                  onPress={() => {
-                    console.log("item.id");
-                  }}
-                  style={{
-                    backgroundColor: "red",
-                    borderTopLeftRadius: 100,
-                    borderTopRightRadius: 100,
-                    borderBottomLeftRadius: 100,
-                    overflow: "hidden",
-                    borderBottomRightRadius: 100,
-                  }}
-                >
-                  <Text className="  h-5 w-5 text-center text-white   ">X</Text>
-                </TouchableHighlight>
+                {editButton && (
+                  <TouchableHighlight
+                    onPress={() => {
+                      console.log("item.id");
+                    }}
+                    style={{
+                      backgroundColor: "red",
+                      borderTopLeftRadius: 100,
+                      borderTopRightRadius: 100,
+                      borderBottomLeftRadius: 100,
+                      overflow: "hidden",
+                      borderBottomRightRadius: 100,
+                    }}
+                  >
+                    <Text className="  h-5 w-5 text-center text-white   ">
+                      X
+                    </Text>
+                  </TouchableHighlight>
+                )}
               </View>
             </View>
           </>

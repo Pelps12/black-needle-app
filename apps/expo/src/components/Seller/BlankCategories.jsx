@@ -19,10 +19,16 @@ import dataURItoBlob from "../../utils/dataURItoBlob";
 import { trpc } from "../../utils/trpc";
 import Modal from "../Modal";
 
-const BlankCategories = ({ sellerId, setAddCategoryButton, categories }) => {
+const BlankCategories = ({
+  endRef,
+  sellerId,
+  setAddCategoryButton,
+  categories,
+}) => {
   return (
     <>
       <BlankCategory
+        endRef={endRef}
         sellerId={sellerId}
         setAddCategoryButton={setAddCategoryButton}
         categories={categories}
@@ -32,7 +38,12 @@ const BlankCategories = ({ sellerId, setAddCategoryButton, categories }) => {
 };
 
 // here
-const BlankCategory = ({ sellerId, setAddCategoryButton, categories }) => {
+const BlankCategory = ({
+  endRef,
+  sellerId,
+  setAddCategoryButton,
+  categories,
+}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [pressedImage, setPressedImage] = useState("");
@@ -41,6 +52,8 @@ const BlankCategory = ({ sellerId, setAddCategoryButton, categories }) => {
   const [disableSaveButton, setDisableSaveButton] = useState(true);
   const [numberOfImages, setNumberOfImages] = useState(0);
   const createCate = trpc.user.createCategory.useMutation();
+  let listViewRef;
+
   const getCat = trpc.user.getCategories.useQuery(
     {
       id: sellerId,
@@ -198,6 +211,8 @@ const BlankCategory = ({ sellerId, setAddCategoryButton, categories }) => {
         });
         const { data, isSuccess } = await getCat.refetch();
         if (isSuccess) {
+          setAddCategoryButton(false);
+          endRef.current?.scrollToEnd();
           console.log(data);
         }
         // trpc.useContext()?.user.getCategories.invalidate();
@@ -238,16 +253,6 @@ const BlankCategory = ({ sellerId, setAddCategoryButton, categories }) => {
 
   return (
     <>
-      {/* <View>
-        <View>
-          <Button
-            color="primary"
-            title="Choose a photo"
-            onPress={pickImageAsync}
-          />
-          <Button title="Use this photo" />
-        </View>
-      </View> */}
       <View className="mx-auto">
         <SafeAreaView>
           <TextInput
@@ -261,6 +266,9 @@ const BlankCategory = ({ sellerId, setAddCategoryButton, categories }) => {
         <FlatList
           data={addFormData.Image}
           className="mx-auto"
+          ref={(ref) => {
+            listViewRef = ref;
+          }}
           ListFooterComponent={<View style={{ height: 40 }} />}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
