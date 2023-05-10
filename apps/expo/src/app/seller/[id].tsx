@@ -10,6 +10,8 @@ import {
 import { Image } from "expo-image";
 import { Link, useSearchParams } from "expo-router";
 
+import { Category, Price, Image as PrismaImage } from "@acme/db";
+
 import Modal from "../../components/Modal";
 import Categories from "../../components/Seller/Categories";
 import Prices from "../../components/Seller/Prices";
@@ -20,10 +22,32 @@ const SellerPage = () => {
   const idString =
     typeof id === "string" ? id : typeof id === "undefined" ? ":)" : id[0]!;
   const [activeTab, setActiveTab] = useState<string>("CATEGORIES");
+  const [user, setUser] = useState<any>(undefined);
 
-  const categoriesEndpoint = trpc.user.getCategories.useQuery({
-    id: idString,
-  });
+  const categoriesEndpoint = trpc.user.getCategories.useQuery(
+    {
+      id: idString,
+    },
+    {
+      enabled: false,
+    },
+  );
+  const [categories, setCategories] = useState<
+    (Category & { Image: PrismaImage[]; prices: Price[] })[] | undefined
+  >(undefined);
+
+  useEffect(() => {
+    async function anyNameFunction() {
+      const { data, isSuccess } = await categoriesEndpoint.refetch();
+      if (isSuccess) {
+        setCategories(data.user?.seller?.Category);
+        setUser(data.user);
+      }
+    }
+
+    // Execute the created function directly
+    anyNameFunction();
+  }, []);
 
   return (
     <SafeAreaView className="bg-[###2196F3]">
@@ -85,21 +109,13 @@ const SellerPage = () => {
       </View>
 
       <View>
-        {activeTab == "PRICES" &&
-          categoriesEndpoint.data?.user?.seller?.Category && (
-            <Prices
-              prices={categoriesEndpoint.data?.user?.seller?.Category}
-              sellerId={categoriesEndpoint.data.user.id}
-            />
-          )}
+        {activeTab == "PRICES" && categories && (
+          <Prices prices={categories} sellerId={user.id} />
+        )}
 
-        {activeTab == "CATEGORIES" &&
-          categoriesEndpoint.data?.user?.seller?.Category && (
-            <Categories
-              categories={categoriesEndpoint.data?.user?.seller.Category}
-              sellerId={categoriesEndpoint.data.user.id}
-            />
-          )}
+        {activeTab == "CATEGORIES" && categories && (
+          <Categories categories={categories} sellerId={user.id} />
+        )}
       </View>
     </SafeAreaView>
   );
