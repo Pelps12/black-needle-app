@@ -70,6 +70,8 @@ export const priceRouter = router({
         });
       }
     }),
+
+  //Please do this
   updatePrice: protectedProcedure
     .input(
       z.object({
@@ -112,6 +114,7 @@ export const priceRouter = router({
               include: {
                 Image: true,
                 seller: true,
+                prices: true,
               },
             },
           },

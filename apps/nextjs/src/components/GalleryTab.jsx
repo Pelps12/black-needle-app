@@ -6,6 +6,7 @@ import EditAndSaveCategory from './EditAndSaveCategory';
 import Modal from './Modal';
 import RemoveImageButton from './RemoveImageButton';
 import SaveAndDeleteCategory from './SaveAndDeleteCategory';
+import ImageWithFallback from './Utils/ImageWithFallback';
 import { useAuth } from '@clerk/nextjs';
 import dataURItoBlob from '@utils/URItoFile';
 import Image from 'next/image';
@@ -312,21 +313,18 @@ const GalleryTab = ({ uid, posts, setCategories, categories }) => {
 														handleRemoveImageClick={handleRemoveImageClick}
 													/>
 												)}
+
 												{image.link !== '/placeholder(2).svg' ? (
-													<Image
+													<ImageWithFallback
 														className="min-w-full max-w-xs md:max-w-md max-h-full shadow-lg object-cover rounded-lg h-56 w-40 md:w-60 md:h-72  object-center"
 														alt="Category Picture"
 														width={500}
-														placeholder="blur"
 														height={666}
 														src={
 															image.link.includes('ucarecdn')
 																? `${image.link}-/preview/-/quality/smart/-/format/auto/`
 																: image.link
 														}
-														blurDataURL={`data:image/svg+xml;base64,${toBase64(
-															convertImage(500, 666)
-														)}`}
 													/>
 												) : (
 													<div>

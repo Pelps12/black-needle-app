@@ -2,6 +2,8 @@ import React from "react";
 import { Pressable, StyleSheet, Text } from "react-native";
 import { Image } from "expo-image";
 
+import SKText from "../../components/Utils/SKText";
+
 const AppleButton = ({ onPress }: { onPress: () => Promise<void> }) => {
   return (
     <Pressable
@@ -10,13 +12,15 @@ const AppleButton = ({ onPress }: { onPress: () => Promise<void> }) => {
     >
       <Image
         source={require("../../../assets/OAuth/Apple_logo_white.svg")}
-        alt="A"
         contentFit="scale-down"
         className=" h-8 w-8"
       />
-      <Text className="ml-2 text-xl font-semibold text-white">
+      <SKText
+        className="ml-2 text-xl font-semibold text-white"
+        fontWeight="normal"
+      >
         Sign in with Apple
-      </Text>
+      </SKText>
     </Pressable>
   );
 };

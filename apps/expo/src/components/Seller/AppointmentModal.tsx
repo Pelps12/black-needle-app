@@ -29,6 +29,7 @@ import {
 
 import type { AppRouter } from "@acme/api/index";
 
+import Loading from "../../components/Utils/Loading";
 import { trpc } from "../../utils/trpc";
 
 type RouterOutput = inferRouterOutputs<AppRouter>;
@@ -45,16 +46,22 @@ const BuyerAppointment = ({
   priceId,
   isOpen,
   closeModal,
+  reschedule,
+  appointmentId,
 }: {
   sellerId: string;
   priceId: string;
   isOpen: boolean;
   closeModal: () => void;
+  reschedule?: boolean;
+  appointmentId?: string;
 }) => {
   const router = useRouter();
 
   const getFreeTimeslots = trpc.appointment.getFreeTimeslots.useMutation();
   const createAppointment = trpc.appointment.createAppointment.useMutation();
+  const rescheduleAppointment =
+    trpc.appointment.rescheduleAppointment.useMutation();
   const today = startOfToday();
 
   const [open, setOpen] = useState(false);
@@ -99,32 +106,44 @@ const BuyerAppointment = ({
     return eachMonthOfInterval({ start: startOfYear, end: endOfYear });
   }
 
-  function onSelectTime(time: TimeSlot) {
+  async function onSelectTime(time: TimeSlot) {
     console.log(time);
 
-    createAppointment.mutate(
-      {
-        sellerAvailability: time.availabilityId,
+    if (reschedule && appointmentId) {
+      const result = await rescheduleAppointment.mutateAsync({
+        appointmentId: appointmentId,
         date: time.date,
-        priceId: priceId,
-      },
-      {
-        onSuccess: () => {
-          // var windowReference = window.open();
-          // windowReference.location.assign(`${env.NEXT_PUBLIC_URL}/profile`)
-          // window.open(`${env.NEXT_PUBLIC_URL}/profile`, '_self');
-          router.push(`/schedule`);
+        sellerAvailability: time.availabilityId,
+      });
+      if (rescheduleAppointment.isSuccess) {
+        trpc.useContext().appointment.getAppointments.refetch();
+        closeModal();
+      }
+    } else {
+      createAppointment.mutate(
+        {
+          sellerAvailability: time.availabilityId,
+          date: time.date,
+          priceId: priceId,
         },
-        onError: (err) => {
-          //Unreachable
-          if (err.data?.code === "UNAUTHORIZED") {
-            if (err.message !== "UNAUTHORIZED") {
-              Alert.alert(err.message);
+        {
+          onSuccess: () => {
+            // var windowReference = window.open();
+            // windowReference.location.assign(`${env.NEXT_PUBLIC_URL}/profile`)
+            // window.open(`${env.NEXT_PUBLIC_URL}/profile`, '_self');
+            router.push(`/schedule`);
+          },
+          onError: (err) => {
+            //Unreachable
+            if (err.data?.code === "UNAUTHORIZED") {
+              if (err.message !== "UNAUTHORIZED") {
+                Alert.alert(err.message);
+              }
             }
-          }
+          },
         },
-      },
-    );
+      );
+    }
   }
   function onSelectDate(day: Date) {
     if (day.toISOString() === selectedDay.toISOString()) {
@@ -276,14 +295,13 @@ const BuyerAppointment = ({
                   }`}
                   onPress={() => onSelectTime(selectedTimeSlot)}
                 >
-                  {createAppointment.isLoading && (
-                    <Image
-                      source={require("../../../assets/utils/loader.svg")}
-                      alt="Loading..."
-                      className="h-5 w-5"
-                    />
+                  {createAppointment.isLoading ? (
+                    <Loading loading={createAppointment.isLoading} />
+                  ) : (
+                    <Text className="font-semibold text-[#F2f2f2]">
+                      CONFIRM?
+                    </Text>
                   )}
-                  <Text className="font-semibold text-[#F2f2f2]">CONFIRM?</Text>
                 </Pressable>
               </View>
               <View className="mx-4 text-xs  ">

@@ -4,6 +4,7 @@ import {
   type ExpoPushTicket,
   type ExpoPushToken,
 } from "expo-server-sdk";
+import { clerkClient } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -217,7 +218,7 @@ export const appointmentRouter = router({
 
       return appointment;
     }),
-  getAppointment: protectedProcedure
+  getAppointments: protectedProcedure
     .input(
       z.object({
         sellerMode: z.boolean().default(false),
@@ -250,7 +251,7 @@ export const appointmentRouter = router({
             },
           },
           orderBy: {
-            updatedAt: "desc",
+            createdAt: "desc",
           },
         });
         console.log(appointments);
@@ -277,11 +278,116 @@ export const appointmentRouter = router({
             },
           },
           orderBy: {
-            updatedAt: "desc",
+            createdAt: "desc",
           },
         });
         console.log(appointment);
         return appointment;
       }
+    }),
+
+  rescheduleAppointment: protectedProcedure
+    .input(
+      z.object({
+        appointmentId: z.string(),
+        sellerAvailability: z.string(),
+        date: z.date(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      if (input.date < new Date()) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Date is in the past",
+        });
+      }
+      const [timeslot, user] = await Promise.all([
+        ctx.prisma.sellerAvailability.findFirst({
+          where: {
+            id: input.sellerAvailability,
+          },
+          include: {
+            Appointment: {
+              where: {
+                appointmentDate: input.date,
+                status: {
+                  in: ["APPROVED", "DOWNPAID"],
+                },
+              },
+            },
+            seller: {
+              select: {
+                phoneNumber: true,
+              },
+            },
+          },
+        }),
+        clerkClient.users.getUser(ctx.auth.userId),
+      ]);
+      console.log(input.date);
+      console.log(timeslot?.Appointment);
+      if (timeslot?.Appointment.length !== 0) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Timeslot already booked",
+        });
+      }
+
+      const updatedAppointment = await ctx.prisma.appointment.update({
+        where: {
+          id: input.appointmentId,
+        },
+        data: {
+          appointmentDate: input.date,
+          sellerAvailabilityId: input.sellerAvailability,
+          status: "PENDING",
+        },
+        include: {
+          price: {
+            include: {
+              category: {
+                include: {
+                  Image: true,
+                },
+              },
+            },
+          },
+          seller: {
+            include: {
+              user: {
+                include: {
+                  tokens: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const expoTokens: ExpoPushToken[] = updatedAppointment.seller.user.tokens
+        .map((token) => token.token)
+        .filter((token) => Expo.isExpoPushToken(token));
+
+      expo.sendPushNotificationsAsync([
+        {
+          to: expoTokens,
+          title: `Reschedule Request from ${user.username ?? "User"}`,
+          body: "Respond to their request",
+          sound: "default",
+          data: {
+            senderId: ctx.auth.userId,
+          },
+        },
+      ]);
+
+      /* await twilio.messages.create({
+				body: `${
+					ctx.session.user.name || 'A customer'
+				} wants reschedule their appointment.\nGo to https://sakpa.co/profile to approve the change`,
+				to: `+1${timeslot.seller.phoneNumber}`,
+				messagingServiceSid: env.MESSAGING_SID
+			}); */
+
+      return updatedAppointment;
     }),
 });

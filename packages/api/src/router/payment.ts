@@ -81,7 +81,7 @@ export const paymentRouter = router({
         metadata: {
           userId: ctx.auth.userId,
           type: "appointment",
-          username: ctx.auth.userId || "Unknown User",
+          username: user?.name || "Unknown User",
           seller: JSON.stringify({
             id: appointment.id,
             sellerNumber: appointment.seller.phoneNumber,
@@ -95,9 +95,10 @@ export const paymentRouter = router({
           code: "INTERNAL_SERVER_ERROR",
         });
       }
-
+      console.log(paymentIntent.amount);
       return {
         client_secret: paymentIntent.client_secret,
+        price: paymentIntent.amount,
       };
     }),
 });

@@ -4,6 +4,7 @@ import { Image } from "expo-image";
 
 import { type Category, type Price, type Image as PrismaImage } from "@acme/db";
 
+import SKTest from "../../components/Utils/SKText";
 import Modal from "../Modal";
 import AppointmentModal from "./AppointmentModal";
 
@@ -73,16 +74,6 @@ const PriceComponent = ({
         setModalVisible={setModalVisible}
         className=""
       >
-        {/* <View className="sahdow-md m-auto rounded-lg bg-[#d9d9d9] p-4">
-          <View>
-            <View>
-              <Text className="text-5xl">Hello World!</Text>
-              <Pressable onPress={() => setModalVisible(false)}>
-                <Text>Hide Modal</Text>
-              </Pressable>
-            </View>
-          </View>
-        </View> */}
         <AppointmentModal
           sellerId={sellerId}
           priceId={price.id}
@@ -90,17 +81,27 @@ const PriceComponent = ({
           closeModal={() => setModalVisible(false)}
         />
       </Modal>
-      <Image source={image?.link ?? ":)"} className="h-40 w-40" />
-      <View className="flex items-end">
-        <Text className="text-right text-xl font-semibold">{price.name}</Text>
-        <Text className="text-right">${price.amount}</Text>
+      <Image source={image?.link ?? ":)"} className="h-40 w-40 rounded-md" />
+      <View className="flex w-48 items-end">
+        <SKTest
+          className=" text-right text-xl font-semibold"
+          fontWeight="semi-bold"
+        >
+          {price.name}
+        </SKTest>
+        <SKTest className="text-right" fontWeight="semi-bold">
+          ${price.amount}
+        </SKTest>
         <Pressable
           className={`my-2 w-24 content-center items-center justify-center  rounded-md bg-[#1dbaa7] text-right   text-black shadow-sm`}
           onPress={() => setModalVisible(true)}
         >
-          <Text className="text-md px-4 py-2 text-center font-semibold text-white">
+          <SKTest
+            className="text-md px-4 py-2 text-center font-semibold text-white"
+            fontWeight="semi-bold"
+          >
             Book
-          </Text>
+          </SKTest>
         </Pressable>
       </View>
     </View>

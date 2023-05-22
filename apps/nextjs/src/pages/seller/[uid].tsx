@@ -105,8 +105,8 @@ const Sellers: NextPage<{
 };
 
 export default Sellers;
-
-/* export const getServerSideProps: GetServerSideProps = async (context) => {
+/* 
+export const getServerSideProps: GetServerSideProps = async (context) => {
 	const uid =
 		typeof context.query.uid === 'string'
 			? context.query.uid
@@ -144,5 +144,4 @@ export default Sellers;
 	return {
 		props: {} // will be passed to the page component as props
 	};
-};
- */
+}; */

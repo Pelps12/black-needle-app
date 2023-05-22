@@ -11,6 +11,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import React, { useState, Fragment, useEffect, useRef } from 'react';
 import 'react-datepicker/dist/react-datepicker.css';
+import ImageWithFallback from './Utils/ImageWithFallback';
 
 const PricesTab = ({ productID, uid, posts, categories }) => {
 	const bears = useBearStore((state) => state.bears);
@@ -393,7 +394,7 @@ const PricesTab = ({ productID, uid, posts, categories }) => {
 								className="card w-96 bg-base-100 shadow-xl"
 							>
 								<figure className="px-10 pt-10">
-									<Image
+									<ImageWithFallback
 										className="min-w-full max-w-xs md:max-w-md max-h-full shadow-lg object-cover rounded-lg h-56 w-40 md:w-60 md:h-72  object-center mx-auto"
 										alt=""
 										width={270}

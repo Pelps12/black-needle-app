@@ -23,7 +23,7 @@ const Order: React.FC = () => {
 	const orders = trpc.order.getOrders.useQuery({
 		sellerMode: sellerMode
 	});
-	const appointment = trpc.appointment.getAppointment.useQuery({
+	const appointment = trpc.appointment.getAppointments.useQuery({
 		sellerMode: sellerMode
 	});
 

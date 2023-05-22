@@ -179,7 +179,7 @@ const Chat: FC<{ id: string | undefined; rId: string | undefined; routerReady: b
 						{rId ? (
 							<>
 								<div className="">
-									{!isLoaded && !isSignedIn ? (
+									{isLoaded && isSignedIn ? (
 										<Image
 											className="object-cover w-16 h-16 rounded-full"
 											src={getRoom.data?.user?.image || '/Missing_avatar.svg'}

@@ -1,6 +1,6 @@
+// @ts-nocheck
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import {
-  Button,
   FlatList,
   Pressable,
   SafeAreaView,

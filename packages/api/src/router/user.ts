@@ -125,7 +125,7 @@ export const userRouter = router({
         },
       });
 
-      const [_, deletedCategory, uploadcareResponse] = await Promise.all([
+      const [_, deletedCategory] = await Promise.all([
         algoliaIndex.deleteObject(input.id),
         ctx.prisma.category.delete({
           where: {

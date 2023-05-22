@@ -149,6 +149,7 @@ model Message {
   userId  String
   message String   @db.Text
   sendAt  DateTime
+  type MessageType?
   user    User     @relation(fields: [userId], references: [id], onUpdate: Cascade)
   room    Room     @relation(fields: [roomId], references: [id], onUpdate: Cascade)
 
@@ -341,4 +342,9 @@ enum Day {
   THURSDAY
   FRIDAY
   SATURDAY
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
 }

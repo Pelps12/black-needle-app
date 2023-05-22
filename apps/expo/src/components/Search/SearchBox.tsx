@@ -25,6 +25,7 @@ export function SearchBox(props: any) {
       <TextInput
         ref={inputRef}
         style={styles.input}
+        className="rounded-md"
         value={inputValue}
         onChangeText={setQuery}
         clearButtonMode="while-editing"
@@ -48,7 +49,7 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
     backgroundColor: "#fff",
-    borderRadius: 4,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: "#ddd",
   },
