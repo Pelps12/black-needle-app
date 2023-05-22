@@ -1,40 +1,47 @@
 import React from "react";
 import { Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
 import { useUser } from "@clerk/clerk-react";
-import { Entypo } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
+
+import SKText from "./Utils/SKText";
 
 const Header = () => {
   const { user } = useUser();
 
   return (
-    <View className="mb-0 flex w-full flex-row items-center justify-between bg-[#F2F2F2] px-2 pb-0 pt-10">
-      <View className="no-animation flex flex-row items-end p-0 text-xl font-bold uppercase">
+    <SafeAreaView className="mb-0 flex w-full flex-row items-center justify-between bg-[#F2F2F2] px-2 py-0">
+      <View className="no-animation flex flex-row items-end gap-0 p-0 text-xl font-bold uppercase">
         <Image
-          source="https://ucarecdn.com/b34e095d-7262-4a4f-96e1-632538bf82b0/"
-          className="h-12 w-24"
-          alt="Logo"
+          source={require("../../assets/sakpa_small.png")}
+          className="h-12 w-12"
+          contentFit="contain"
         />
+        <SKText className="text-2xl" fontWeight="medium">
+          akpa
+        </SKText>
       </View>
 
       <View className="flex-row items-center gap-3">
-        <Image
+        {/* <Image
           className="h-8 w-8 rounded-full"
           source={require("../../assets/shopping_cart.svg")}
           alt=":)"
-        />
+        /> */}
         <Link href="/chat">
-          <Entypo name="chat" size={24} color="black" />
+          <Ionicons name="ios-chatbox-outline" size={24} color="black" />
         </Link>
 
-        <Image
-          className="h-10 w-10 rounded-full"
-          source={user?.profileImageUrl}
-          alt=":)"
-        />
+        <Link href="/profile">
+          <Image
+            className="h-10 w-10 rounded-full"
+            source={user?.profileImageUrl}
+          />
+        </Link>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 

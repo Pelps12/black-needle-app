@@ -10,6 +10,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { protectedProcedure, publicProcedure, router } from "../trpc";
+import r2 from "../utils/r2";
 
 export const uploadRouter = router({
   uploadImages: publicProcedure
@@ -34,82 +35,88 @@ export const uploadRouter = router({
       return images;
     }),
 
-  getPresignedUrl: protectedProcedure
+  putPresignedUrl: protectedProcedure
     .input(
       z.object({
-        type: z.enum(["PUT", "GET"]),
+        type: z.enum(["PUT"]),
         roomId: z.string(),
         key: z.string().optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const r2 = new S3Client({
-        region: "auto",
-        endpoint: `https://${process.env.CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-        credentials: {
-          accessKeyId: process.env.CLOUDFLARE_ACCESS_KEY,
-          secretAccessKey: process.env.CLOUDFLARE_ACCESS_SECRET,
-        },
-      });
-      if (input.type === "GET") {
-        const [{ Metadata }, url, room] = await Promise.all([
-          r2.send(
-            new HeadObjectCommand({
-              Bucket: "black-needle-private",
-              Key: input.key,
-            }),
-          ),
-          getSignedUrl(
-            r2,
-            new GetObjectCommand({
-              Bucket: "black-needle-private",
-              Key: input.key,
-            }),
-            { expiresIn: 60 },
-          ),
-          ctx.prisma.room.findFirst({
-            where: {
-              id: input.roomId,
-              Participant: {
-                some: {
-                  userId: ctx.auth.userId,
-                },
+      console.log("bnuiovernvoernv oernv eor");
+
+      const imageId = randomUUID();
+      const url = await getSignedUrl(
+        r2,
+        new PutObjectCommand({
+          Bucket: "black-needle-private",
+          Key: `chat/${imageId}`,
+          ContentType: "image/jpeg",
+          Metadata: {
+            roomId: input.roomId,
+          },
+        }),
+        { expiresIn: 3000 },
+      );
+      console.log({ url, imageId });
+      return { url, imageId };
+    }),
+
+  getPresignedUrl: protectedProcedure
+    .input(
+      z.object({
+        type: z.enum(["GET"]),
+        roomId: z.string(),
+        key: z.string(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const [{ Metadata, MissingMeta }, url, room] = await Promise.all([
+        r2.send(
+          new HeadObjectCommand({
+            Bucket: "black-needle-private",
+            Key: `chat/${input.key}`,
+          }),
+        ),
+        getSignedUrl(
+          r2,
+          new GetObjectCommand({
+            Bucket: "black-needle-private",
+            Key: `chat/${input.key}`,
+          }),
+          { expiresIn: 60 },
+        ),
+        ctx.prisma.room.findFirst({
+          where: {
+            id: input.roomId,
+            Participant: {
+              some: {
+                userId: ctx.auth.userId,
               },
             },
-          }),
-        ]);
-        return url;
-        if (Metadata) {
-          const roomId = Metadata["roomId"];
-          //If the object belongs to this room and the user is a member of this room
-          if (roomId === input.roomId && room) {
-            return url;
-          } else {
-            throw new TRPCError({
-              code: "UNAUTHORIZED",
-              message: "You do not have permission to join this room",
-            });
-          }
+          },
+        }),
+      ]);
+      console.log(Metadata);
+
+      if (Metadata) {
+        const roomId = Metadata["roomid"];
+        //If the object belongs to this room and the user is a member of this room
+        console.log(roomId, room, MissingMeta);
+        if (roomId === input.roomId && room) {
+          return url;
         } else {
           throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Object is invalid",
+            code: "UNAUTHORIZED",
+            message: "You do not have permission to join this room",
           });
         }
       } else {
-        const url = await getSignedUrl(
-          r2,
-          new PutObjectCommand({
-            Bucket: "black-needle-private",
-            Key: `chat/${randomUUID()}`,
-            ContentType: "image/jpeg",
-            Metadata: {
-              roomId: input.roomId,
-            },
-          }),
-          { expiresIn: 3000 },
-        );
-        return url;
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Object is invalid",
+        });
       }
     }),
 });

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 import { useInfiniteHits } from "react-instantsearch-hooks";
@@ -10,7 +11,7 @@ export function InfiniteHits({ hitComponent: Hit, ...props }) {
       data={hits}
       keyExtractor={(item, idx) => idx.toString()}
       ItemSeparatorComponent={() => <View style={styles.separator} />}
-      contentContainerStyle={{ paddingBottom: 20 }}
+      contentContainerStyle={{ paddingBottom: 150 }}
       ListFooterComponent={<View style={{ height: 200 }} />}
       renderItem={({ item }) => (
         <View style={styles.item} className="p-3">

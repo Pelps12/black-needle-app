@@ -5,6 +5,7 @@ import { env } from '../env/client.mjs';
 import { trpc as api, type RouterOutputs } from '../utils/api';
 import { trpc } from '../utils/trpc';
 import { useAuth } from '@clerk/nextjs';
+import ImageWithFallback from '@components/Utils/ImageWithFallback';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import algoliasearch from 'algoliasearch/lite';
 import { Hit as AlgoliaHit } from 'instantsearch.js';
@@ -51,7 +52,7 @@ const searchClient = algoliasearch('MXKJ7URABT', 'ecd72cebe5c87facc09e9e9884038e
 const CustomHits = () => {
 	const { hits } = useHits();
 	return (
-		<div className="grid grid-cols-3  gap-5">
+		<div className="grid p-2 md:grid-cols-3  gap-5">
 			{hits.map((hit) => (
 				<Hit hit={hit} />
 			))}
@@ -69,12 +70,12 @@ function Hit({ hit }: { hit: any }) {
 					className="group"
 				>
 					<div className=" my-2 ">
-						<Image
+						<ImageWithFallback
 							className="min-w-full max-w-xs md:max-w-md max-h-full shadow-lg object-cover rounded-lg h-[30vh] w-40 md:w-60 md:h-72  object-center mx-auto"
 							alt="Picture f the "
 							width={270}
 							height={360}
-							src={hit.Image[0].link}
+							src={`${hit.Image[0].link}-/preview/938x432/-/quality/smart/-/format/auto/`}
 						/>
 
 						<h3 className="mt-4 text-xl text-gray-700 text-left font-bold">{item.name} </h3>
@@ -188,7 +189,7 @@ const Home: NextPage<HomePageProps> = ({ serverState, url }) => {
 
 						<SearchBox
 							classNames={{
-								root: 'flex',
+								root: 'flex px-2',
 								form: 'w-full flex gap-3',
 								submitIcon: 'h-5 w-5 fill-primary',
 								input: 'w-full h-8 rounded-md px-3',

@@ -9,12 +9,14 @@ import {
 } from "react-native";
 import { Image } from "expo-image";
 import { Link, useSearchParams } from "expo-router";
+import { useUser } from "@clerk/clerk-expo";
 
 import { Category, Price, Image as PrismaImage } from "@acme/db";
 
 import Modal from "../../components/Modal";
 import Categories from "../../components/Seller/Categories";
 import Prices from "../../components/Seller/Prices";
+import SKTest from "../../components/Utils/SKText";
 import { trpc } from "../../utils/trpc";
 
 const SellerPage = () => {
@@ -23,6 +25,8 @@ const SellerPage = () => {
     typeof id === "string" ? id : typeof id === "undefined" ? ":)" : id[0]!;
   const [activeTab, setActiveTab] = useState<string>("CATEGORIES");
   const [user, setUser] = useState<any>(undefined);
+
+  const { user: clerkUser } = useUser();
 
   const categoriesEndpoint = trpc.user.getCategories.useQuery(
     {
@@ -46,33 +50,50 @@ const SellerPage = () => {
     }
 
     // Execute the created function directly
-    anyNameFunction();
-  }, []);
+    if (typeof idString === "string") {
+      console.log(idString);
+      anyNameFunction();
+    }
+  }, [idString]);
 
   return (
-    <SafeAreaView className="bg-[###2196F3]">
+    <SafeAreaView className="bg-[##2196F3]">
       <View className="mx-3 max-w-md flex-row items-center justify-between">
         <View className="">
+          {/* Temporary */}
           <Image
-            source={categoriesEndpoint?.data?.user?.image ?? ":)"}
-            alt="Pic"
-            className="mr-2 h-32 w-32 rounded-full shadow-sm "
+            source={categoriesEndpoint?.data?.user?.image}
+            className="mr-2 h-20 w-20 rounded-xl shadow-sm "
+            placeholder={require("../../../assets/placeholder.png")}
           />
         </View>
 
         <View className="ml-2 w-72 flex-col items-start">
-          <Text className=" text-4xl font-semibold">
-            {categoriesEndpoint.data?.user?.name ?? "Unknown"}
-          </Text>
-          <Link className="my-2" href={`/chat/${idString}`}>
-            <View
-              className={` flex flex-row content-center items-center justify-center rounded-lg  bg-[#1dbaa7] px-3 py-1  text-black `}
+          {categoriesEndpoint.isLoading ? (
+            <Image
+              className="mr-2 h-10 w-48 rounded-xl shadow-sm"
+              source={require("../../../assets/placeholder.png")}
+            />
+          ) : (
+            <SKTest
+              className=" max-w-xs text-2xl font-semibold"
+              fontWeight="semi-bold"
             >
-              <Text className=" text-center text-xl font-semibold text-white">
-                Chat
-              </Text>
-            </View>
-          </Link>
+              {categoriesEndpoint.data?.user?.name ?? "Unknown"}
+            </SKTest>
+          )}
+          {categoriesEndpoint.isSuccess &&
+            categoriesEndpoint.data?.user?.id !== clerkUser?.id && (
+              <Link className="my-2" href={`/chat/${idString}`}>
+                <View
+                  className={` flex flex-row content-center items-center justify-center rounded-lg  bg-[#1dbaa7] px-3 py-1  text-black `}
+                >
+                  <SKTest className=" text-md text-center font-semibold text-white">
+                    CHAT
+                  </SKTest>
+                </View>
+              </Link>
+            )}
         </View>
       </View>
 
@@ -83,7 +104,8 @@ const SellerPage = () => {
               aria-current="page"
               onPress={() => setActiveTab("CATEGORIES")}
             >
-              <Text
+              <SKTest
+                fontWeight="medium"
                 className={`inline-block rounded-t-lg px-4 py-4 text-center text-sm font-medium ${
                   activeTab == "CATEGORIES"
                     ? "text-[#72a2f9]"
@@ -91,18 +113,19 @@ const SellerPage = () => {
                 }`}
               >
                 Categories
-              </Text>
+              </SKTest>
             </Pressable>
           </View>
           <View className="mr-2">
             <Pressable onPress={() => setActiveTab("PRICES")}>
-              <Text
+              <SKTest
+                fontWeight="medium"
                 className={`inline-block rounded-t-lg px-4 py-4 text-center text-sm font-medium ${
                   activeTab == "PRICES" ? "text-[#72a2f9]" : "text-[#25252D]"
                 }`}
               >
                 Prices
-              </Text>
+              </SKTest>
             </Pressable>
           </View>
         </View>
@@ -110,15 +133,11 @@ const SellerPage = () => {
 
       <View>
         {activeTab == "PRICES" && categories && (
-          <Prices prices={categories} sellerId={user.id} />
+          <Prices prices={categories} sellerId={user?.id} />
         )}
 
         {activeTab == "CATEGORIES" && categories && (
-          <Categories
-            setCategories={setCategories}
-            categories={categories}
-            sellerId={user.id}
-          />
+          <Categories categories={categories} sellerId={user?.id} />
         )}
       </View>
     </SafeAreaView>

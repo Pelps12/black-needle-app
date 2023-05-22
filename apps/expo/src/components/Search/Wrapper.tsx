@@ -16,7 +16,7 @@ const searchClient = algoliasearch(
 export default function App() {
   return (
     <View className="flex flex-col bg-[#F2F2F2]">
-      <InstantSearch searchClient={searchClient} indexName="dev_sakpa">
+      <InstantSearch searchClient={searchClient} indexName="sakpa">
         <SearchBox />
 
         <InfiniteHits maxHitsPerPage={5} hitComponent={Result} />

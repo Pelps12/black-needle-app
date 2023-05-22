@@ -11,13 +11,6 @@ const ChatSidebar: NextPage = () => {
 
 	const suggestionMut = trpc.upload.getPresignedUrl.useMutation();
 
-	const handleClick = () => {
-		suggestionMut.mutate({
-			type: 'PUT',
-			roomId: 'cldcra91i0000mo0ffkxiye76'
-		});
-	};
-
 	return (
 		<div className="border-r border-gray-300 lg:col-span-1">
 			<div className="overflow-auto">
@@ -57,10 +50,6 @@ const ChatSidebar: NextPage = () => {
 								</div>
 							</div>
 						))}
-
-					<button className="btn" onClick={() => handleClick()}>
-						CLICK
-					</button>
 				</div>
 			</div>
 		</div>

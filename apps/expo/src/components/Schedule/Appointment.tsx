@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Alert, Pressable, Text, View } from "react-native";
 import { Image } from "expo-image";
+import { Link } from "expo-router";
 import {
   initPaymentSheet,
   presentPaymentSheet,
@@ -13,6 +14,8 @@ import {
   type Image as PrismaImage,
 } from "@acme/db";
 
+import AppointmentModal from "../../components/Seller/AppointmentModal";
+import SKText from "../../components/Utils/SKText";
 import { trpc } from "../../utils/trpc";
 import Modal from "../Modal";
 import PaymentModal from "../Payment/StripeModal";
@@ -42,6 +45,7 @@ const Appointment = ({
 
   const [isOpen, setIsOpen] = useState(false);
   const [stripeModalOpen, setStripeModalOpen] = useState(false);
+  const [rescheduleModalOpen, setRescheduleModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const fetchPaymentSheetParams = trpc.payment.getPaymentSheet.useMutation();
@@ -62,27 +66,29 @@ const Appointment = ({
               `${appointments.price.category.Image[0]?.link}-/preview/-/quality/smart/-/format/auto/` ||
               "https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png"
             }
-            alt="Price Pic"
             className="h-36 w-36 rounded-xl"
           />
           <View>
-            <Text className="text-xl font-semibold">
+            <SKText className="text-xl font-semibold" fontWeight="semi-bold">
               {appointments.price.name.substring(0, 20)}
               {appointments.price.name.length > 20 && "..."}
-            </Text>
+            </SKText>
             <View>
-              <Text>
+              <SKText fontWeight="semi-bold">
                 {appointments.appointmentDate?.toLocaleDateString("en-US", {
                   month: "short",
                   day: "numeric",
                 })}
-              </Text>
-              <Text className="font-bold text-[#1dbaa7]">
+              </SKText>
+              <SKText
+                className="font-bold text-[#1dbaa7]"
+                fontWeight="font-bold"
+              >
                 {appointments.appointmentDate?.toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
                 })}
-              </Text>
+              </SKText>
             </View>
           </View>
         </View>
@@ -96,7 +102,6 @@ const Appointment = ({
               >
                 <Image
                   source={require("../../../assets/yes.svg")}
-                  alt={"Yes"}
                   className="mx-5 h-5 w-5 rounded-md object-cover"
                 />
               </Pressable>
@@ -104,40 +109,60 @@ const Appointment = ({
               >
                 <Image
                   source={require("../../../assets/no.svg")}
-                  alt={"Yes"}
                   className="mx-5 h-5 w-5 rounded-md object-cover"
                 />
               </Pressable>
             </>
           )}
-          {!sellerMode && appointments.status === "APPROVED" && (
-            <Pressable
-              className={`btn btn-outline btn-sm btn-secondary rounded-lg bg-[#72a2f9] p-2`}
-              onPress={() => setStripeModalOpen(true)}
-            >
-              <Text className="font-semibold text-white">PAY</Text>
-            </Pressable>
-          )}
+          <View className="flex w-auto  flex-row items-center justify-center rounded-lg bg-[#d9d9d9]">
+            {!sellerMode &&
+              appointments.status === "APPROVED" &&
+              !appointments.price.category.seller.downPaymentPercentage && (
+                <Link
+                  className={`btn btn-outline btn-sm btn-secondary  border-r p-2`}
+                  href={`/schedule/payment?appointmentId=${appointments.id}`}
+                >
+                  <Text className="font-semibold ">Pay</Text>
+                </Link>
+              )}
 
-          {(appointments.status === "DOWNPAID" ||
-            !appointments.price.category.seller.downPaymentPercentage) &&
-            (appointments.appointmentDate &&
-            appointments.appointmentDate > new Date() ? (
+            {
               <Pressable
-                className={`btn btn-outline btn-sm btn-error rounded-lg bg-[#E26850] p-2`}
-                onPress={() => openModal()}
+                className={`btn btn-outline btn-sm btn-secondary  p-2`}
+                onPress={() => setRescheduleModalOpen(true)}
               >
-                <Text className="font-semibold text-white">CANCEL</Text>
+                <SKText className="font-semibold " fontWeight="semi-bold">
+                  Reschedule
+                </SKText>
               </Pressable>
-            ) : (
-              <Pressable
-                className={`btn btn-outline btn-sm btn-secondary rounded-lg bg-[#72a2f9] p-2`}
-                /* onPress={() => payForAppointment(appointments.id)} */
-              >
-                <Text className="font-semibold text-white">COMPLETE</Text>
-              </Pressable>
-            ))}
-          <Text
+            }
+
+            {appointments.status === "DOWNPAID" &&
+              (appointments.appointmentDate &&
+              appointments.appointmentDate > new Date() ? (
+                <Pressable
+                  className={`btn btn-outline btn-sm btn-error   p-2`}
+                  onPress={() => openModal()}
+                >
+                  <SKText
+                    className="font-semibold text-[#E26850]"
+                    fontWeight="semi-bold"
+                  >
+                    Cancel
+                  </SKText>
+                </Pressable>
+              ) : (
+                <Pressable
+                  className={`btn btn-outline btn-sm btn-secondary  bg-[#72a2f9] p-2`}
+                  /* onPress={() => payForAppointment(appointments.id)} */
+                >
+                  <SKText className="font-semibold" fontWeight="semi-bold">
+                    Complete
+                  </SKText>
+                </Pressable>
+              ))}
+          </View>
+          <SKText
             className={`${
               appointments.status === "PENDING"
                 ? "text-[#EBA937]"
@@ -147,18 +172,34 @@ const Appointment = ({
                 ? "text-error"
                 : "text-[#2BDA82]"
             } font-bold `}
+            fontWeight="bold"
           >
             {appointments.status}
-          </Text>
+          </SKText>
         </View>
       </View>
+
+      <Modal
+        modalVisible={rescheduleModalOpen}
+        setModalVisible={setRescheduleModalOpen}
+        className=""
+      >
+        <AppointmentModal
+          sellerId={appointments.sellerId}
+          priceId={appointments.priceId}
+          isOpen={rescheduleModalOpen}
+          closeModal={() => setRescheduleModalOpen(false)}
+          reschedule={true}
+          appointmentId={appointments.id}
+        />
+      </Modal>
 
       <Modal
         modalVisible={stripeModalOpen}
         setModalVisible={setStripeModalOpen}
         className=""
       >
-        {/* <View className="sahdow-md m-auto rounded-lg bg-[#d9d9d9] p-4">
+        {/* <View className="sahdow-md m-auto rounded-lg bg-[#d9d9d9] p-4"> 
           <View>
             <View>
               <Text className="text-5xl">Hello World!</Text>

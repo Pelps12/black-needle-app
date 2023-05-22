@@ -2,7 +2,9 @@
 import { router } from "../trpc";
 import { appointmentRouter } from "./appointment";
 import { authRouter } from "./auth";
+import { cartRouter } from "./cart";
 import { chatRouter } from "./chat";
+import { paymentRouter } from "./payment";
 import { priceRouter } from "./price";
 import { searchRouter } from "./search";
 import { uploadRouter } from "./upload";
@@ -15,10 +17,12 @@ export const appRouter = router({
   user: userRouter,
   price: priceRouter,
   search: searchRouter,
+  payment: paymentRouter,
   //cart: cartRouter,
   appointment: appointmentRouter,
   //order: orderRouter,
   chat: chatRouter,
+  cart: cartRouter,
   //waitlist: waitListRouter,
 });
 

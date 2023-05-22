@@ -17,6 +17,7 @@ import {
 import { type Category, type Price, type Image as PrismaImage } from "@acme/db";
 
 import { trpc } from "../../utils/trpc";
+import SKTest from "../../components/Utils/SKText";
 import Modal from "../Modal";
 import BlankCategories from "./BlankCategories";
 
@@ -121,6 +122,7 @@ const Category = ({
   );
   return (
     <View className="mx-auto">
+<<<<<<< HEAD
       <Text className="mx-auto text-4xl font-semibold">{category.name}</Text>
       <View className="flex-row justify-end ">
         <View className="mr-2">
@@ -158,23 +160,31 @@ const Category = ({
         </View>
       </View>
       {/* <Modal
+=======
+      <SKTest className="mx-auto text-4xl font-semibold" fontWeight="semi-bold">
+        {category.name}
+      </SKTest>
+      <Modal
+>>>>>>> d469d9157af4a87ccf4184e1b5f594817189122d
         modalVisible={modalVisible}
         setModalVisible={setModalVisible}
         className=""
       >
         <Image
-          source={pressedImage ?? ""}
-          alt="Image"
           className="m-2 mx-auto h-96 w-96 rounded-xl"
+          placeholder={require("../../../assets/placeholder.png")}
+          source={pressedImage ?? ""}
         />
       </Modal> */}
       <FlatList
         data={category.Image}
         className="mx-auto"
         ListFooterComponent={<View style={{ height: 40 }} />}
+        contentContainerStyle={{ paddingBottom: 150, marginBottom: 200 }}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <>
+<<<<<<< HEAD
             <View style={{ position: "relative" }}>
               <Pressable
                 onPress={() => {
@@ -210,6 +220,20 @@ const Category = ({
                 )}
               </View>
             </View>
+=======
+            <Pressable
+              onPress={() => {
+                setModalVisible(true);
+                setPressedImage(item.link);
+              }}
+            >
+              <Image
+                source={item.link}
+                placeholder={require("../../../assets/placeholder.png")}
+                className="m-2 h-44 w-44 rounded-xl"
+              />
+            </Pressable>
+>>>>>>> d469d9157af4a87ccf4184e1b5f594817189122d
           </>
         )}
         numColumns={2}

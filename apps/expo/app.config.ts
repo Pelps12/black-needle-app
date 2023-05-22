@@ -16,7 +16,7 @@ const defineConfig = (): ExpoConfig => ({
   scheme: "sakpa",
   version: "1.0.0",
   orientation: "portrait",
-  icon: "./assets/sakpa_icon.png",
+  icon: "./assets/sakpa_small_(2).png",
   userInterfaceStyle: "light",
   splash: {
     image: "./assets/sakpa_icon.png",
@@ -36,8 +36,7 @@ const defineConfig = (): ExpoConfig => ({
   },
   android: {
     adaptiveIcon: {
-      foregroundImage: "./assets/icon.png",
-      backgroundColor: "#1F104A",
+      foregroundImage: "./assets/sakpa_small_(2).png",
     },
   },
   extra: {

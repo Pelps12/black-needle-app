@@ -12,6 +12,8 @@ import { useOAuth } from "@clerk/clerk-expo";
 
 import { useWarmUpBrowser } from "../hooks/useWarmUpBrowser";
 import AppleButton from "./OAuth/AppleButton";
+import SKText from "./Utils/SKText";
+import SKTextInput from "./Utils/SKTextInput";
 
 export const SignInSignUpScreen = () => {
   return (
@@ -72,18 +74,21 @@ const SignInWithOAuth = () => {
         />
       </View>
       <View className="mx-3">
-        <TextInput
+        <SKTextInput
           placeholder="Email Address"
           spellCheck={false}
-          className=" my-auto block  h-12 w-72 rounded-xl border-2 border-[#d9d9d9] bg-gray-100 pb-2 pl-4 text-xl outline-none focus:text-gray-700"
+          className=" my-auto block  h-16 w-72 rounded-xl border-2 border-[#d9d9d9] bg-gray-100 p-4 text-xl outline-none focus:text-gray-700"
         />
         <Pressable
           className={`mx-auto my-2 flex w-72  flex-row content-center items-center justify-center rounded-xl bg-[#1dbaa7] py-4 text-black shadow-sm`}
           onPress={handleSignInWithGooglePress}
         >
-          <Text className="text-md  ml-2 font-semibold text-white">
+          <SKText
+            className="ml-2  text-lg font-semibold text-white"
+            fontWeight="semi-bold"
+          >
             CONTINUE
-          </Text>
+          </SKText>
         </Pressable>
 
         <Divider />
@@ -99,11 +104,13 @@ const SignInWithOAuth = () => {
       >
         <Image
           source={require("../../assets/OAuth/google_2.svg")}
-          alt="G"
           contentFit="scale-down"
           className=" h-8 w-8"
         />
-        <Text className="ml-2 text-xl font-semibold"> Sign in with Google</Text>
+        <SKText className="ml-2 text-xl " fontWeight="normal">
+          {" "}
+          Sign in with Google
+        </SKText>
       </Pressable>
     </View>
   );
