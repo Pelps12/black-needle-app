@@ -29,6 +29,11 @@ const Categories = ({
     prices: Price[];
   })[];
   sellerId: string;
+  setCategories:{
+    categories: (Category & {
+      Image: PrismaImage[];
+      prices: Price[];
+    })[];
 }) => {
   const { userId, isSignedIn } = useAuth();
   const [addCategoryButton, setAddCategoryButton] = useState(false);
