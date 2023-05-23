@@ -14,7 +14,7 @@ export const config = {
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 	const payload = (await buffer(req)).toString();
 	const headers = req.headers as Record<string, string>;
-
+	console.log(env.CLERK_SECRET_KEY);
 	try {
 		const wh = new Webhook(process.env.CLERK_SECRET_KEY ?? '');
 		let msg;
