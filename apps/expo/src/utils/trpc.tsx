@@ -38,7 +38,7 @@ const getBaseUrl = () => {
       "Failed to get localhost. Please point to your production server.",
     );
   }
-  return "https://www.sakpa.co";
+  return "https://dev.sakpa.co";
 };
 
 /**
