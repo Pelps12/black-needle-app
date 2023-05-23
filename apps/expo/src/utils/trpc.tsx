@@ -29,14 +29,14 @@ const getBaseUrl = () => {
    * baseUrl to your production API URL.
    */
   const localhost = Constants.manifest?.debuggerHost?.split(":")[0];
-  return "https://discussions-berry-motel-why.trycloudflare.com";
+
   if (!localhost) {
-    // return "https://your-production-url.com";
+    return "https://dev.sakpa.co";
     throw new Error(
       "Failed to get localhost. Please point to your production server.",
     );
   }
-  return `http://${localhost}:3000`;
+  return "https://discussions-berry-motel-why.trycloudflare.com";
 };
 
 /**
