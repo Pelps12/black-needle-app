@@ -141,7 +141,7 @@ const Home: NextPage<HomePageProps> = ({ serverState, url }) => {
 				</Head>
 				<InstantSearch
 					searchClient={searchClient}
-					indexName="dev_sakpa"
+					indexName={env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME}
 					routing={{
 						router: createInstantSearchRouterNext({
 							serverUrl: url,
