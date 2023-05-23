@@ -39,6 +39,7 @@ export const createContextInner = async ({
  **/
 export const createContext = async (opts: CreateNextContextOptions) => {
   /* const authorization = opts.req.headers.authorization;
+  console.log(authorization);
   if (authorization) {
     opts.req.headers.authorization =
       "Bearer " + Buffer.from(authorization, "base64").toString();

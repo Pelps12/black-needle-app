@@ -1,5 +1,6 @@
 import React from "react";
 import { SafeAreaView, StatusBar, StyleSheet, Text, View } from "react-native";
+import Constants from "expo-constants";
 import { FontAwesome } from "@expo/vector-icons";
 import algoliasearch from "algoliasearch/lite";
 import { InstantSearch } from "react-instantsearch-hooks";
@@ -16,7 +17,10 @@ const searchClient = algoliasearch(
 export default function App() {
   return (
     <View className="flex flex-col bg-[#F2F2F2]">
-      <InstantSearch searchClient={searchClient} indexName="dev_sakpa">
+      <InstantSearch
+        searchClient={searchClient}
+        indexName={Constants.expoConfig?.extra?.ALGOLIA_INDEX as string}
+      >
         <SearchBox />
 
         <InfiniteHits maxHitsPerPage={5} hitComponent={Result} />
