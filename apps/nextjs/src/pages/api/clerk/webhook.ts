@@ -15,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 	const payload = (await buffer(req)).toString();
 	const headers = req.headers as Record<string, string>;
 
-	const wh = new Webhook(env.CLERK_SECRET_KEY);
+	const wh = new Webhook(Buffer.from(env.CLERK_SECRET_KEY).toString('base64'));
 	let msg;
 	try {
 		msg = wh.verify(payload, headers) as any;
