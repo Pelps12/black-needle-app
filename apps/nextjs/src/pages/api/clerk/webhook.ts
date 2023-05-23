@@ -3,8 +3,7 @@ import { type NextApiRequest, type NextApiResponse } from 'next';
 import { Webhook } from 'svix';
 import type {} from '@clerk/types';
 import { prisma } from '@acme/db';
-import { clerkClient } from '@clerk/clerk-sdk-node';
-import util from 'util';
+import { env } from '@acme/env-config';
 
 export const config = {
 	api: {
@@ -12,13 +11,11 @@ export const config = {
 	}
 };
 
-const secret = 'whsec_Yo/pisVtbNqoM0y3doPqMPPMCL9BP1aG';
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 	const payload = (await buffer(req)).toString();
 	const headers = req.headers as Record<string, string>;
 
-	const wh = new Webhook(secret);
+	const wh = new Webhook(env.CLERK_SECRET_KEY);
 	let msg;
 	try {
 		msg = wh.verify(payload, headers) as any;

@@ -39,6 +39,7 @@ export const env = createEnv({
     EXPO_ACCESS_TOKEN: z.string(),
     ABLY_HASH: z.string(),
     ALGOLIA_SECRET_KEY: z.string(),
+    CLERK_SIGNING_SECRET: z.string(),
     NODE_ENV: z.enum(["development", "test", "production"]),
   },
   client: {
@@ -110,5 +111,6 @@ export const env = createEnv({
     CLOUDFLARE_ACCESS_KEY: process.env.CLOUDFLARE_ACCESS_KEY,
     CLOUDFLARE_ACCESS_SECRET: process.env.CLOUDFLARE_ACCESS_SECRET,
     CLOUDFLARE_ACCOUNT_ID: process.env.CLOUDFLARE_ACCOUNT_ID,
+    CLERK_SIGNING_SECRET: process.env.CLERK_SIGNING_SECRET,
   },
 });
