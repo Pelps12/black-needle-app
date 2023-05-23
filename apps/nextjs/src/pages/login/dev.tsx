@@ -1,6 +1,6 @@
+import { env } from '@acme/env-config/env';
 import { NextPage } from 'next';
 import React, { useState } from 'react';
-import { env } from '../../env/client.mjs';
 
 const Dev: NextPage = () => {
 	const [password, setPassword] = useState<string>();

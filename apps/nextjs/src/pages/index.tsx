@@ -1,21 +1,12 @@
-import NewUser from '../components/NewUser';
-import SearchBar from '../components/SearchBar';
-import SearchResultPage from '../components/SearchResultPage';
-import { env } from '../env/client.mjs';
-import { trpc as api, type RouterOutputs } from '../utils/api';
-import { trpc } from '../utils/trpc';
-import { useAuth } from '@clerk/nextjs';
+import { env } from '@acme/env-config/env';
 import ImageWithFallback from '@components/Utils/ImageWithFallback';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import algoliasearch from 'algoliasearch/lite';
-import { Hit as AlgoliaHit } from 'instantsearch.js';
 import type { NextPage } from 'next';
 import { GetServerSideProps } from 'next';
 import { NextSeo } from 'next-seo';
 import Head from 'next/head';
-import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
 import singletonRouter from 'next/router';
 import { useState, useEffect, SetStateAction, Dispatch } from 'react';
 import { renderToString } from 'react-dom/server';
@@ -92,8 +83,6 @@ const Home: NextPage<HomePageProps> = ({ serverState, url }) => {
 	const [animationParent]: any = useAutoAnimate();
 	const [count, setCount] = useState(0);
 	const arr = ['catering', 'hairdressing', 'accessories', 'services'];
-
-	const [searchResults, setSearchResults] = useState<any[]>([]);
 
 	// const resultMut = trpc.search.getSearchedPrices.useMutation();
 

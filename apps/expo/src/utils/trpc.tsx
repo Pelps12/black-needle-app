@@ -5,9 +5,9 @@ import { useAuth } from "@clerk/clerk-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
-import superjson from "superjson";
 
 import { type AppRouter } from "@acme/api";
+import { transformer } from "@acme/api/transformer";
 
 /**
  * A set of typesafe hooks for consuming your API.
@@ -51,7 +51,7 @@ export const TRPCProvider: React.FC<{
   const [queryClient] = React.useState(() => new QueryClient());
   const [trpcClient] = React.useState(() =>
     trpc.createClient({
-      transformer: superjson,
+      transformer,
       links: [
         httpBatchLink({
           async headers() {

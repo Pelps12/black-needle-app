@@ -1,12 +1,97 @@
+import Expo, { ExpoPushToken } from "expo-server-sdk";
 import { TRPCError } from "@trpc/server";
 import Ably from "ably/promises";
 import { z } from "zod";
 
 import { type Message, type Participant, type Room } from "@acme/db";
+import { env } from "@acme/env-config/env";
 
 import { protectedProcedure, router } from "../trpc";
+import { expo } from "../utils/expo";
+import { twilio } from "../utils/twilio";
 
 export const chatRouter = router({
+  createRoom: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const room = await ctx.prisma.room.create({
+        data: {
+          Participant: {
+            createMany: {
+              data: [
+                {
+                  userId: ctx.auth.userId,
+                },
+                {
+                  userId: input.userId,
+                },
+              ],
+            },
+          },
+          type: "PRIVATE",
+        },
+        include: {
+          Participant: {
+            include: {
+              user: {
+                include: {
+                  tokens: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const initiator = room.Participant.find(
+        (participant) => participant.userId === ctx.auth.userId,
+      );
+      const receiver = room.Participant.find(
+        (participant) => participant.userId !== ctx.auth.userId,
+      );
+
+      //ABSTRACT THIS AWAY
+      if (initiator && receiver) {
+        if (receiver.user.tokens) {
+          const expoTokens: ExpoPushToken[] = receiver.user.tokens
+            .map((token) => token.token as ExpoPushToken)
+            .filter((token) => Expo.isExpoPushToken(token));
+
+          if (expoTokens.length > 0) {
+            const ticket = await expo.sendPushNotificationsAsync([
+              {
+                to: expoTokens,
+                title: initiator.user.name || "Unknown User",
+                body: `${
+                  initiator.user.name ?? "Someone"
+                } wants to start a chat with you\n
+                    Go to ${env.NEXT_PUBLIC_URL}/chat to respond`,
+                sound: "default",
+                data: {
+                  senderId: initiator.userId,
+                },
+              },
+            ]);
+            console.log(ticket);
+          }
+        } else {
+          twilio.messages.create({
+            body: `${
+              initiator.user.name ?? "Someone"
+            } wants to start a chat with you\n
+            Go to ${env.NEXT_PUBLIC_URL}/chat to respond`,
+            to: `+1${receiver.user.phoneNumber}`,
+            messagingServiceSid: env.MESSAGING_SID,
+          });
+        }
+      }
+
+      return room;
+    }),
   getRecentRooms: protectedProcedure.query(async ({ ctx }) => {
     const room = await ctx.prisma.room.findMany({
       where: {
@@ -135,7 +220,7 @@ export const chatRouter = router({
     }),
 
   getToken: protectedProcedure.mutation(async ({ ctx }) => {
-    const client = new Ably.Realtime({ key: process.env.ABLY_API_KEY });
+    const client = new Ably.Realtime({ key: env.ABLY_API_KEY });
     console.log("Definetely Authorized");
     console.log(ctx.auth.userId);
     const permissions: any = {

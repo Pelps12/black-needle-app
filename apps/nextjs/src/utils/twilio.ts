@@ -1,5 +1,5 @@
+import { env } from '@acme/env-config/env';
 import Twilio from 'twilio';
-import { env } from '../env/server.mjs';
 
 declare global {
 	// eslint-disable-next-line no-var

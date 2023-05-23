@@ -2,11 +2,10 @@ import { TRPCError } from "@trpc/server";
 import Stripe from "stripe";
 import { z } from "zod";
 
-import { protectedProcedure, router } from "../trpc";
+import { env } from "@acme/env-config/env";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
-  apiVersion: "2022-11-15",
-});
+import { protectedProcedure, router } from "../trpc";
+import { stripe } from "../utils/stripe";
 
 export const paymentRouter = router({
   getPaymentSheet: protectedProcedure
@@ -101,4 +100,47 @@ export const paymentRouter = router({
         price: paymentIntent.amount,
       };
     }),
+  refreshStripe: protectedProcedure.mutation(async ({ input, ctx }) => {
+    const seller = await ctx.prisma.seller.findFirst({
+      where: {
+        id: ctx.auth.userId,
+      },
+    });
+    if (!seller || !seller.subAccountID) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Bruh. You aren't a seller",
+      });
+    }
+
+    const accountLink = await stripe.accountLinks.create({
+      account: seller.subAccountID,
+      refresh_url: `${env.NEXT_PUBLIC_URL}/seller/register?refresh=true`,
+      return_url: `${env.NEXT_PUBLIC_URL}/seller/register?return=true`,
+      type: "account_onboarding",
+    });
+    return {
+      accountLink,
+    };
+  }),
+  verifyStripe: protectedProcedure.mutation(async ({ input, ctx }) => {
+    const seller = await ctx.prisma.seller.findFirst({
+      where: {
+        id: ctx.auth.userId,
+      },
+    });
+    if (!seller || !seller.subAccountID) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Bruh. You aren't a seller",
+      });
+    }
+
+    const account = await stripe.accounts.retrieve(seller.subAccountID);
+
+    return {
+      seller,
+      success: account.details_submitted,
+    };
+  }),
 });

@@ -77,11 +77,9 @@ const ChatPage = () => {
       staleTime: Infinity,
     },
   );
-  const chatImageRouter = trpc.upload.putPresignedUrl.useMutation();
   const utils = trpc.useContext();
 
   const { userId } = useAuth();
-  const scrollViewRef = useRef<SectionList>(null);
   const endRef = useRef<FlatList>(null);
 
   const [_, ably] = useChannel(`chat:${userId}`, (message) => {

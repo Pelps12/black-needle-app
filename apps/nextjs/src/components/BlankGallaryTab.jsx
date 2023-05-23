@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
 import svg from '../../public/placeholder.svg';
-import BlankGalleryImages from './BlankGalleryImages';
-import { trpc } from '../utils/trpc';
 import dataURItoBlob from '../utils/URItoFile';
-import { env } from '../env/client.mjs';
-import { useRouter } from 'next/router';
+import { trpc } from '../utils/trpc';
+import BlankGalleryImages from './BlankGalleryImages';
+import { env } from '@acme/env-config/env';
 import { useLoadingStore } from '@utils/sellerUploadStore';
+import Image from 'next/image';
+import { useRouter } from 'next/router';
+import React, { useEffect, useState } from 'react';
 
 const BlankGallaryTab = ({
 	disableEditButton,

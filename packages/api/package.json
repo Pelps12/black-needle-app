@@ -13,15 +13,20 @@
   "dependencies": {
     "@acme/auth": "^0.1.0",
     "@acme/db": "^0.1.0",
+    "@acme/env-config": "^0.1.0",
     "@aws-sdk/client-s3": "^3.168.0",
     "@aws-sdk/s3-request-presigner": "^3.168.0",
+    "@msgpack/msgpack": "3.0.0-beta2",
     "@trpc/client": "^10.1.0",
     "@trpc/server": "^10.1.0",
     "ably": "^1.2.39",
     "algoliasearch": "^4.17.0",
+    "expo": "^48.0.6",
     "expo-server-sdk": "^3.7.0",
+    "nextjs": "^0.0.3",
     "stripe": "^12.2.0",
     "superjson": "1.9.1",
+    "twilio": "^4.11.1",
     "zod": "^3.21.4"
   },
   "devDependencies": {

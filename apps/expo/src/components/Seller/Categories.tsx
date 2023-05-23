@@ -10,16 +10,15 @@ import SKTest from "../../components/Utils/SKText";
 import Modal from "../Modal";
 import BlankCategories from "./BlankCategories";
 
-const Categories = ({
-  categories,
-  sellerId,
-}: {
+type CategoryProps = {
   categories: (Category & {
     Image: PrismaImage[];
     prices: Price[];
   })[];
   sellerId: string;
-}) => {
+};
+
+const Categories: React.FC<CategoryProps> = ({ categories, sellerId }) => {
   const { userId, isSignedIn } = useAuth();
   const [addCategoryButton, setAddCategoryButton] = useState(false);
   return (

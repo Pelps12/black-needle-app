@@ -1,5 +1,6 @@
-import React from 'react';
+//@ts-nocheck
 import { NumberBox } from './NumberBox';
+import React from 'react';
 
 interface timeProps {
 	days: number | string;

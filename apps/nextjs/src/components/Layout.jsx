@@ -1,11 +1,10 @@
 import { MixpanelContext } from '../../providers/Mixpanel';
-import { env } from '../env/client.mjs';
 import { useLoginStore } from '../utils/loginModalStore';
 import { trpc } from '../utils/trpc';
 import Footer from './Footer';
 import LoginForm from './LoginForm';
 import Navbar from './Navbar';
-import SearchBar from './SearchBar';
+import { env } from '@acme/env-config/env';
 import { useRouter } from 'next/router';
 import { useState, useEffect, useContext } from 'react';
 
@@ -22,14 +21,8 @@ export default function Layout({ children }) {
 	}, [checked2]);
 	return (
 		<>
-			{env.NEXT_PUBLIC_IN_DEV !== 'dev' && <Navbar />}
-			{router.pathname !== '/' && (
-				<SearchBar
-					setSearchResults={setSearchResults}
-					resultMut={resultMut}
-					filterValue={filterValue}
-				/>
-			)}
+			<Navbar />
+
 			<main>{children}</main>
 			<input
 				type="checkbox"

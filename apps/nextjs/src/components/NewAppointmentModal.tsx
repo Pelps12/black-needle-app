@@ -1,8 +1,9 @@
-import { Dialog, Tab, Transition } from '@headlessui/react';
-import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { trpc } from '../utils/trpc';
-import { env } from '../env/client.mjs';
-import { useRouter } from 'next/router';
+import { AppRouter } from '@acme/api';
+import { env } from '@acme/env-config/env';
+import { Dialog, Tab, Transition } from '@headlessui/react';
+import { Day } from '@prisma/client';
+import { inferRouterOutputs } from '@trpc/server';
 import {
 	add,
 	eachDayOfInterval,
@@ -21,9 +22,8 @@ import {
 	eachMonthOfInterval,
 	isPast
 } from 'date-fns';
-import { Day } from '@prisma/client';
-import { inferRouterOutputs } from '@trpc/server';
-import { AppRouter } from 'server/trpc/router';
+import { useRouter } from 'next/router';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
 
 type RouterOutput = inferRouterOutputs<AppRouter>;
 
@@ -93,8 +93,7 @@ const BuyerAppointment = ({
 			{
 				sellerAvailability: time.availabilityId,
 				date: time.date,
-				priceId: priceId,
-				origin: document.referrer
+				priceId: priceId
 			},
 			{
 				onSuccess: (data) => {

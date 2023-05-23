@@ -1,5 +1,4 @@
 // @ts-check
-import { env } from './src/env/server.mjs';
 
 /**
  * Don't be scared of the generics here.
@@ -16,7 +15,7 @@ function defineNextConfig(config) {
 export default defineNextConfig({
 	reactStrictMode: true,
 	swcMinify: true,
-	transpilePackages: ['@acme/api', '@acme/auth', '@acme/db'],
+	transpilePackages: ['@acme/api', '@acme/auth', '@acme/db', '@acme/env-config'],
 	images: {
 		domains: ['lh3.googleusercontent.com', 'pbs.twimg.com', 'ucarecdn.com', 'images.clerk.dev']
 	}

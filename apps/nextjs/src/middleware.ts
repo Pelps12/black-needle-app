@@ -1,4 +1,4 @@
-import { env } from './env/server.mjs';
+import { env } from '@acme/env-config/env';
 import { withClerkMiddleware } from '@clerk/nextjs/server';
 import { NextResponse, type NextRequest } from 'next/server';
 
@@ -17,19 +17,6 @@ export default withClerkMiddleware((request: NextRequest) => {
 		PUBLIC_FILE.test(pathname)
 	) {
 		return NextResponse.next();
-	} // exclude all files in the public folder)
-	if (process.env.VERCEL_ENVIRONMENT === 'prod' && pathname === '/login/dev') {
-		url.pathname = '/';
-		return NextResponse.redirect(url);
-	}
-
-	if (process.env.VERCEL_ENVIRONMENT === 'dev') {
-		return NextResponse.next();
-	}
-
-	if (pathname !== '/soon' && process.env.NEXT_PUBLIC_IN_DEV === 'true') {
-		url.pathname = '/soon';
-		return NextResponse.redirect(url);
 	}
 
 	return NextResponse.next();

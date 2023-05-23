@@ -2,9 +2,9 @@ import SellersPage from '../../components/SellersPage';
 import { trpc } from '../../utils/trpc';
 import { appRouter } from '@acme/api';
 import { prisma } from '@acme/db';
+import { env } from '@acme/env-config/env';
 import { getAuth } from '@clerk/nextjs/server';
 import type { Category, Image, User } from '@prisma/client';
-import { env } from 'env/client.mjs';
 import fsPromises from 'fs/promises';
 import isbot from 'isbot';
 import { GetServerSideProps, NextPage } from 'next';
@@ -13,11 +13,6 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import path from 'path';
 import React, { useEffect, useState } from 'react';
-import { getServerAuthSession } from 'server/common/get-server-auth-session';
-
-export const config = {
-	runtime: 'experimental-edge' // for Edge API Routes only
-};
 
 /* export async function getServerSideProps() {
 	const filePath = path.join(process.cwd(), 'Gallery.json');

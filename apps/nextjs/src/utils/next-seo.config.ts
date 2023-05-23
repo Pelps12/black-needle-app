@@ -1,4 +1,4 @@
-import { env } from '../env/client.mjs';
+import { env } from '@acme/env-config/env';
 import { DefaultSeoProps } from 'next-seo';
 
 //Must only be used on client side
