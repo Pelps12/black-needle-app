@@ -1,5 +1,5 @@
+import { env } from '@acme/env-config/env';
 import { SignIn, SignedOut } from '@clerk/nextjs';
-import { env } from 'env/client.mjs';
 import { useRouter } from 'next/router';
 
 const LoginModal = () => {

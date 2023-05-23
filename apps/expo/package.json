@@ -49,6 +49,7 @@
     "nativewind": "^2.0.11",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-hooks": "link:@ably-labs\\react-hooks",
     "react-instantsearch-hooks": "^6.42.2",
     "react-native": "0.71.7",
     "react-native-dropdown-picker": "^5.4.6",

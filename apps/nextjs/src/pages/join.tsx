@@ -1,8 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import { env } from '@acme/env-config/env';
+import { motion } from 'framer-motion';
 import { NextSeo } from 'next-seo';
 import Link from 'next/link';
-import { env } from '../env/client.mjs';
-import { motion } from 'framer-motion';
+import React, { useEffect, useRef } from 'react';
 
 const JoinPage = () => {
 	const canvasRef = useRef<HTMLCanvasElement>(null);

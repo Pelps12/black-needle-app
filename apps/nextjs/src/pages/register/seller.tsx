@@ -1,11 +1,11 @@
-import { env } from '../../env/client.mjs';
 import { colourOptions as colorOptions, ServicesOption } from '../../utils/data';
 import { trpc } from '../../utils/trpc';
+import { env } from '@acme/env-config/env';
 import { useAuth } from '@clerk/nextjs';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { NextSeo } from 'next-seo';
 import { useRouter } from 'next/router';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { GroupBase, StylesConfig } from 'react-select';
@@ -41,8 +41,8 @@ const SellerRegister = () => {
 
 	const animatedComponents = makeAnimated();
 	const mutation = trpc.user.createSeller.useMutation();
-	const refreshStripeMut = trpc.user.refreshStripe.useMutation();
-	const verifyStripe = trpc.user.verifyStripe.useMutation();
+	const refreshStripeMut = trpc.payment.refreshStripe.useMutation();
+	const verifyStripe = trpc.payment.verifyStripe.useMutation();
 	const { userId, isSignedIn } = useAuth();
 
 	const { query } = useRouter();

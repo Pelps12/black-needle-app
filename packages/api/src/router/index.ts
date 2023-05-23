@@ -4,6 +4,7 @@ import { appointmentRouter } from "./appointment";
 import { authRouter } from "./auth";
 import { cartRouter } from "./cart";
 import { chatRouter } from "./chat";
+import { orderRouter } from "./order";
 import { paymentRouter } from "./payment";
 import { priceRouter } from "./price";
 import { searchRouter } from "./search";
@@ -20,7 +21,7 @@ export const appRouter = router({
   payment: paymentRouter,
   //cart: cartRouter,
   appointment: appointmentRouter,
-  //order: orderRouter,
+  order: orderRouter,
   chat: chatRouter,
   cart: cartRouter,
   //waitlist: waitListRouter,

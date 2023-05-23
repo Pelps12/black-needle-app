@@ -1,8 +1,6 @@
-import { Dialog, Tab, Transition } from '@headlessui/react';
-import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { trpc } from '../utils/trpc';
-import { env } from '../env/client.mjs';
-import { useRouter } from 'next/router';
+import { env } from '@acme/env-config/env';
+import { Dialog, Tab, Transition } from '@headlessui/react';
 import {
 	add,
 	eachDayOfInterval,
@@ -19,6 +17,8 @@ import {
 	endOfWeek,
 	startOfToday
 } from 'date-fns';
+import { useRouter } from 'next/router';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
 
 const BuyerAppointment = ({ sellerId, priceId, isOpen, closeModal }) => {
 	function classNames(...classes) {

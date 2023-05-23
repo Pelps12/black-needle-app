@@ -1,6 +1,6 @@
-import { env } from '../env/client.mjs';
 import { trpc } from '../utils/trpc';
 import Appointment from './Appointment';
+import { env } from '@acme/env-config/env';
 import { useAuth, useUser } from '@clerk/nextjs';
 import { Tab } from '@headlessui/react';
 import { Category, OrderOnItem, Price, Image as PrismaImage, OrderStatus } from '@prisma/client';

@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
-import { env } from '../env/client.mjs';
 import { trpc } from '../utils/trpc';
+import { env } from '@acme/env-config/env';
+import React, { useEffect } from 'react';
 
 const ShoppingCart = ({ setBears, deleteProducts, products, setIsCart }) => {
 	const checkoutMut = trpc.cart.checkout.useMutation();

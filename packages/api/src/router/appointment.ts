@@ -8,11 +8,13 @@ import { clerkClient } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { Day } from "@acme/db";
+import { Day, Role } from "@acme/db";
+import { env } from "@acme/env-config/env";
 
 import { protectedProcedure, publicProcedure, router } from "../trpc";
+import { stripe } from "../utils/stripe";
 
-const expo = new Expo({ accessToken: process.env.EXPO_ACCESS_TOKEN });
+const expo = new Expo({ accessToken: env.EXPO_ACCESS_TOKEN });
 
 export const appointmentRouter = router({
   getFreeTimeslots: publicProcedure
@@ -389,5 +391,211 @@ export const appointmentRouter = router({
 			}); */
 
       return updatedAppointment;
+    }),
+  refundPayment: protectedProcedure
+    .input(
+      z.object({
+        canceler: z.nativeEnum(Role),
+        appointmentId: z.string().cuid(),
+        reason: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const appointment = await ctx.prisma.appointment.findFirstOrThrow({
+        where: {
+          id: input.appointmentId,
+        },
+        include: {
+          seller: true,
+          price: true,
+        },
+      });
+      if (input.canceler === "BUYER") {
+        if (appointment.userId === ctx.auth.userId) {
+          if (
+            appointment.status === "DOWNPAID" &&
+            appointment.seller.downPaymentPercentage
+          ) {
+            await stripe.payouts.create({
+              amount:
+                appointment.seller.downPaymentPercentage *
+                appointment.price.amount *
+                100,
+              currency: "usd",
+            });
+            await ctx.prisma.appointment.update({
+              where: {
+                id: input.appointmentId,
+              },
+              data: {
+                canceler: "BUYER",
+                cancellationReason: input.reason,
+                status: "CANCELED",
+              },
+            });
+          } else if (
+            appointment.status === "APPROVED" &&
+            !appointment.seller.downPaymentPercentage
+          ) {
+            await ctx.prisma.appointment.update({
+              where: {
+                id: input.appointmentId,
+              },
+              data: {
+                canceler: "BUYER",
+                cancellationReason: input.reason,
+                status: "CANCELED",
+              },
+            });
+          }
+        } else {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+          });
+        }
+      } else if (input.canceler === "SELLER") {
+        if ((appointment.sellerId = ctx.auth.userId)) {
+          if (
+            appointment.status === "DOWNPAID" &&
+            appointment.seller.downPaymentPercentage &&
+            appointment.paymentIntent
+          ) {
+            await stripe.refunds.create({
+              amount:
+                appointment.seller.downPaymentPercentage *
+                appointment.price.amount *
+                100,
+              payment_intent: appointment.paymentIntent,
+              currency: "usd",
+              reverse_transfer: true,
+            });
+
+            await ctx.prisma.appointment.update({
+              where: {
+                id: input.appointmentId,
+              },
+              data: {
+                canceler: "SELLER",
+                cancellationReason: input.reason,
+                status: "CANCELED",
+              },
+            });
+          } else if (
+            appointment.status == "PAID" &&
+            !appointment.seller.downPaymentPercentage
+          ) {
+            await ctx.prisma.appointment.update({
+              where: {
+                id: input.appointmentId,
+              },
+              data: {
+                canceler: "SELLER",
+                cancellationReason: input.reason,
+                status: "CANCELED",
+              },
+            });
+          }
+        }
+      }
+    }),
+  completePayment: protectedProcedure
+    .input(
+      z.object({
+        appointmentId: z.string().cuid(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const [appointment, user] = await Promise.all([
+        ctx.prisma.appointment.findFirst({
+          where: {
+            id: input.appointmentId,
+            userId: ctx.auth.userId,
+          },
+          include: {
+            price: {
+              include: {
+                category: {
+                  include: {
+                    Image: true,
+                    seller: true,
+                  },
+                },
+              },
+            },
+          },
+        }),
+        clerkClient.users.getUser(ctx.auth.userId),
+      ]);
+
+      if (!appointment?.price.category.seller.downPaymentPercentage) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+        });
+      }
+
+      if (appointment) {
+        const totalAmount = appointment.price.amount;
+        console.log(appointment.price.category);
+        const session = await stripe.checkout.sessions.create({
+          line_items: [
+            {
+              price_data: {
+                currency: "usd",
+                product_data: {
+                  name: `${appointment.price.name} (Remaining Amount)`,
+                  images: appointment.price.category.Image.map(
+                    (image) => image.link,
+                  ),
+                },
+                unit_amount:
+                  appointment.price.amount *
+                  (1 -
+                    appointment.price.category.seller.downPaymentPercentage) *
+                  100,
+              },
+
+              quantity: 1,
+            },
+            {
+              price_data: {
+                currency: "usd",
+                product_data: {
+                  name: "Service Fee",
+                },
+                unit_amount: totalAmount < 9 ? 135 : Math.ceil(totalAmount * 7),
+              },
+
+              quantity: 1,
+            },
+          ],
+          success_url: `${env.NEXT_PUBLIC_URL}/profile`,
+          cancel_url: `${ctx.headers?.referer}/?canceled=true`,
+          custom_text: {
+            submit: {
+              message: "We have 7% service charge.",
+            },
+          },
+          mode: "payment",
+          payment_intent_data: {
+            transfer_group: appointment.id,
+
+            metadata: {
+              userId: ctx.auth.userId,
+              type: "appointment",
+              username: user.username || "Unknown User",
+              seller: JSON.stringify({
+                id: appointment.id,
+                sellerNumber: appointment.price.category.seller.phoneNumber,
+              }),
+              isDownPayment: "false",
+            },
+          },
+        });
+        return session;
+      } else {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+        });
+      }
     }),
 });

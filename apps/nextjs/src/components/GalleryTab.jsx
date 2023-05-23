@@ -1,4 +1,3 @@
-import { env } from '../env/client.mjs';
 import { useLoadingStore } from '../utils/sellerUploadStore';
 import { trpc } from '../utils/trpc';
 import AddCategoryButton from './AddCategoryButton';
@@ -7,6 +6,7 @@ import Modal from './Modal';
 import RemoveImageButton from './RemoveImageButton';
 import SaveAndDeleteCategory from './SaveAndDeleteCategory';
 import ImageWithFallback from './Utils/ImageWithFallback';
+import { env } from '@acme/env-config/env';
 import { useAuth } from '@clerk/nextjs';
 import dataURItoBlob from '@utils/URItoFile';
 import Image from 'next/image';

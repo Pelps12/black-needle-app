@@ -1,4 +1,4 @@
-import { env } from '../src/env/client.mjs';
+import { env } from '@acme/env-config/env';
 import { useAuth } from '@clerk/nextjs';
 import mp, { OverridedMixpanel } from 'mixpanel-browser';
 import { useEffect, createContext, useState } from 'react';

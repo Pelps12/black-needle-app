@@ -4,19 +4,11 @@ import algoliasearch from "algoliasearch";
 import Stripe from "stripe";
 import { z } from "zod";
 
+import { env } from "@acme/env-config";
+
 import { protectedProcedure, publicProcedure, router } from "../trpc";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
-  apiVersion: "2022-11-15",
-});
-
-const client = algoliasearch(
-  process.env.NEXT_PUBLIC_ALGOLIA_APP_ID ?? "",
-  process.env.ALGOLIA_SECRET_KEY ?? "",
-);
-const algoliaIndex = client.initIndex(
-  process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME ?? "",
-);
+import { algoliaIndex } from "../utils/algolia";
+import { stripe } from "../utils/stripe";
 
 export const userRouter = router({
   createCategory: protectedProcedure
@@ -139,7 +131,7 @@ export const userRouter = router({
           ),
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Uploadcare.Simple ${process.env.NEXT_PUBLIC_UPLOADCARE_PUB_KEY}:${process.env.UPLOADCARE_SECRET_KEY}`,
+            Authorization: `Uploadcare.Simple ${env.NEXT_PUBLIC_UPLOADCARE_PUB_KEY}:${env.UPLOADCARE_SECRET_KEY}`,
             Accept: "application/vnd.uploadcare-v0.7+json",
           },
         }),
@@ -240,8 +232,8 @@ export const userRouter = router({
       const [accountLink] = await Promise.all([
         stripe.accountLinks.create({
           account: accountId,
-          refresh_url: `${process.env.NEXT_PUBLIC_URL}/seller/register?refresh=true`,
-          return_url: `${process.env.NEXT_PUBLIC_URL}/seller/register?return=true`,
+          refresh_url: `${env.NEXT_PUBLIC_URL}/seller/register?refresh=true`,
+          return_url: `${env.NEXT_PUBLIC_URL}/seller/register?return=true`,
           type: "account_onboarding",
         }),
       ]);
@@ -249,4 +241,29 @@ export const userRouter = router({
         accountLink,
       };
     }),
+  createStripeAccountLink: protectedProcedure.mutation(async ({ ctx }) => {
+    const { publicMetadata } = await clerkClient.users.getUser(ctx.auth.userId);
+    if (publicMetadata.role !== "SELLER") {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "You are not a seller",
+      });
+    }
+    const seller = await ctx.prisma.seller.findFirst({
+      where: {
+        id: ctx.auth.userId,
+      },
+    });
+    if (seller?.subAccountID) {
+      const accountLink = await stripe.accounts.createLoginLink(
+        seller.subAccountID,
+      );
+      return accountLink;
+    } else {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "You have not finished the Stripe onboarding",
+      });
+    }
+  }),
 });

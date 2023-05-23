@@ -4,11 +4,7 @@ import algoliasearch from "algoliasearch";
 import { z } from "zod";
 
 import { protectedProcedure, publicProcedure, router } from "../trpc";
-
-const client = algoliasearch(
-  process.env.NEXT_PUBLIC_ALGOLIA_APP_ID ?? "",
-  process.env.ALGOLIA_SECRET_KEY ?? "",
-);
+import { algoliaIndex } from "../utils/algolia";
 
 export const priceRouter = router({
   createPrice: protectedProcedure
@@ -51,10 +47,6 @@ export const priceRouter = router({
         });
 
         const newPrices = [...category.prices, price];
-
-        const algoliaIndex = client.initIndex(
-          process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME ?? "",
-        );
 
         algoliaIndex.partialUpdateObject({
           prices: newPrices,

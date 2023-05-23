@@ -21,22 +21,15 @@ import { trpc } from "../../utils/trpc";
 import Modal from "../Modal";
 import BlankCategories from "./BlankCategories";
 
-const Categories = ({
-  categories,
-  sellerId,
-}: {
+type CategoryProps = {
   categories: (Category & {
     Image: PrismaImage[];
     prices: Price[];
   })[];
   sellerId: string;
-  setCategories: {
-    categories: (Category & {
-      Image: PrismaImage[];
-      prices: Price[];
-    })[];
-  };
-}) => {
+};
+
+const Categories: React.FC<CategoryProps> = ({ categories, sellerId }) => {
   const { userId, isSignedIn } = useAuth();
   const [addCategoryButton, setAddCategoryButton] = useState(false);
   const endRef = useRef<FlatList>(null);

@@ -9,8 +9,6 @@ const ChatSidebar: NextPage = () => {
 	const router = useRouter();
 	const roomsEndpoint = trpc.chat.getRecentRooms.useQuery();
 
-	const suggestionMut = trpc.upload.getPresignedUrl.useMutation();
-
 	return (
 		<div className="border-r border-gray-300 lg:col-span-1">
 			<div className="overflow-auto">

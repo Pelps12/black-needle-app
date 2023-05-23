@@ -1,3 +1,4 @@
+import { IncomingHttpHeaders } from "http";
 import type {
   SignedInAuthObject,
   SignedOutAuthObject,
@@ -11,8 +12,9 @@ import { prisma } from "@acme/db";
 /**
  * Replace this with an object if you want to pass things to createContextInner
  */
-type AuthContextProps = {
+type AdditionalContextProps = {
   auth: SignedInAuthObject | SignedOutAuthObject;
+  headers?: IncomingHttpHeaders;
 };
 
 /** Use this helper for:
@@ -20,10 +22,14 @@ type AuthContextProps = {
  *  - trpc's `createSSGHelpers` where we don't have req/res
  * @see https://beta.create.t3.gg/en/usage/trpc#-servertrpccontextts
  */
-export const createContextInner = async ({ auth }: AuthContextProps) => {
+export const createContextInner = async ({
+  auth,
+  headers,
+}: AdditionalContextProps) => {
   return {
     auth,
     prisma,
+    headers,
   };
 };
 

@@ -1,4 +1,4 @@
-import { env } from '../env/server.mjs';
+import { env } from '@acme/env-config/env';
 
 declare global {
 	// eslint-disable-next-line no-var
