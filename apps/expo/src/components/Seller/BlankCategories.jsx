@@ -209,15 +209,12 @@ const BlankCategory = ({
             (image) => `https://ucarecdn.com/${result[image]}/`,
           ),
         });
-        const { data, isSuccess } = await getCat.refetch();
-        if (isSuccess) {
-          setAddCategoryButton(false);
-          endRef.current?.scrollToEnd();
-          console.log(data);
-        }
-        // trpc.useContext()?.user.getCategories.invalidate();
-        // .then((data) => trpc.useContext().user.getCategories.refetch())
-        // .catch((err) => console.log(err.message));
+        // const { data, isSuccess } = await getCat.refetch();
+        // if (isSuccess) {
+        //   setAddCategoryButton(false);
+        //   endRef.current?.scrollToEnd();
+        //   console.log(data);
+        // }
       } else {
         console.log(await response.text(), response.status);
       }
