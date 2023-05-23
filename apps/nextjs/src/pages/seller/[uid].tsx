@@ -1,17 +1,8 @@
 import SellersPage from '../../components/SellersPage';
 import { trpc } from '../../utils/trpc';
-import { appRouter } from '@acme/api';
-import { prisma } from '@acme/db';
-import { env } from '@acme/env-config/env';
-import { getAuth } from '@clerk/nextjs/server';
 import type { Category, Image, User } from '@prisma/client';
-import fsPromises from 'fs/promises';
-import isbot from 'isbot';
-import { GetServerSideProps, NextPage } from 'next';
-import { NextSeo, ProfilePageJsonLd } from 'next-seo';
-import Head from 'next/head';
+import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import path from 'path';
 import React, { useEffect, useState } from 'react';
 
 /* export async function getServerSideProps() {
