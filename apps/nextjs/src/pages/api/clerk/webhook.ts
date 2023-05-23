@@ -14,9 +14,9 @@ export const config = {
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 	const payload = (await buffer(req)).toString();
 	const headers = req.headers as Record<string, string>;
-	console.log(env.CLERK_SECRET_KEY);
+
 	try {
-		const wh = new Webhook(process.env.CLERK_SECRET_KEY ?? '');
+		const wh = new Webhook(env.CLERK_SIGNING_SECRET);
 		let msg;
 		msg = wh.verify(payload, headers) as any;
 		//console.log(util.inspect(msg, false, null, true /* enable colors */));
