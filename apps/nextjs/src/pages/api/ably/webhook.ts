@@ -62,14 +62,6 @@ export default async function ably(req: NextApiRequest, res: NextApiResponse) {
 						);
 
 						if (receiver && initiator) {
-							twilio.messages.create({
-								body: `${initiator.user.name ?? 'Someone'} said\n\"${text}\"\nGo to ${
-									env.NEXT_PUBLIC_URL
-								}/chat to respond`,
-								to: `+1${receiver.user.phoneNumber}`,
-								messagingServiceSid: env.MESSAGING_SID
-							});
-
 							const expoTokens: ExpoPushToken[] = receiver.user.tokens
 								.map((token) => token.token as ExpoPushToken)
 								.filter((token) => Expo.isExpoPushToken(token));
@@ -87,6 +79,14 @@ export default async function ably(req: NextApiRequest, res: NextApiResponse) {
 									}
 								]);
 								console.log(ticket);
+							} else {
+								twilio.messages.create({
+									body: `${initiator.user.name ?? 'Someone'} said\n\"${text}\"\nGo to ${
+										env.NEXT_PUBLIC_URL
+									}/chat to respond`,
+									to: `+1${receiver.user.phoneNumber}`,
+									messagingServiceSid: env.MESSAGING_SID
+								});
 							}
 						}
 						res.send(200);

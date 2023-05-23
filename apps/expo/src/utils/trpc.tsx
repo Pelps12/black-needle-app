@@ -31,12 +31,14 @@ const getBaseUrl = () => {
   const localhost = Constants.manifest?.debuggerHost?.split(":")[0];
 
   if (!localhost) {
-    return "https://dev.sakpa.co";
+    return process.env.EAS_BUILD_PROFILE === "production"
+      ? "https://www.sakpa.co"
+      : "https://dev.sakpa.co";
     throw new Error(
       "Failed to get localhost. Please point to your production server.",
     );
   }
-  return "https://discussions-berry-motel-why.trycloudflare.com";
+  return "https://www.sakpa.co";
 };
 
 /**

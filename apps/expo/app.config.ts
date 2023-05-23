@@ -1,12 +1,21 @@
 import type { ExpoConfig } from "@expo/config";
 
 const CLERK_PUBLISHABLE_KEY =
-  "pk_test_ZW5vcm1vdXMtc2F3ZmlzaC05MS5jbGVyay5hY2NvdW50cy5kZXYk";
+  process.env.EAS_BUILD_PROFILE === "production"
+    ? "pk_live_Y2xlcmsuc2FrcGEuY28k"
+    : "pk_test_ZW5vcm1vdXMtc2F3ZmlzaC05MS5jbGVyay5hY2NvdW50cy5kZXYk";
 
-const PUBLIC_URL = "http://localhost:3000";
+const PUBLIC_URL =
+  process.env.EAS_BUILD_PROFILE === "production"
+    ? "https://www.sakpa.co"
+    : "https://dev.sakpa.co";
+const ALGOLIA_INDEX =
+  process.env.EAS_BUILD_PROFILE === "production" ? "sakpa" : "dev_sakpa";
 const NEXT_PUBLIC_UPLOADCARE_PUB_KEY = "ee6b07357ef85077ad3e";
 const STRIPE_PUBLISHABLE_KEY =
-  "pk_test_51M482WChaXTQFF1r63Ekbj7Gl8pcRDNLhGNLrLdshWxGOWyDtsmucwUgVUcOYcNm6e9GAcrOI4M8kDwb4qdovjcb006Gu3lgyh";
+  process.env.EAS_BUILD_PROFILE === "production"
+    ? "pk_live_51M482WChaXTQFF1rkBgJlD0NzpuCx3M1AZnUcWF47i037nUIwEe9kVbnrCVru1P0PFJW1K70ELSrtBQ0TXNWtw7000kEXLQlHF"
+    : "pk_test_51M482WChaXTQFF1r63Ekbj7Gl8pcRDNLhGNLrLdshWxGOWyDtsmucwUgVUcOYcNm6e9GAcrOI4M8kDwb4qdovjcb006Gu3lgyh";
 const MERCHANT_ID = "merchant.co.sakpa";
 
 const defineConfig = (): ExpoConfig => ({
@@ -48,13 +57,14 @@ const defineConfig = (): ExpoConfig => ({
     STRIPE_PUBLISHABLE_KEY,
     MERCHANT_ID,
     NEXT_PUBLIC_UPLOADCARE_PUB_KEY,
+    ALGOLIA_INDEX,
   },
   plugins: [
     [
       "expo-image-picker",
       {
         photosPermission:
-          "The app accesses your photos to let you share them with your friends.",
+          "The app accesses your photos to let you share them clients or service providers",
       },
     ],
   ],
