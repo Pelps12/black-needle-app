@@ -129,7 +129,7 @@ model Message {
   userId  String
   message String   @db.Text
   sendAt  DateTime
-  user    User     @relation(fields: [userId], references: [id])
+  user    User     @relation(fields: [userId], references: [id], onUpdate: Cascade)
   room    Room     @relation(fields: [roomId], references: [id])
 
   @@unique([roomId, sendAt])
