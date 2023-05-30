@@ -162,6 +162,8 @@ const Category = ({
     // formData.append("metadata[user]", uid);
 
     files.forEach((file, index) => {
+      console.log("John Ojo");
+      console.log(file);
       let uriParts = file.uri.split(".");
       let fileType = uriParts[uriParts.length - 1];
       console.log("Inside");
@@ -219,22 +221,38 @@ const Category = ({
                     .map((cate) => cate.id)
                     .indexOf(category.id);
                 }
+                console.log("here");
                 newCategory[categoryIndex].Image.map((image) =>
-                  console.log(image.link),
+                  console.log(image),
                 );
+
+                console.log("First Bus");
+                console.log(newCategory);
                 const getFileObjects = async () => {
                   return Promise.all(
-                    newCategory[categoryIndex].Image.map((image) =>
-                      dataURItoBlob(image.link.uri),
-                    ),
+                    newCategory[categoryIndex].Image.filter(
+                      (image) => typeof image.link != "string",
+                    ).map((image) => dataURItoBlob(image.link.uri)),
+                    // newCategory[categoryIndex].Image.map((image) =>
+                    //   dataURItoBlob(image.link.uri),
+                    // ),
                   );
                 };
+
+                console.log("Last Bus");
                 const files = await getFileObjects();
+                console.log("About to check files");
+                console.log(files);
                 if (files.length > 0) {
                   console.log(files);
+                  console.log("Helo");
                   const response = await imageUpload(
-                    newCategory[categoryIndex].Image.map((image) => image.link),
+                    newCategory[categoryIndex].Image.filter(
+                      (image) => typeof image.link != "string",
+                    ).map((image) => image.link),
                   );
+                  console.log("Ho");
+                  console.log(response);
                   if (response.ok) {
                     console.log(response);
 
