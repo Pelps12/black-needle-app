@@ -95,6 +95,65 @@ export const userRouter = router({
         user,
       };
     }),
+  updateImage: protectedProcedure
+    .input(
+      z.array(
+        z.object({
+          imageId: z.string(),
+          link: z.string(),
+        }),
+      ),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const images = await ctx.prisma.image.findMany({
+        where: {
+          id: {
+            in: input.map((input) => input.imageId),
+          },
+        },
+        include: {
+          category: true,
+        },
+      });
+      console.log(images);
+      images.forEach((image) => {
+        if (image.category?.sellerId !== ctx.auth.userId) {
+          throw new TRPCError({
+            message: "Not authorized",
+            code: "UNAUTHORIZED",
+          });
+        }
+      });
+      const result = await fetch("https://api.uploadcare.com/files/storage/", {
+        method: "DELETE",
+        body: JSON.stringify(images.map((input) => input.link.split("/")[3])),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Uploadcare.Simple ${env.NEXT_PUBLIC_UPLOADCARE_PUB_KEY}:${env.UPLOADCARE_SECRET_KEY}`,
+          Accept: "application/vnd.uploadcare-v0.7+json",
+        },
+      });
+      console.log(images.map((input) => input.link.split("/")[3]));
+
+      if (!result.ok) {
+        console.log(await result.json());
+      } else {
+        console.log(await result.json());
+      }
+
+      await Promise.all(
+        input.map((input) => {
+          return ctx.prisma.image.update({
+            where: {
+              id: input.imageId,
+            },
+            data: {
+              link: input.link,
+            },
+          });
+        }),
+      );
+    }),
   deleteCategory: protectedProcedure
     .input(
       z.object({

@@ -137,7 +137,7 @@ const SellerPage = () => {
         )}
 
         {activeTab == "CATEGORIES" && categories && (
-          <Categories categories={categories} sellerId={user?.id} />
+          <Categories setCategories={setCategories} categories={categories} sellerId={user?.id} />
         )}
       </View>
     </SafeAreaView>

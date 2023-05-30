@@ -6,7 +6,9 @@ import {
   TouchableHighlight,
   View,
 } from "react-native";
+import Constants from "expo-constants";
 import { Image } from "expo-image";
+import * as ImagePicker from "expo-image-picker";
 import { useAuth } from "@clerk/clerk-expo";
 import {
   Feather,
@@ -17,6 +19,7 @@ import {
 import { type Category, type Price, type Image as PrismaImage } from "@acme/db";
 
 import SKTest from "../../components/Utils/SKText";
+import dataURItoBlob from "../../utils/dataURItoBlob";
 import { trpc } from "../../utils/trpc";
 import Modal from "../Modal";
 import BlankCategories from "./BlankCategories";
@@ -27,9 +30,14 @@ type CategoryProps = {
     prices: Price[];
   })[];
   sellerId: string;
+  setCategories: any;
 };
 
-const Categories: React.FC<CategoryProps> = ({ categories, sellerId }) => {
+const Categories: React.FC<CategoryProps> = ({
+  setCategories,
+  categories,
+  sellerId,
+}) => {
   const { userId, isSignedIn } = useAuth();
   const [addCategoryButton, setAddCategoryButton] = useState(false);
   const endRef = useRef<FlatList>(null);
@@ -83,7 +91,13 @@ const Categories: React.FC<CategoryProps> = ({ categories, sellerId }) => {
           }
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <Category category={item} sellerId={sellerId} />
+            <Category
+              endRef={endRef}
+              setCategories={setCategories}
+              categories={categories}
+              category={item}
+              sellerId={sellerId}
+            />
           )}
         />
       </View>
@@ -94,14 +108,24 @@ const Categories: React.FC<CategoryProps> = ({ categories, sellerId }) => {
 const Category = ({
   category,
   sellerId,
+  categories,
+  setCategories,
+  endRef,
 }: {
   category: Category & {
     Image: PrismaImage[];
     prices: Price[]; //take a look at my flatlist in blankcategory.jsx
   };
+  setCategories: any;
   sellerId: string;
+  endRef: any;
+  categories: (Category & {
+    Image: PrismaImage[];
+  })[];
 }) => {
   const [modalVisible, setModalVisible] = React.useState(false);
+  const updateCatImage = trpc.user.updateImage.useMutation();
+  const [oldCategory, setOldCategory] = useState(null);
   const [pressedImage, setPressedImage] = React.useState<string>();
   const [editButton, setEditButton] = React.useState(false);
   const catDelete = trpc.user.deleteCategory.useMutation();
@@ -114,6 +138,56 @@ const Category = ({
     //   enabled: false,
     // },
   );
+
+  const pickImageAsync = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      return result.assets[0];
+    } else {
+      alert("You did not select any image.");
+    }
+  };
+  const imageUpload = async (files) => {
+    const formData = new FormData();
+    formData.append(
+      "UPLOADCARE_PUB_KEY",
+      Constants.expoConfig?.extra?.NEXT_PUBLIC_UPLOADCARE_PUB_KEY,
+    );
+    formData.append("UPLOADCARE_STORE", "auto");
+
+    // formData.append("metadata[user]", uid);
+
+    files.forEach((file, index) => {
+      let uriParts = file.uri.split(".");
+      let fileType = uriParts[uriParts.length - 1];
+      console.log("Inside");
+      console.log(file);
+      console.log(file.uri);
+      console.log(file.name);
+      console.log(`image/${fileType}`);
+      formData.append(`my_file(${index}).jpg`, {
+        uri: file.uri,
+        name: "John",
+        type: `image/${fileType}`,
+      });
+    });
+
+    console.log(formData);
+
+    const response = await fetch("https://upload.uploadcare.com/base/", {
+      method: "POST",
+      body: formData,
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response;
+  };
+
   return (
     <View className="mx-auto">
       <Text className="mx-auto text-4xl font-semibold">{category.name}</Text>
@@ -125,32 +199,110 @@ const Category = ({
               setEditButton(!editButton);
             }}
           >
-            <Feather style={{}} name="edit-2" size={24} color="black" />
+            {!editButton && (
+              <Feather style={{}} name="edit-2" size={24} color="black" />
+            )}
           </Pressable>
         </View>
 
-        <View className="">
-          <Pressable
-            onPress={async () => {
-              console.log("Pressed");
-              await catDelete.mutateAsync({
-                id: category.id,
-              });
+        {editButton && (
+          // Upload for edited images
+          <View className="mr-2">
+            <Pressable
+              onPress={async () => {
+                setEditButton(!editButton);
+                var categoryIndex;
+                var imageIndex;
+                const newCategory = [...categories];
+                if (newCategory !== undefined) {
+                  categoryIndex = newCategory
+                    .map((cate) => cate.id)
+                    .indexOf(category.id);
+                }
+                newCategory[categoryIndex].Image.map((image) =>
+                  console.log(image.link),
+                );
+                const getFileObjects = async () => {
+                  return Promise.all(
+                    newCategory[categoryIndex].Image.map((image) =>
+                      dataURItoBlob(image.link.uri),
+                    ),
+                  );
+                };
+                const files = await getFileObjects();
+                if (files.length > 0) {
+                  console.log(files);
+                  const response = await imageUpload(
+                    newCategory[categoryIndex].Image.map((image) => image.link),
+                  );
+                  if (response.ok) {
+                    console.log(response);
 
-              const { data, isSuccess } = await getCat.refetch();
-              if (isSuccess) {
-                console.log(data);
-              }
-            }}
-          >
-            <MaterialCommunityIcons
-              style={{}}
-              name="delete-outline"
-              size={24}
-              color="black"
-            />
-          </Pressable>
-        </View>
+                    const result = await response.json();
+                    console.log(result);
+
+                    await updateCatImage.mutate(
+                      newCategory[categoryIndex].Image.map((image, idx) => {
+                        return {
+                          link: `https://ucarecdn.com/${
+                            result[`my_file(${idx}).jpg`]
+                          }/`,
+                          imageId: image.id,
+                        };
+                      }),
+                    );
+                    // const { data, isSuccess } = await getCat.refetch();
+                    // if (isSuccess) {
+                    //   endRef.current?.scrollToEnd();
+                    //   console.log(data);
+                    // }
+                  } else {
+                    console.log(await response.text(), response.status);
+                  }
+                }
+              }}
+            >
+              <Feather name="save" size={24} color="black" />
+            </Pressable>
+          </View>
+        )}
+
+        {!editButton && (
+          <View className="">
+            <Pressable
+              onPress={async () => {
+                console.log("Pressed");
+                await catDelete.mutateAsync({
+                  id: category.id,
+                });
+
+                const { data, isSuccess } = await getCat.refetch();
+                if (isSuccess) {
+                  console.log(data);
+                }
+              }}
+            >
+              <MaterialCommunityIcons
+                style={{}}
+                name="delete-outline"
+                size={24}
+                color="black"
+              />
+            </Pressable>
+          </View>
+        )}
+
+        {editButton && (
+          <View className="mr-2">
+            <Pressable
+              onPress={() => {
+                setEditButton(!editButton);
+              }}
+            >
+              <MaterialCommunityIcons name="cancel" size={24} color="black" />
+            </Pressable>
+          </View>
+        )}
       </View>
       {/* <Modal
         modalVisible={modalVisible}
@@ -173,9 +325,43 @@ const Category = ({
           <>
             <View style={{ position: "relative" }}>
               <Pressable
-                onPress={() => {
+                onPress={async () => {
                   setModalVisible(true);
                   setPressedImage(item.link);
+                  if (
+                    item.link === require("../../../assets/placeholder(3).svg")
+                  ) {
+                    const imageUrl = await pickImageAsync();
+                    if (imageUrl) {
+                      const editedImage = {
+                        id: item.id,
+                        link: imageUrl,
+                        categoryId: item.categoryId,
+                      };
+                      var categoryIndex;
+                      var imageIndex;
+                      const newCategory = [...categories];
+                      if (newCategory !== undefined) {
+                        categoryIndex = newCategory
+                          .map((cate) => cate.id)
+                          .indexOf(item.categoryId);
+                        newCategory.map((cate) => {
+                          if (cate.id === item.categoryId) {
+                            imageIndex = cate.Image.map(
+                              (img) => img.id,
+                            ).indexOf(item.id);
+                          }
+                        });
+                        console.log(imageIndex);
+                        newCategory[categoryIndex].Image[imageIndex] =
+                          editedImage;
+                      }
+
+                      setCategories(newCategory);
+                    }
+                  } else {
+                    console.log("H");
+                  }
                 }}
               >
                 <Image
@@ -188,7 +374,32 @@ const Category = ({
                 {editButton && (
                   <TouchableHighlight
                     onPress={() => {
-                      console.log("item.id");
+                      const editedImage = {
+                        id: item.id,
+
+                        link: require("../../../assets/placeholder(3).svg"),
+                        categoryId: category.id,
+                      };
+                      var categoryIndex;
+                      var imageIndex;
+                      const newCategory = [...categories];
+                      if (newCategory !== undefined) {
+                        categoryIndex = newCategory
+                          .map((cate) => cate.id)
+                          .indexOf(category.id);
+                        newCategory.map((cate) => {
+                          if (cate.id === category.id) {
+                            imageIndex = cate.Image.map(
+                              (img) => img.id,
+                            ).indexOf(item.id);
+                          }
+                        });
+                        console.log(imageIndex);
+                        newCategory[categoryIndex].Image[imageIndex] =
+                          editedImage;
+                      }
+
+                      setCategories(newCategory);
                     }}
                     style={{
                       backgroundColor: "red",

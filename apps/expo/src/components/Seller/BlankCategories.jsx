@@ -209,12 +209,12 @@ const BlankCategory = ({
             (image) => `https://ucarecdn.com/${result[image]}/`,
           ),
         });
-        // const { data, isSuccess } = await getCat.refetch();
-        // if (isSuccess) {
-        //   setAddCategoryButton(false);
-        //   endRef.current?.scrollToEnd();
-        //   console.log(data);
-        // }
+        const { data, isSuccess } = await getCat.refetch();
+        if (isSuccess) {
+          setAddCategoryButton(false);
+          endRef.current?.scrollToEnd();
+          console.log(data);
+        }
       } else {
         console.log(await response.text(), response.status);
       }
