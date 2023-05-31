@@ -125,6 +125,7 @@ const Category = ({
 }) => {
   const [modalVisible, setModalVisible] = React.useState(false);
   const updateCatImage = trpc.user.updateImage.useMutation();
+  const { userId, isSignedIn } = useAuth();
   const [oldCategory, setOldCategory] = useState(null);
   const [pressedImage, setPressedImage] = React.useState<string>();
   const [editButton, setEditButton] = React.useState(false);
@@ -201,7 +202,7 @@ const Category = ({
               setEditButton(!editButton);
             }}
           >
-            {!editButton && (
+            {!editButton && isSignedIn && userId === sellerId && (
               <Feather style={{}} name="edit-2" size={24} color="black" />
             )}
           </Pressable>
@@ -246,21 +247,26 @@ const Category = ({
                 if (files.length > 0) {
                   console.log(files);
                   console.log("Helo");
+                  newCategory[categoryIndex].Image.filter(
+                    (image) => typeof image.link != "string",
+                  ).map((image) => console.log(image));
                   const response = await imageUpload(
                     newCategory[categoryIndex].Image.filter(
                       (image) => typeof image.link != "string",
                     ).map((image) => image.link),
                   );
                   console.log("Ho");
-                  console.log(response);
+
                   if (response.ok) {
                     console.log(response);
-
+                    console.log("entered");
                     const result = await response.json();
                     console.log(result);
-
+                    console.log("We are here");
                     await updateCatImage.mutate(
-                      newCategory[categoryIndex].Image.map((image, idx) => {
+                      newCategory[categoryIndex].Image.filter(
+                        (image) => typeof image.link != "string",
+                      ).map((image, idx) => {
                         return {
                           link: `https://ucarecdn.com/${
                             result[`my_file(${idx}).jpg`]
@@ -285,7 +291,7 @@ const Category = ({
           </View>
         )}
 
-        {!editButton && (
+        {!editButton && isSignedIn && userId === sellerId && (
           <View className="">
             <Pressable
               onPress={async () => {
@@ -310,7 +316,7 @@ const Category = ({
           </View>
         )}
 
-        {editButton && (
+        {editButton && isSignedIn && userId === sellerId && (
           <View className="mr-2">
             <Pressable
               onPress={() => {
@@ -376,6 +382,12 @@ const Category = ({
                       }
 
                       setCategories(newCategory);
+                      categories[0]?.Image.map((image) => {
+                        console.log(image);
+                      });
+                      // newCategory[categoryIndex].Image.map((image) =>
+                      //   dataURItoBlob(image.link.uri),
+                      // )
                     }
                   } else {
                     console.log("H");
@@ -389,7 +401,7 @@ const Category = ({
                 />
               </Pressable>
               <View style={{ position: "absolute", top: 0, right: 0 }}>
-                {editButton && (
+                {editButton && isSignedIn && userId === sellerId && (
                   <TouchableHighlight
                     onPress={() => {
                       const editedImage = {
