@@ -2,7 +2,9 @@ import React, { Fragment, useEffect, useRef, useState } from "react";
 import {
   FlatList,
   Pressable,
+  SafeAreaView,
   Text,
+  TextInput,
   TouchableHighlight,
   View,
 } from "react-native";
@@ -125,11 +127,13 @@ const Category = ({
 }) => {
   const [modalVisible, setModalVisible] = React.useState(false);
   const updateCatImage = trpc.user.updateImage.useMutation();
+  const cat = trpc.user.updateCategory.useMutation();
   const { userId, isSignedIn } = useAuth();
-  const [oldCategory, setOldCategory] = useState(null);
+  const [oldCategory, setOldCategory] = useState("");
   const [pressedImage, setPressedImage] = React.useState<string>();
   const [editButton, setEditButton] = React.useState(false);
   const catDelete = trpc.user.deleteCategory.useMutation();
+  const [categoryTitle, onChangecategoryTitle] = React.useState(category.name);
   const getCat = trpc.user.getCategories.useQuery(
     {
       id: sellerId,
@@ -150,6 +154,19 @@ const Category = ({
       return result.assets[0];
     } else {
       alert("You did not select any image.");
+    }
+  };
+  const checkInputBoxChange = (newTitle) => {
+    onChangecategoryTitle(newTitle);
+    const newCategory = [...categories];
+    var categoryIndex;
+    if (newCategory !== undefined) {
+      categoryIndex = newCategory.map((cate) => cate.id).indexOf(category.id);
+    }
+    // setOldCategory(newCategory[categoryIndex].name);
+    newCategory[categoryIndex].name = newTitle;
+    if (newCategory[categoryIndex].name > 0) {
+      setCategories(newCategory);
     }
   };
   const imageUpload = async (files) => {
@@ -193,12 +210,25 @@ const Category = ({
 
   return (
     <View className="mx-auto">
-      <Text className="mx-auto text-4xl font-semibold">{category.name}</Text>
+      {editButton && (
+        <SafeAreaView>
+          <TextInput
+            placeholder="Category Name"
+            keyboardType="default"
+            className="mx-auto w-48 border-2"
+            value={category.name}
+            onChangeText={(newTitle) => checkInputBoxChange(newTitle)}
+          />
+        </SafeAreaView>
+      )}
+      {!editButton && (
+        <Text className="mx-auto text-4xl font-semibold">{category.name}</Text>
+      )}
       <View className="flex-row justify-end ">
         <View className="mr-2">
           <Pressable
             onPress={() => {
-              console.log(category.name);
+              setOldCategory(category.name);
               setEditButton(!editButton);
             }}
           >
@@ -216,6 +246,7 @@ const Category = ({
                 setEditButton(!editButton);
                 var categoryIndex;
                 var imageIndex;
+
                 const newCategory = [...categories];
                 if (newCategory !== undefined) {
                   categoryIndex = newCategory
@@ -223,10 +254,16 @@ const Category = ({
                     .indexOf(category.id);
                 }
                 console.log("here");
+                if (newCategory[categoryIndex].name != oldCategory) {
+                  await cat.mutate({
+                    categoryId: category.id,
+                    name: newCategory[categoryIndex].name,
+                  });
+                }
                 newCategory[categoryIndex].Image.map((image) =>
                   console.log(image),
                 );
-
+                console.log(oldCategory);
                 console.log("First Bus");
                 console.log(newCategory);
                 const getFileObjects = async () => {
