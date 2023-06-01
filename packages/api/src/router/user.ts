@@ -95,6 +95,46 @@ export const userRouter = router({
         user,
       };
     }),
+  updateCategory: protectedProcedure
+    .input(
+      z.object({
+        categoryId: z.string(),
+        name: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const galleryOwnerId = await ctx.prisma.category.findFirst({
+        where: {
+          id: input.categoryId,
+        },
+        select: {
+          sellerId: true,
+        },
+      });
+
+      if (galleryOwnerId) {
+        if (ctx.auth.userId === galleryOwnerId.sellerId) {
+          const category = await ctx.prisma.category.update({
+            where: {
+              id: input.categoryId,
+            },
+            data: {
+              name: input.name,
+            },
+          });
+          // await esClient.update({
+          // 	index: 'categories',
+          // 	id: category.id,
+          // 	doc: {
+          // 		name: category.name,
+          // 		'seller-id': ctx.session.user.id,
+          // 		type: category.type
+          // 	},
+          // 	doc_as_upsert: true
+          // });
+        }
+      }
+    }),
   updateImage: protectedProcedure
     .input(
       z.array(
