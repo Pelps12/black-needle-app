@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Pressable,
   SafeAreaView,
@@ -13,14 +13,18 @@ import { useUser } from "@clerk/clerk-expo";
 
 import { Category, Price, Image as PrismaImage } from "@acme/db";
 
-import Modal from "../../components/Modal";
 import Categories from "../../components/Seller/Categories";
 import Prices from "../../components/Seller/Prices";
 import SKTest from "../../components/Utils/SKText";
 import { trpc } from "../../utils/trpc";
 
-const SellerPage = () => {
-  const { id } = useSearchParams();
+type SellerPageProps = {
+  sellerId?: string | null | undefined;
+};
+
+const SellerPage: React.FC<SellerPageProps> = ({ sellerId }) => {
+  const params = useSearchParams();
+  const id = sellerId ?? params.id;
   const idString =
     typeof id === "string" ? id : typeof id === "undefined" ? ":)" : id[0]!;
   const [activeTab, setActiveTab] = useState<string>("CATEGORIES");

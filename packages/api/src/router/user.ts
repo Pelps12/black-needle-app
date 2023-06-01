@@ -121,6 +121,19 @@ export const userRouter = router({
             data: {
               name: input.name,
             },
+            include: {
+              Image: true,
+              prices: true
+            }
+          });
+
+          algoliaIndex.partialUpdateObject({
+            objectID: category.id,
+            name: category.name,
+            sellerId: ctx.auth.userId,
+            type: category.type,
+            prices: category.prices,
+            Image: category.Image,
           });
           // await esClient.update({
           // 	index: 'categories',

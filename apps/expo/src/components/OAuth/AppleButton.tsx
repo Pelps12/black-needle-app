@@ -17,7 +17,7 @@ const AppleButton = ({ onPress }: { onPress: () => Promise<void> }) => {
       />
       <SKText
         className="ml-2 text-xl font-semibold text-white"
-        fontWeight="normal"
+        fontWeight="medium"
       >
         Sign in with Apple
       </SKText>
