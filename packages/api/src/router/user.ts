@@ -18,9 +18,10 @@ export const userRouter = router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      clerkClient.users.updateUser(ctx.auth.userId, {
+      const result = await clerkClient.users.updateUser(ctx.auth.userId, {
         username: input.username,
       });
+      console.log(result);
     }),
   createCategory: protectedProcedure
     .input(
