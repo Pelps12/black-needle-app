@@ -11,6 +11,17 @@ import { algoliaIndex } from "../utils/algolia";
 import { stripe } from "../utils/stripe";
 
 export const userRouter = router({
+  updateUser: protectedProcedure
+    .input(
+      z.object({
+        username: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      clerkClient.users.updateUser(ctx.auth.userId, {
+        username: input.username,
+      });
+    }),
   createCategory: protectedProcedure
     .input(
       z.object({
@@ -123,8 +134,8 @@ export const userRouter = router({
             },
             include: {
               Image: true,
-              prices: true
-            }
+              prices: true,
+            },
           });
 
           algoliaIndex.partialUpdateObject({
