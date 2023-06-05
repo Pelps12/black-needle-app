@@ -11,6 +11,24 @@
         "privacyPolicyUrl": "https://www.sakpa.co/privacy"
       }
     },
+    "advisory": {
+      "alcoholTobaccoOrDrugUseOrReferences": "NONE",
+      "contests": "NONE",
+      "gamblingSimulated": "NONE",
+      "horrorOrFearThemes": "NONE",
+      "matureOrSuggestiveThemes": "NONE",
+      "medicalOrTreatmentInformation": "NONE",
+      "profanityOrCrudeHumor": "NONE",
+      "sexualContentGraphicAndNudity": "NONE",
+      "sexualContentOrNudity": "NONE",
+      "violenceCartoonOrFantasy": "NONE",
+      "violenceRealistic": "NONE",
+      "violenceRealisticProlongedGraphicOrSadistic": "NONE",
+      "gambling": false,
+      "unrestrictedWebAccess": false,
+      "kidsAgeBand": null,
+      "seventeenPlus": false
+    },
     "categories": ["SHOPPING", "LIFESTYLE"],
     "release": { "automaticRelease": true },
     "review": {
@@ -20,6 +38,7 @@
       "phone": "+1 210 712 0869",
       "demoPassword": "",
       "demoUsername": "topeojo129@gmail.com",
+
       "notes": "The app does not have credentials but uses OAuth to authenticate. You can view the demo through the following URL or use the credentials to login with Google"
     }
   }
