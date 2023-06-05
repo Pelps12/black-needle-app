@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 import {
   Button,
+  GestureResponderEvent,
   Pressable,
   StyleSheet,
   Text,
@@ -10,7 +11,7 @@ import {
 } from "react-native";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
-import { useAuth, useUser } from "@clerk/clerk-expo";
+import { useAuth, useUser } from "@clerk/clerk-react";
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import AnimatedLottieView from "lottie-react-native";
@@ -21,6 +22,7 @@ import FormTextInput from "../components/Utils/FormTextInput";
 import SKTest from "../components/Utils/SKText";
 import SKText from "../components/Utils/SKText";
 import SKTextInput from "../components/Utils/SKTextInput";
+import dataURItoBlob from "../utils/dataURItoBlob";
 import { trpc } from "../utils/trpc";
 
 const formSchema = z.object({
@@ -31,14 +33,16 @@ export type ProfileFormSchemaType = z.infer<typeof formSchema>;
 
 const Profile = () => {
   const { isSignedIn, user, isLoaded } = useUser();
-  const { control, handleSubmit } = useForm<ProfileFormSchemaType>({
-    resolver: zodResolver(formSchema),
-  });
-  const [image, setImage] = useState<string>();
+
+  const [image, setImage] = useState<string | undefined>(user?.imageUrl);
+  const [username, setUsername] = useState<string | null | undefined>(
+    user?.username ?? user?.fullName,
+  );
   const { signOut } = useAuth();
   const [editMode, setEditMode] = useState(false);
   const animation = useRef<AnimatedLottieView>(null);
   const getSession = trpc.auth.getSession.useQuery();
+  const updateUser = trpc.user.updateUser.useMutation();
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
@@ -54,8 +58,30 @@ const Profile = () => {
     }
   };
 
-  const onSubmit: SubmitHandler<ProfileFormSchemaType> = (data) => {
-    console.log(data);
+  const handleSubmit = async (e: GestureResponderEvent) => {
+    console.log(image, username);
+    if (user) {
+      let uriParts = image?.split(".");
+      let fileType = uriParts && uriParts[uriParts.length - 1];
+      const file = image ? await dataURItoBlob(image) : null;
+      console.log(file?.size);
+      const [userResult, imageResult] = await Promise.all([
+        username
+          ? updateUser.mutateAsync({
+              username: username,
+            })
+          : [],
+        file
+          ? user.setProfileImage({
+              file,
+            })
+          : [],
+      ]);
+      console.log(imageResult);
+      setImage(undefined);
+      setUsername(undefined);
+      user.reload();
+    }
   };
 
   const handleProfilePicChange = () => {
@@ -77,7 +103,7 @@ const Profile = () => {
           </SKTest>
         </View>
 
-        <View className="">
+        <View className="items-center">
           {!editMode ? (
             <Pressable
               className={`mx-3   flex flex-row  content-center items-center justify-center rounded-lg bg-[#1dbaa7] px-3 py-1  shadow-sm`}
@@ -87,7 +113,7 @@ const Profile = () => {
             </Pressable>
           ) : (
             <View className="mx-3 flex-row gap-2">
-              <Pressable onPress={handleSubmit(onSubmit)}>
+              <Pressable onPress={handleSubmit}>
                 <AntDesign name="save" size={30} color="#1dbaa7" />
               </Pressable>
 
@@ -111,13 +137,12 @@ const Profile = () => {
             className="h-20 w-20 rounded-xl "
             placeholder={require("../../assets/placeholder.png")}
           />
-          <FormTextInput
+          <SKTextInput
             className="hidden w-auto rounded-md   border-b p-0.5 text-2xl font-semibold"
             fontWeight="semi-bold"
             defaultValue={user?.profileImageUrl}
-            name="image"
             value={image}
-            control={control}
+            onChangeText={(e) => setImage(e)}
           />
           {editMode && (
             <View className="absolute -bottom-2.5 -right-2.5 rounded-lg  ">
@@ -145,12 +170,12 @@ const Profile = () => {
                   {user?.username ?? user?.fullName ?? "Unknown"}
                 </SKText>
               ) : (
-                <FormTextInput
-                  className="w-auto rounded-md border-b   p-0.5 text-2xl font-semibold"
+                <SKTextInput
+                  className="w-auto rounded-md border-b p-0.5 text-2xl font-semibold text-black"
                   fontWeight="semi-bold"
                   defaultValue={user?.username ?? user?.fullName ?? "Unknown"}
-                  name="username"
-                  control={control}
+                  value={username ?? ""}
+                  onChangeText={(e) => setUsername(e)}
                 />
               )}
             </>
@@ -159,10 +184,10 @@ const Profile = () => {
       </View>
 
       <Pressable
-        className={`mx-auto my-2 flex flex-row  content-center items-center justify-center rounded-lg bg-[#1dbaa7] px-5 py-3  shadow-sm`}
+        className={`mx-auto my-2 flex flex-row  content-center items-center justify-center rounded-lg bg-[#1dbaa7] px-3 py-1  shadow-sm`}
         onPress={() => signOut().catch((err) => console.log(err))}
       >
-        <SKTest className="text-xl font-semibold text-white">Sign Out</SKTest>
+        <SKTest className="text-lg font-semibold text-white">Sign Out</SKTest>
       </Pressable>
     </View>
   );

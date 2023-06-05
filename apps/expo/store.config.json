@@ -1,0 +1,26 @@
+{
+  "configVersion": 0,
+  "apple": {
+    "info": {
+      "en-US": {
+        "title": "Sakpa",
+        "subtitle": "A marketplace for students",
+        "description": "Sakpa is a marketplace for college students to book appointments and pay for services such as hairdressing and catering",
+        "keywords": ["app", "marketplace", "college"],
+        "marketingUrl": "https://www.sakpa.co/join",
+        "privacyPolicyUrl": "https://www.sakpa.co/privacy"
+      }
+    },
+    "categories": ["SHOPPING", "LIFESTYLE"],
+    "release": { "automaticRelease": true },
+    "review": {
+      "firstName": "John",
+      "lastName": "Ojo",
+      "email": "cfcdiurnal@gmail.com",
+      "phone": "+1 210 712 0869",
+      "demoPassword": "",
+      "demoUsername": "topeojo129@gmail.com",
+      "notes": "The app does not have credentials but uses OAuth to authenticate. You can view the demo through the following URL or use the credentials to login with Google"
+    }
+  }
+}
