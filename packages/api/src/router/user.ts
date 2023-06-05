@@ -11,6 +11,18 @@ import { algoliaIndex } from "../utils/algolia";
 import { stripe } from "../utils/stripe";
 
 export const userRouter = router({
+  updateUser: protectedProcedure
+    .input(
+      z.object({
+        username: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const result = await clerkClient.users.updateUser(ctx.auth.userId, {
+        username: input.username,
+      });
+      console.log(result);
+    }),
   createCategory: protectedProcedure
     .input(
       z.object({
@@ -94,6 +106,59 @@ export const userRouter = router({
       return {
         user,
       };
+    }),
+  updateCategory: protectedProcedure
+    .input(
+      z.object({
+        categoryId: z.string(),
+        name: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const galleryOwnerId = await ctx.prisma.category.findFirst({
+        where: {
+          id: input.categoryId,
+        },
+        select: {
+          sellerId: true,
+        },
+      });
+
+      if (galleryOwnerId) {
+        if (ctx.auth.userId === galleryOwnerId.sellerId) {
+          const category = await ctx.prisma.category.update({
+            where: {
+              id: input.categoryId,
+            },
+            data: {
+              name: input.name,
+            },
+            include: {
+              Image: true,
+              prices: true,
+            },
+          });
+
+          algoliaIndex.partialUpdateObject({
+            objectID: category.id,
+            name: category.name,
+            sellerId: ctx.auth.userId,
+            type: category.type,
+            prices: category.prices,
+            Image: category.Image,
+          });
+          // await esClient.update({
+          // 	index: 'categories',
+          // 	id: category.id,
+          // 	doc: {
+          // 		name: category.name,
+          // 		'seller-id': ctx.session.user.id,
+          // 		type: category.type
+          // 	},
+          // 	doc_as_upsert: true
+          // });
+        }
+      }
     }),
   updateImage: protectedProcedure
     .input(

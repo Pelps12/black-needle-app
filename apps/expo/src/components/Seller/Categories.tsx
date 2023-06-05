@@ -2,7 +2,9 @@ import React, { Fragment, useEffect, useRef, useState } from "react";
 import {
   FlatList,
   Pressable,
+  SafeAreaView,
   Text,
+  TextInput,
   TouchableHighlight,
   View,
 } from "react-native";
@@ -125,10 +127,13 @@ const Category = ({
 }) => {
   const [modalVisible, setModalVisible] = React.useState(false);
   const updateCatImage = trpc.user.updateImage.useMutation();
-  const [oldCategory, setOldCategory] = useState(null);
+  const cat = trpc.user.updateCategory.useMutation();
+  const { userId, isSignedIn } = useAuth();
+  const [oldCategory, setOldCategory] = useState("");
   const [pressedImage, setPressedImage] = React.useState<string>();
   const [editButton, setEditButton] = React.useState(false);
   const catDelete = trpc.user.deleteCategory.useMutation();
+  const [categoryTitle, onChangecategoryTitle] = React.useState(category.name);
   const getCat = trpc.user.getCategories.useQuery(
     {
       id: sellerId,
@@ -151,6 +156,19 @@ const Category = ({
       alert("You did not select any image.");
     }
   };
+  const checkInputBoxChange = (newTitle) => {
+    onChangecategoryTitle(newTitle);
+    const newCategory = [...categories];
+    var categoryIndex;
+    if (newCategory !== undefined) {
+      categoryIndex = newCategory.map((cate) => cate.id).indexOf(category.id);
+    }
+    // setOldCategory(newCategory[categoryIndex].name);
+    newCategory[categoryIndex].name = newTitle;
+    if (newCategory[categoryIndex].name > 0) {
+      setCategories(newCategory);
+    }
+  };
   const imageUpload = async (files) => {
     const formData = new FormData();
     formData.append(
@@ -162,6 +180,8 @@ const Category = ({
     // formData.append("metadata[user]", uid);
 
     files.forEach((file, index) => {
+      console.log("John Ojo");
+      console.log(file);
       let uriParts = file.uri.split(".");
       let fileType = uriParts[uriParts.length - 1];
       console.log("Inside");
@@ -190,16 +210,29 @@ const Category = ({
 
   return (
     <View className="mx-auto">
-      <Text className="mx-auto text-4xl font-semibold">{category.name}</Text>
+      {editButton && (
+        <SafeAreaView>
+          <TextInput
+            placeholder="Category Name"
+            keyboardType="default"
+            className="mx-auto w-48 border-2"
+            value={category.name}
+            onChangeText={(newTitle) => checkInputBoxChange(newTitle)}
+          />
+        </SafeAreaView>
+      )}
+      {!editButton && (
+        <Text className="mx-auto text-4xl font-semibold">{category.name}</Text>
+      )}
       <View className="flex-row justify-end ">
         <View className="mr-2">
           <Pressable
             onPress={() => {
-              console.log(category.name);
+              setOldCategory(category.name);
               setEditButton(!editButton);
             }}
           >
-            {!editButton && (
+            {!editButton && isSignedIn && userId === sellerId && (
               <Feather style={{}} name="edit-2" size={24} color="black" />
             )}
           </Pressable>
@@ -213,36 +246,64 @@ const Category = ({
                 setEditButton(!editButton);
                 var categoryIndex;
                 var imageIndex;
+
                 const newCategory = [...categories];
                 if (newCategory !== undefined) {
                   categoryIndex = newCategory
                     .map((cate) => cate.id)
                     .indexOf(category.id);
                 }
+                console.log("here");
+                if (newCategory[categoryIndex].name != oldCategory) {
+                  await cat.mutate({
+                    categoryId: category.id,
+                    name: newCategory[categoryIndex].name,
+                  });
+                }
                 newCategory[categoryIndex].Image.map((image) =>
-                  console.log(image.link),
+                  console.log(image),
                 );
+                console.log(oldCategory);
+                console.log("First Bus");
+                console.log(newCategory);
                 const getFileObjects = async () => {
                   return Promise.all(
-                    newCategory[categoryIndex].Image.map((image) =>
-                      dataURItoBlob(image.link.uri),
-                    ),
+                    newCategory[categoryIndex].Image.filter(
+                      (image) => typeof image.link != "string",
+                    ).map((image) => dataURItoBlob(image.link.uri)),
+                    // newCategory[categoryIndex].Image.map((image) =>
+                    //   dataURItoBlob(image.link.uri),
+                    // ),
                   );
                 };
+
+                console.log("Last Bus");
                 const files = await getFileObjects();
+                console.log("About to check files");
+                console.log(files);
                 if (files.length > 0) {
                   console.log(files);
+                  console.log("Helo");
+                  newCategory[categoryIndex].Image.filter(
+                    (image) => typeof image.link != "string",
+                  ).map((image) => console.log(image));
                   const response = await imageUpload(
-                    newCategory[categoryIndex].Image.map((image) => image.link),
+                    newCategory[categoryIndex].Image.filter(
+                      (image) => typeof image.link != "string",
+                    ).map((image) => image.link),
                   );
+                  console.log("Ho");
+
                   if (response.ok) {
                     console.log(response);
-
+                    console.log("entered");
                     const result = await response.json();
                     console.log(result);
-
+                    console.log("We are here");
                     await updateCatImage.mutate(
-                      newCategory[categoryIndex].Image.map((image, idx) => {
+                      newCategory[categoryIndex].Image.filter(
+                        (image) => typeof image.link != "string",
+                      ).map((image, idx) => {
                         return {
                           link: `https://ucarecdn.com/${
                             result[`my_file(${idx}).jpg`]
@@ -267,7 +328,7 @@ const Category = ({
           </View>
         )}
 
-        {!editButton && (
+        {!editButton && isSignedIn && userId === sellerId && (
           <View className="">
             <Pressable
               onPress={async () => {
@@ -292,7 +353,7 @@ const Category = ({
           </View>
         )}
 
-        {editButton && (
+        {editButton && isSignedIn && userId === sellerId && (
           <View className="mr-2">
             <Pressable
               onPress={() => {
@@ -358,6 +419,12 @@ const Category = ({
                       }
 
                       setCategories(newCategory);
+                      categories[0]?.Image.map((image) => {
+                        console.log(image);
+                      });
+                      // newCategory[categoryIndex].Image.map((image) =>
+                      //   dataURItoBlob(image.link.uri),
+                      // )
                     }
                   } else {
                     console.log("H");
@@ -371,7 +438,7 @@ const Category = ({
                 />
               </Pressable>
               <View style={{ position: "absolute", top: 0, right: 0 }}>
-                {editButton && (
+                {editButton && isSignedIn && userId === sellerId && (
                   <TouchableHighlight
                     onPress={() => {
                       const editedImage = {

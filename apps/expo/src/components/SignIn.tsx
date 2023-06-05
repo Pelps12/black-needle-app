@@ -12,6 +12,7 @@ import { useOAuth } from "@clerk/clerk-expo";
 
 import { useWarmUpBrowser } from "../hooks/useWarmUpBrowser";
 import AppleButton from "./OAuth/AppleButton";
+import GoogleButton from "./OAuth/GoogleButton";
 import SKText from "./Utils/SKText";
 import SKTextInput from "./Utils/SKTextInput";
 
@@ -95,23 +96,12 @@ const SignInWithOAuth = () => {
       </View>
 
       <View>
-        <AppleButton onPress={handleSignInWithApplePress}></AppleButton>
+        <AppleButton onPress={handleSignInWithApplePress} />
       </View>
 
-      <Pressable
-        className={`mx-auto my-2 flex w-72  flex-row content-center items-center justify-center rounded-md bg-[#d9d9d9] py-3 text-black shadow-sm`}
-        onPress={handleSignInWithGooglePress}
-      >
-        <Image
-          source={require("../../assets/OAuth/google_2.svg")}
-          contentFit="scale-down"
-          className=" h-8 w-8"
-        />
-        <SKText className="ml-2 text-xl " fontWeight="normal">
-          {" "}
-          Sign in with Google
-        </SKText>
-      </Pressable>
+      <View>
+        <GoogleButton onPress={handleSignInWithGooglePress} />
+      </View>
     </View>
   );
 };

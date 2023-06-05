@@ -1,6 +1,7 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import {
   Button,
+  GestureResponderEvent,
   Pressable,
   StyleSheet,
   Text,
@@ -8,28 +9,185 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useAuth } from "@clerk/clerk-expo";
-import { FlashList } from "@shopify/flash-list";
-import LottieView from "lottie-react-native";
+import { Image } from "expo-image";
+import * as ImagePicker from "expo-image-picker";
+import { useAuth, useUser } from "@clerk/clerk-react";
+import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
+import { zodResolver } from "@hookform/resolvers/zod";
 import AnimatedLottieView from "lottie-react-native";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { z } from "zod";
 
-import Loading from "../components/Utils/Loading";
+import FormTextInput from "../components/Utils/FormTextInput";
 import SKTest from "../components/Utils/SKText";
-import { trpc, type RouterOutputs } from "../utils/trpc";
+import SKText from "../components/Utils/SKText";
+import SKTextInput from "../components/Utils/SKTextInput";
+import dataURItoBlob from "../utils/dataURItoBlob";
+import { trpc } from "../utils/trpc";
+
+const formSchema = z.object({
+  image: z.string().optional(),
+  username: z.string(),
+});
+export type ProfileFormSchemaType = z.infer<typeof formSchema>;
 
 const Profile = () => {
-  const { signOut, isSignedIn } = useAuth();
+  const { isSignedIn, user, isLoaded } = useUser();
+
+  const [image, setImage] = useState<string | undefined>(user?.imageUrl);
+  const [username, setUsername] = useState<string | null | undefined>(
+    user?.username ?? user?.fullName,
+  );
+  const { signOut } = useAuth();
+  const [editMode, setEditMode] = useState(false);
   const animation = useRef<AnimatedLottieView>(null);
   const getSession = trpc.auth.getSession.useQuery();
+  const updateUser = trpc.user.updateUser.useMutation();
+
+  const pickImage = async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0]?.uri);
+    }
+  };
+
+  const handleSubmit = async (e: GestureResponderEvent) => {
+    console.log(image, username);
+    if (user) {
+      let uriParts = image?.split(".");
+      let fileType = uriParts && uriParts[uriParts.length - 1];
+      const file = image ? await dataURItoBlob(image) : null;
+      console.log(file?.size);
+      const [userResult, imageResult] = await Promise.all([
+        username
+          ? updateUser.mutateAsync({
+              username: username,
+            })
+          : [],
+        file
+          ? user.setProfileImage({
+              file,
+            })
+          : [],
+      ]);
+      console.log(imageResult);
+      setImage(undefined);
+      setUsername(undefined);
+      user.reload();
+    }
+  };
+
+  const handleProfilePicChange = () => {
+    if (editMode) {
+      pickImage();
+    }
+  };
+
+  const handleEditCancel = () => {
+    setImage(undefined);
+    setEditMode(false);
+  };
   return (
     <View className="">
-      <SKTest className="mx-3 text-4xl font-bold">Profile</SKTest>
+      <View className="flex-row justify-between">
+        <View>
+          <SKTest className="mx-3 text-4xl font-bold" fontWeight="semi-bold">
+            Profile
+          </SKTest>
+        </View>
+
+        <View className="items-center">
+          {!editMode ? (
+            <Pressable
+              className={`mx-3   flex flex-row  content-center items-center justify-center rounded-lg bg-[#1dbaa7] px-3 py-1  shadow-sm`}
+              onPress={() => setEditMode(true)}
+            >
+              <SKTest className="text-lg font-semibold text-white">Edit</SKTest>
+            </Pressable>
+          ) : (
+            <View className="mx-3 flex-row gap-2">
+              <Pressable onPress={handleSubmit}>
+                <AntDesign name="save" size={30} color="#1dbaa7" />
+              </Pressable>
+
+              <Pressable onPress={handleEditCancel}>
+                <MaterialCommunityIcons
+                  name="cancel"
+                  size={30}
+                  color="#E26850"
+                />
+              </Pressable>
+            </View>
+          )}
+        </View>
+      </View>
+
+      <View className="mx-3 max-w-md items-center justify-start gap-3">
+        <Pressable onPress={handleProfilePicChange}>
+          {/* Temporary */}
+          <Image
+            source={image ?? user?.profileImageUrl}
+            className="h-20 w-20 rounded-xl "
+            placeholder={require("../../assets/placeholder.png")}
+          />
+          <SKTextInput
+            className="hidden w-auto rounded-md   border-b p-0.5 text-2xl font-semibold"
+            fontWeight="semi-bold"
+            defaultValue={user?.profileImageUrl}
+            value={image}
+            onChangeText={(e) => setImage(e)}
+          />
+          {editMode && (
+            <View className="absolute -bottom-2.5 -right-2.5 rounded-lg  ">
+              <MaterialCommunityIcons
+                name="pencil-circle"
+                size={24}
+                color="#72a2f9"
+              />
+            </View>
+          )}
+        </Pressable>
+        <View className="mx-2">
+          {!isLoaded ? (
+            <Image
+              className="mr-2 h-10 w-48 rounded-xl shadow-sm"
+              source={require("../../assets/placeholder.png")}
+            />
+          ) : (
+            <>
+              {!editMode ? (
+                <SKText
+                  className=" max-w-xs p-0.5 text-2xl font-semibold"
+                  fontWeight="semi-bold"
+                >
+                  {user?.username ?? user?.fullName ?? "Unknown"}
+                </SKText>
+              ) : (
+                <SKTextInput
+                  className="w-auto rounded-md border-b p-0.5 text-2xl font-semibold text-black"
+                  fontWeight="semi-bold"
+                  defaultValue={user?.username ?? user?.fullName ?? "Unknown"}
+                  value={username ?? ""}
+                  onChangeText={(e) => setUsername(e)}
+                />
+              )}
+            </>
+          )}
+        </View>
+      </View>
 
       <Pressable
-        className={`mx-auto my-2 flex flex-row  content-center items-center justify-center rounded-lg bg-[#1dbaa7] px-5 py-3  shadow-sm`}
+        className={`mx-auto my-2 flex flex-row  content-center items-center justify-center rounded-lg bg-[#1dbaa7] px-3 py-1  shadow-sm`}
         onPress={() => signOut().catch((err) => console.log(err))}
       >
-        <SKTest className="text-xl font-semibold text-white">Sign Out</SKTest>
+        <SKTest className="text-lg font-semibold text-white">Sign Out</SKTest>
       </Pressable>
     </View>
   );
