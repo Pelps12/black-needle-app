@@ -3,7 +3,7 @@ import { FlatList, RefreshControl, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { Link, useNavigation } from "expo-router";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth } from "@clerk/clerk-expo";
 import { EvilIcons } from "@expo/vector-icons";
 import formatDistanceStrict from "date-fns/formatDistanceStrict";
 

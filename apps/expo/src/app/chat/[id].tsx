@@ -17,7 +17,7 @@ import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { Link, useSearchParams } from "expo-router";
 import { useChannel } from "@ably-labs/react-hooks";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth } from "@clerk/clerk-expo";
 import {
   EvilIcons,
   Feather,

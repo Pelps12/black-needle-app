@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Constants from "expo-constants";
 import { Stack, Tabs } from "expo-router";
@@ -42,6 +42,10 @@ const RootLayout = () => {
     Poppins_600SemiBold,
     Poppins_700Bold,
   });
+
+  useEffect(() => {
+    console.log(Constants.expoConfig?.extra?.CLERK_PUBLISHABLE_KEY);
+  }, []);
 
   const onLayoutRootView = useCallback(async () => {
     if (fontsLoaded) {

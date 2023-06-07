@@ -44,11 +44,11 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1(react-dom@18.2.0)(react@18.2.0)
       '@clerk/clerk-expo':
-        specifier: ^0.17.6
-        version: 0.17.6(@babel/core@7.21.4)(@types/react@18.0.38)(expo-auth-session@4.0.3)(expo-web-browser@12.1.1)(react-dom@18.2.0)(react-native@0.71.7)(react@18.2.0)
+        specifier: ^0.16.1
+        version: 0.16.1(@babel/core@7.21.4)(@types/react@18.0.38)(expo-auth-session@4.0.3)(expo-web-browser@12.1.1)(react-dom@18.2.0)(react-native@0.71.7)(react@18.2.0)
       '@clerk/clerk-react':
-        specifier: ^4.17.0
-        version: 4.17.0(react@18.2.0)
+        specifier: ^4.15.1
+        version: 4.15.1(react@18.2.0)
       '@expo-google-fonts/dev':
         specifier: ^0.2.3
         version: 0.2.3
@@ -3993,8 +3993,8 @@ packages:
       tslib: 2.4.1
     dev: false
 
-  /@clerk/clerk-expo@0.17.6(@babel/core@7.21.4)(@types/react@18.0.38)(expo-auth-session@4.0.3)(expo-web-browser@12.1.1)(react-dom@18.2.0)(react-native@0.71.7)(react@18.2.0):
-    resolution: {integrity: sha512-HxejkJwq/7586p5NZHt+0IOa0S9YlJW7jja+8bMirD0+Tiryr1sc9O9EJptnQ3YuDBfe/+v3nBwx18L4vB/Qkw==}
+  /@clerk/clerk-expo@0.16.1(@babel/core@7.21.4)(@types/react@18.0.38)(expo-auth-session@4.0.3)(expo-web-browser@12.1.1)(react-dom@18.2.0)(react-native@0.71.7)(react@18.2.0):
+    resolution: {integrity: sha512-r5ad0tgoHdpzF9nBvad/YWA6icv25JkJfP9DrylrZh1+DUDYE0ItT6dwccNTKRW6CncSld3zfdm9JTEnv3uuSg==}
     engines: {node: '>=14'}
     peerDependencies:
       expo-auth-session: '>=4'
@@ -4038,6 +4038,19 @@ packages:
       - '@babel/core'
       - '@types/react'
       - react-dom
+    dev: false
+
+  /@clerk/clerk-react@4.15.1(react@18.2.0):
+    resolution: {integrity: sha512-KnFlXL/X9Nq5Xe1TQ0Al+ybdwgHBpVQ44ytZd4R/9rEcqwJur3pnrjALLnEEarmzg71V+sij7eTyCfLRryCXVg==}
+    engines: {node: '>=14'}
+    peerDependencies:
+      react: '>=16'
+    dependencies:
+      '@clerk/shared': 0.15.8(react@18.2.0)
+      '@clerk/types': 3.40.0
+      react: 18.2.0
+      swr: 1.3.0(react@18.2.0)
+      tslib: 2.4.1
     dev: false
 
   /@clerk/clerk-react@4.17.0(react@18.2.0):
@@ -4095,6 +4108,14 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       tslib: 2.4.1
+    dev: false
+
+  /@clerk/shared@0.15.8(react@18.2.0):
+    resolution: {integrity: sha512-wbZ52k+udAeLpGMV0f9gm9S7xiiv3vtHgt6zJFuS2if9UGokpMlZDcqhBu+BxSxKn1TQSpXzmN5XP9bZ+lg5jg==}
+    peerDependencies:
+      react: '>=16'
+    dependencies:
+      react: 18.2.0
     dev: false
 
   /@clerk/shared@0.17.1(react@18.2.0):

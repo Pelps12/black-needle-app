@@ -3,14 +3,14 @@ import type { ExpoConfig } from "@expo/config";
 const CLERK_PUBLISHABLE_KEY =
   process.env.EAS_BUILD_PROFILE === "production"
     ? "pk_live_Y2xlcmsuc2FrcGEuY28k"
-    : "pk_live_Y2xlcmsuc2FrcGEuY28k";
+    : "pk_test_ZW5vcm1vdXMtc2F3ZmlzaC05MS5jbGVyay5hY2NvdW50cy5kZXYk";
 
 const PUBLIC_URL =
   process.env.EAS_BUILD_PROFILE === "production"
     ? "https://www.sakpa.co"
     : "https://dev.sakpa.co";
 const ALGOLIA_INDEX =
-  process.env.EAS_BUILD_PROFILE === "production" ? "sakpa" : "sakpa";
+  process.env.EAS_BUILD_PROFILE === "production" ? "sakpa" : "dev_sakpa";
 const NEXT_PUBLIC_UPLOADCARE_PUB_KEY = "ee6b07357ef85077ad3e";
 const STRIPE_PUBLISHABLE_KEY =
   process.env.EAS_BUILD_PROFILE === "production"
