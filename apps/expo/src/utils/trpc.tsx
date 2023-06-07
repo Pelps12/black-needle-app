@@ -1,7 +1,7 @@
 import Buffer from "buffer";
 import React, { useEffect } from "react";
 import Constants from "expo-constants";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth } from "@clerk/clerk-expo";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";

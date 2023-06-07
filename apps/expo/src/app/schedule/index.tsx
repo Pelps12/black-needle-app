@@ -9,7 +9,7 @@ import {
   View,
 } from "react-native";
 import { useSearchParams } from "expo-router";
-import { useUser } from "@clerk/clerk-react";
+import { useUser } from "@clerk/clerk-expo";
 
 import Appointment from "../../components/Schedule/Appointment";
 import Loading from "../../components/Utils/Loading";
