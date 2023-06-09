@@ -4,6 +4,15 @@ importers:
 
   .:
     dependencies:
+      '@acme/api':
+        specifier: ^0.1.0
+        version: link:packages/api
+      '@acme/db':
+        specifier: ^0.1.0
+        version: link:packages/db
+      '@acme/env-config':
+        specifier: ^0.1.0
+        version: link:packages/config/env
       '@acme/eslint-config':
         specifier: ^0.1.0
         version: link:packages/config/eslint

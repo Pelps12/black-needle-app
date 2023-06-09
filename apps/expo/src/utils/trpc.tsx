@@ -31,14 +31,12 @@ const getBaseUrl = () => {
   const localhost = Constants.manifest?.debuggerHost?.split(":")[0];
 
   if (!localhost) {
-    return process.env.EAS_BUILD_PROFILE === "production"
-      ? "https://www.sakpa.co"
-      : "https://dev.sakpa.co";
+    Constants.expoConfig?.extra?.PUBLIC_URL;
     throw new Error(
       "Failed to get localhost. Please point to your production server.",
     );
   }
-  return "https://dev.sakpa.co";
+  return Constants.expoConfig?.extra?.PUBLIC_URL;
 };
 
 /**

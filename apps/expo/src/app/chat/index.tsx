@@ -103,9 +103,9 @@ const Message = ({
             <SKTest className="ml-2 block text-sm text-gray-600">
               {data.Message[0]?.type !== "IMAGE" ? (
                 <>
-                  {(data.Message[0]?.message.length ?? 0) < 20
+                  {(data.Message[0]?.message.length ?? 0) < 35
                     ? data.Message[0]?.message
-                    : data.Message[0]?.message.substring(0, 20) + " ..."}
+                    : data.Message[0]?.message.substring(0, 35) + " ..."}
                 </>
               ) : (
                 <View className="flex-row items-center">

@@ -167,7 +167,7 @@ const Profile = () => {
                   className=" max-w-xs p-0.5 text-2xl font-semibold"
                   fontWeight="semi-bold"
                 >
-                  {user?.username ?? user?.fullName ?? "Unknown"}
+                  {user?.username ?? user?.fullName ?? "No Name"}
                 </SKText>
               ) : (
                 <SKTextInput

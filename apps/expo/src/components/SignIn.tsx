@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Pressable,
   SafeAreaView,
@@ -8,7 +8,7 @@ import {
   View,
 } from "react-native";
 import { Image } from "expo-image";
-import { useOAuth } from "@clerk/clerk-expo";
+import { useOAuth, useSignIn } from "@clerk/clerk-expo";
 
 import { useWarmUpBrowser } from "../hooks/useWarmUpBrowser";
 import AppleButton from "./OAuth/AppleButton";
@@ -28,9 +28,23 @@ export const SignInSignUpScreen = () => {
 
 const SignInWithOAuth = () => {
   useWarmUpBrowser();
-
+  const [email, setEmail] = useState<string>();
+  const [password, setPassword] = useState<string>();
   const { startOAuthFlow } = useOAuth({ strategy: "oauth_google" });
   const { startOAuthFlow: appleFlow } = useOAuth({ strategy: "oauth_apple" });
+  const { signIn, setActive: setEmailFlowActive } = useSignIn();
+
+  const handleEmailLogin = async () => {
+    if (email && password) {
+      const result = await signIn?.create({
+        identifier: email,
+        password,
+      });
+      if (result?.status === "complete" && setEmailFlowActive) {
+        setEmailFlowActive({ session: result.createdSessionId });
+      }
+    }
+  };
 
   const handleSignInWithGooglePress = React.useCallback(async () => {
     try {
@@ -78,11 +92,22 @@ const SignInWithOAuth = () => {
         <SKTextInput
           placeholder="Email Address"
           spellCheck={false}
-          className=" my-auto block  h-16 w-72 rounded-xl border-2 border-[#d9d9d9] bg-gray-100 p-4 text-xl outline-none focus:text-gray-700"
+          value={email}
+          onChangeText={(e) => setEmail(e)}
+          className=" my-1 block  h-16 w-72 rounded-xl border-2 border-[#d9d9d9] bg-gray-100 p-4 text-lg outline-none focus:text-gray-700"
+        />
+        <SKTextInput
+          placeholder="Password"
+          spellCheck={false}
+          value={password}
+          secureTextEntry={true}
+          onChangeText={(e) => setPassword(e)}
+          textContentType="password"
+          className=" my-1 block  h-16 w-72 rounded-xl border-2 border-[#d9d9d9] bg-gray-100 p-4 text-lg outline-none focus:text-gray-700"
         />
         <Pressable
           className={`mx-auto my-2 flex w-72  flex-row content-center items-center justify-center rounded-xl bg-[#1dbaa7] py-4 text-black shadow-sm`}
-          onPress={handleSignInWithGooglePress}
+          onPress={handleEmailLogin}
         >
           <SKText
             className="ml-2  text-lg font-semibold text-white"
