@@ -10,7 +10,7 @@ const LoginModal = () => {
 				<SignIn
 					path={router.pathname}
 					routing="path"
-					signUpUrl={`${env.NEXT_PUBLIC_URL}/sign-in`}
+					signUpUrl={`${env.NEXT_PUBLIC_URL}/sign-up`}
 					appearance={{
 						variables: {
 							colorPrimary: '#1dbaa7'
