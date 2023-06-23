@@ -1,11 +1,13 @@
+import "react-native-gesture-handler";
 import React, { useCallback, useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Constants from "expo-constants";
-import { Stack, Tabs } from "expo-router";
+import { Tabs } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { ClerkProvider, SignedIn, SignedOut } from "@clerk/clerk-expo";
+import { SignIn } from "@clerk/clerk-react";
 import {
   Poppins_400Regular,
   Poppins_500Medium,
@@ -14,6 +16,8 @@ import {
   useFonts,
 } from "@expo-google-fonts/dev";
 import { AntDesign, FontAwesome, MaterialIcons } from "@expo/vector-icons";
+import { NavigationContainer, useNavigation } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StripeProvider } from "@stripe/stripe-react-native";
 
 import { SignInSignUpScreen } from "../components/SignIn";
@@ -21,6 +25,8 @@ import Header from "../components/header";
 import AblyProvider from "../providers/AblyProvider";
 import NotificationsProvider from "../providers/NotificationsProvider";
 import { TRPCProvider } from "../utils/trpc";
+import Login from "./signin";
+import SignUp from "./signup";
 
 const tokenCache = {
   getToken(key: string) {
@@ -35,6 +41,7 @@ SplashScreen.preventAutoHideAsync(); //Prevent the splash screen from automatica
 
 // This is the main layout of the app
 // It wraps your pages with the providers they need
+const Stack = createNativeStackNavigator();
 const RootLayout = () => {
   let [fontsLoaded] = useFonts({
     Poppins_500Medium,
@@ -191,6 +198,13 @@ const RootLayout = () => {
                         href: null,
                       }}
                     />
+                    <Tabs.Screen
+                      name="signup"
+                      options={{
+                        title: "Signup",
+                        href: null,
+                      }}
+                    />
                   </Tabs>
 
                   <StatusBar />
@@ -202,7 +216,20 @@ const RootLayout = () => {
       </SignedIn>
 
       <SignedOut>
-        <SignInSignUpScreen />
+        <Stack.Navigator initialRouteName="signin">
+          <Stack.Screen
+            name="signin"
+            component={Login}
+            options={{ title: "Login" }}
+          />
+          <Stack.Screen
+            name="signup"
+            component={SignUp}
+            options={{ title: "Register" }}
+          />
+        </Stack.Navigator>
+
+        {/* <SignInSignUpScreen /> */}
       </SignedOut>
     </ClerkProvider>
   );

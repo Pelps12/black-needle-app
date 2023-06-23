@@ -8,25 +8,28 @@ import {
   View,
 } from "react-native";
 import { Image } from "expo-image";
+import { Link, Stack } from "expo-router";
 import { useOAuth, useSignIn } from "@clerk/clerk-expo";
+import { NavigationContainer, useNavigation } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
+import AppleButton from "../components/OAuth/AppleButton";
+import GoogleButton from "../components/OAuth/GoogleButton";
+import SKText from "../components/Utils/SKText";
+import SKTextInput from "../components/Utils/SKTextInput";
 import { useWarmUpBrowser } from "../hooks/useWarmUpBrowser";
-import AppleButton from "./OAuth/AppleButton";
-import GoogleButton from "./OAuth/GoogleButton";
-import SKText from "./Utils/SKText";
-import SKTextInput from "./Utils/SKTextInput";
 
-export const SignInSignUpScreen = () => {
+const Signin = ({ navigation }) => {
   return (
     <SafeAreaView className="bg-[#f2f2f2]">
       <View className="h-full w-full p-4">
-        <SignInWithOAuth />
+        <SignInWithOAuth navigation={navigation} />
       </View>
     </SafeAreaView>
   );
 };
 
-const SignInWithOAuth = () => {
+const SignInWithOAuth = ({ navigation }) => {
   useWarmUpBrowser();
   const [email, setEmail] = useState<string>();
   const [password, setPassword] = useState<string>();
@@ -88,6 +91,7 @@ const SignInWithOAuth = () => {
           className="h-40 w-40"
         />
       </View>
+
       <View className="mx-3">
         <SKTextInput
           placeholder="Email Address"
@@ -116,7 +120,12 @@ const SignInWithOAuth = () => {
             CONTINUE
           </SKText>
         </Pressable>
-
+        <SKText className="text-center">
+          Don't have an account?{" "}
+          <Pressable onPress={() => navigation.navigate("signup")}>
+            <SKText className="text-[#2563eb]">Sign Up</SKText>
+          </Pressable>
+        </SKText>
         <Divider />
       </View>
 
@@ -158,3 +167,5 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
 });
+
+export default Signin;
