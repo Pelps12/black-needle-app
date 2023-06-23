@@ -25,6 +25,7 @@ import Header from "../components/header";
 import AblyProvider from "../providers/AblyProvider";
 import NotificationsProvider from "../providers/NotificationsProvider";
 import { TRPCProvider } from "../utils/trpc";
+import Forgotpassword from "./forgotpassword";
 import Login from "./signin";
 import SignUp from "./signup";
 
@@ -205,6 +206,18 @@ const RootLayout = () => {
                         href: null,
                       }}
                     />
+                    <Tabs.Screen
+                      name="forgotpassword"
+                      options={{
+                        href: null,
+                      }}
+                    />
+                    <Tabs.Screen
+                      name="signin"
+                      options={{
+                        href: null,
+                      }}
+                    />
                   </Tabs>
 
                   <StatusBar />
@@ -226,6 +239,11 @@ const RootLayout = () => {
             name="signup"
             component={SignUp}
             options={{ title: "Register" }}
+          />
+          <Stack.Screen
+            name="forgotpassword"
+            component={Forgotpassword}
+            options={{ title: "Forgot Password" }}
           />
         </Stack.Navigator>
 

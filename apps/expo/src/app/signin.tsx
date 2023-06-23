@@ -33,19 +33,34 @@ const SignInWithOAuth = ({ navigation }) => {
   useWarmUpBrowser();
   const [email, setEmail] = useState<string>();
   const [password, setPassword] = useState<string>();
+  const [errorMessage, setErrorMessage] = useState<string>();
   const { startOAuthFlow } = useOAuth({ strategy: "oauth_google" });
   const { startOAuthFlow: appleFlow } = useOAuth({ strategy: "oauth_apple" });
   const { signIn, setActive: setEmailFlowActive } = useSignIn();
 
   const handleEmailLogin = async () => {
     if (email && password) {
-      const result = await signIn?.create({
-        identifier: email,
-        password,
-      });
-      if (result?.status === "complete" && setEmailFlowActive) {
-        setEmailFlowActive({ session: result.createdSessionId });
+      try {
+        const result = await signIn?.create({
+          identifier: email,
+          password,
+        });
+
+        if (result?.status === "complete" && setEmailFlowActive) {
+          setEmailFlowActive({ session: result.createdSessionId });
+        }
+      } catch (err) {
+        // Handle the error here
+        console.error("An error occurred:", JSON.stringify(err));
+        setErrorMessage(err.errors[0].message);
       }
+      // const result = await signIn?.create({
+      //   identifier: email,
+      //   password,
+      // });
+      // if (result?.status === "complete" && setEmailFlowActive) {
+      //   setEmailFlowActive({ session: result.createdSessionId });
+      // }
     }
   };
 
@@ -93,6 +108,11 @@ const SignInWithOAuth = ({ navigation }) => {
       </View>
 
       <View className="mx-3">
+        {errorMessage && (
+          <Text className="rounded bg-red-500 p-2 text-center text-white">
+            {errorMessage}
+          </Text>
+        )}
         <SKTextInput
           placeholder="Email Address"
           spellCheck={false}
@@ -120,12 +140,21 @@ const SignInWithOAuth = ({ navigation }) => {
             CONTINUE
           </SKText>
         </Pressable>
-        <SKText className="text-center">
-          Don't have an account?{" "}
+
+        <Pressable onPress={() => navigation.navigate("forgotpassword")}>
+          <SKText className="text-right text-[#2563eb]">
+            Forgot password?
+          </SKText>
+        </Pressable>
+
+        <Divider />
+        <View className="flex-row justify-center">
+          <SKText className="text-center">Don't have an account? </SKText>
           <Pressable onPress={() => navigation.navigate("signup")}>
             <SKText className="text-[#2563eb]">Sign Up</SKText>
           </Pressable>
-        </SKText>
+        </View>
+
         <Divider />
       </View>
 
