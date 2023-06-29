@@ -23,6 +23,9 @@ export const userRouter = router({
       });
       console.log(result);
     }),
+    deleteUser: protectedProcedure.mutation(async ({ctx}) => {
+     const deletedUser =  await clerkClient.users.deleteUser(ctx.auth.userId);
+    }),
   createCategory: protectedProcedure
     .input(
       z.object({
