@@ -6,6 +6,7 @@ import { Link } from "expo-router";
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 
+import type {} from "react";
 import SKText from "./Utils/SKText";
 
 const Header = () => {

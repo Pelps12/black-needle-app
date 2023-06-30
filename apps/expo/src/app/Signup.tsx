@@ -62,7 +62,7 @@ const SignUp = () => {
   return (
     <View>
       {!pendingVerification && (
-        <View className="mt-12 flex h-5/6 items-center justify-center ">
+        <View className="flex h-full items-center justify-center ">
           <View className="p-6">
             <Image
               source={require("../../assets/sakpa_small.png")}
@@ -85,6 +85,7 @@ const SignUp = () => {
                 className="my-1 block  h-16 w-72 rounded-xl border-2 border-[#d9d9d9] bg-gray-100 p-4 text-lg outline-none focus:text-gray-700"
                 value={password}
                 placeholder="Password..."
+                placeholderTextColor="#000"
                 secureTextEntry={true}
                 onChangeText={(password) => setPassword(password)}
               />

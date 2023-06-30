@@ -8,9 +8,9 @@ import {
   View,
 } from "react-native";
 import { Image } from "expo-image";
-import { Link, Stack } from "expo-router";
+import { createURL } from "expo-linking";
+import { Link, Stack, useNavigation, useRouter } from "expo-router";
 import { useOAuth, useSignIn } from "@clerk/clerk-expo";
-import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import AppleButton from "../components/OAuth/AppleButton";
@@ -19,22 +19,26 @@ import SKText from "../components/Utils/SKText";
 import SKTextInput from "../components/Utils/SKTextInput";
 import { useWarmUpBrowser } from "../hooks/useWarmUpBrowser";
 
-const Signin = ({ navigation }) => {
+const Signin = () => {
   return (
     <SafeAreaView className="bg-[#f2f2f2]">
       <View className="h-full w-full p-4">
-        <SignInWithOAuth navigation={navigation} />
+        <SignInWithOAuth />
       </View>
     </SafeAreaView>
   );
 };
 
-const SignInWithOAuth = ({ navigation }) => {
+const SignInWithOAuth = () => {
+  const navigation = useNavigation();
+  const router = useRouter();
   useWarmUpBrowser();
   const [email, setEmail] = useState<string>();
   const [password, setPassword] = useState<string>();
   const [errorMessage, setErrorMessage] = useState<string>();
-  const { startOAuthFlow } = useOAuth({ strategy: "oauth_google" });
+  const { startOAuthFlow } = useOAuth({
+    strategy: "oauth_google",
+  });
   const { startOAuthFlow: appleFlow } = useOAuth({ strategy: "oauth_apple" });
   const { signIn, setActive: setEmailFlowActive } = useSignIn();
 
@@ -49,24 +53,19 @@ const SignInWithOAuth = ({ navigation }) => {
         if (result?.status === "complete" && setEmailFlowActive) {
           setEmailFlowActive({ session: result.createdSessionId });
         }
-      } catch (err) {
+      } catch (err: any) {
         // Handle the error here
         console.error("An error occurred:", JSON.stringify(err));
         setErrorMessage(err.errors[0].message);
       }
-      // const result = await signIn?.create({
-      //   identifier: email,
-      //   password,
-      // });
-      // if (result?.status === "complete" && setEmailFlowActive) {
-      //   setEmailFlowActive({ session: result.createdSessionId });
-      // }
     }
   };
 
   const handleSignInWithGooglePress = React.useCallback(async () => {
     try {
-      const { createdSessionId, setActive } = await startOAuthFlow();
+      const { createdSessionId, setActive } = await startOAuthFlow({
+        redirectUrl: `${createURL("oauth-callback")}`,
+      });
       if (createdSessionId && setActive) {
         setActive({ session: createdSessionId });
       } else {
@@ -83,7 +82,9 @@ const SignInWithOAuth = ({ navigation }) => {
 
   const handleSignInWithApplePress = React.useCallback(async () => {
     try {
-      const { createdSessionId, setActive } = await appleFlow();
+      const { createdSessionId, setActive } = await appleFlow({
+        redirectUrl: `${createURL("oauth-callback")}`,
+      });
       if (createdSessionId && setActive) {
         setActive({ session: createdSessionId });
       } else {
@@ -108,11 +109,6 @@ const SignInWithOAuth = ({ navigation }) => {
       </View>
 
       <View className="mx-3">
-        {errorMessage && (
-          <Text className="rounded bg-red-500 p-2 text-center text-white">
-            {errorMessage}
-          </Text>
-        )}
         <SKTextInput
           placeholder="Email Address"
           spellCheck={false}
@@ -141,7 +137,7 @@ const SignInWithOAuth = ({ navigation }) => {
           </SKText>
         </Pressable>
 
-        <Pressable onPress={() => navigation.navigate("forgotpassword")}>
+        <Pressable onPress={() => router.push("/forgotpassword")}>
           <SKText className="text-right text-[#2563eb]">
             Forgot password?
           </SKText>
@@ -150,11 +146,10 @@ const SignInWithOAuth = ({ navigation }) => {
         <Divider />
         <View className="flex-row justify-center">
           <SKText className="text-center">Don't have an account? </SKText>
-          <Pressable onPress={() => navigation.navigate("signup")}>
+          <Pressable onPress={() => router.push("signup")}>
             <SKText className="text-[#2563eb]">Sign Up</SKText>
           </Pressable>
         </View>
-
         <Divider />
       </View>
 

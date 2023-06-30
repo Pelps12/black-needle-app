@@ -31,10 +31,8 @@ const getBaseUrl = () => {
   const localhost = Constants.manifest?.debuggerHost?.split(":")[0];
 
   if (!localhost) {
-    Constants.expoConfig?.extra?.PUBLIC_URL;
-    throw new Error(
-      "Failed to get localhost. Please point to your production server.",
-    );
+    return Constants.expoConfig?.extra?.PUBLIC_URL;
+
   }
   return Constants.expoConfig?.extra?.PUBLIC_URL;
 };

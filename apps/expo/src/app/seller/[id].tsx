@@ -141,7 +141,11 @@ const SellerPage: React.FC<SellerPageProps> = ({ sellerId }) => {
         )}
 
         {activeTab == "CATEGORIES" && categories && (
-          <Categories setCategories={setCategories} categories={categories} sellerId={user?.id} />
+          <Categories
+            setCategories={setCategories}
+            categories={categories}
+            sellerId={user?.id}
+          />
         )}
       </View>
     </SafeAreaView>

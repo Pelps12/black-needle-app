@@ -1,5 +1,6 @@
 import "react-native-gesture-handler";
 import React, { useCallback, useEffect } from "react";
+import { View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Constants from "expo-constants";
 import { Tabs } from "expo-router";
@@ -20,14 +21,12 @@ import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StripeProvider } from "@stripe/stripe-react-native";
 
-import { SignInSignUpScreen } from "../components/SignIn";
 import Header from "../components/header";
 import AblyProvider from "../providers/AblyProvider";
 import NotificationsProvider from "../providers/NotificationsProvider";
 import { TRPCProvider } from "../utils/trpc";
-import Forgotpassword from "./forgotpassword";
+import SignUp from "./Signup";
 import Login from "./signin";
-import SignUp from "./signup";
 
 const tokenCache = {
   getToken(key: string) {
@@ -200,21 +199,17 @@ const RootLayout = () => {
                       }}
                     />
                     <Tabs.Screen
-                      name="signup"
+                      name="Signup"
                       options={{
                         title: "Signup",
                         href: null,
                       }}
                     />
-                    <Tabs.Screen
-                      name="forgotpassword"
-                      options={{
-                        href: null,
-                      }}
-                    />
+
                     <Tabs.Screen
                       name="signin"
                       options={{
+                        title: "Signup",
                         href: null,
                       }}
                     />
@@ -239,11 +234,6 @@ const RootLayout = () => {
             name="signup"
             component={SignUp}
             options={{ title: "Register" }}
-          />
-          <Stack.Screen
-            name="forgotpassword"
-            component={Forgotpassword}
-            options={{ title: "Forgot Password" }}
           />
         </Stack.Navigator>
 
