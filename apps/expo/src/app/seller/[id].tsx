@@ -17,6 +17,7 @@ import Categories from "../../components/Seller/Categories";
 import Prices from "../../components/Seller/Prices";
 import SKTest from "../../components/Utils/SKText";
 import { trpc } from "../../utils/trpc";
+import ProtectedLink from "../../components/Utils/ProtectedLink";
 
 type SellerPageProps = {
   sellerId?: string | null | undefined;
@@ -88,7 +89,7 @@ const SellerPage: React.FC<SellerPageProps> = ({ sellerId }) => {
           )}
           {categoriesEndpoint.isSuccess &&
             categoriesEndpoint.data?.user?.id !== clerkUser?.id && (
-              <Link className="my-2" href={`/chat/${idString}`}>
+              <ProtectedLink className="my-2" href={`/chat/${idString}`}>
                 <View
                   className={` flex flex-row content-center items-center justify-center rounded-lg  bg-[#1dbaa7] px-3 py-1  text-black `}
                 >
@@ -96,7 +97,7 @@ const SellerPage: React.FC<SellerPageProps> = ({ sellerId }) => {
                     CHAT
                   </SKTest>
                 </View>
-              </Link>
+              </ProtectedLink>
             )}
         </View>
       </View>

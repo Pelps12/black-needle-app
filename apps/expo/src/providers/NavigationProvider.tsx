@@ -1,0 +1,180 @@
+import { useAuth, useUser } from '@clerk/clerk-expo'
+import Header from '../components/header'
+import { AntDesign, MaterialIcons } from '@expo/vector-icons'
+import { Tabs } from 'expo-router'
+import { StatusBar } from 'expo-status-bar'
+import React, { useEffect, useState } from 'react'
+
+const NavigationProvider = () => {
+    const {isSignedIn, isLoaded}= useUser();
+    if(!isLoaded) {
+        return null
+    }
+    return (
+        <>
+        <Tabs
+                        screenOptions={{
+                        headerStyle: {
+                            backgroundColor: "#F2F2F2",
+                        }, 
+
+                        header: () => <Header />,
+                        headerShadowVisible: false,
+                        tabBarStyle: {
+                            backgroundColor: "#d9d9d9",
+                            borderRadius: 20,
+                            left: 10,
+                            right: 10,
+                            bottom: 10,
+                            elevation: 0,
+                            position: "absolute",
+
+                            height: 90,
+                            paddingTop: 10,
+                        },
+                        tabBarIconStyle: {
+                            marginTop: 10,
+                            color: "#000",
+                        },
+                        tabBarActiveTintColor: "#1dbaa7",
+                        }}
+                        initialRouteName="index"
+                    >
+                        <Tabs.Screen
+                        name="index"
+                        options={{
+                            title: "Home",
+                            tabBarLabelStyle: {
+                            display: "none",
+                            },
+                            tabBarIcon: ({ color }) => (
+                            <AntDesign name="home" size={24} color={color} />
+                            ),
+                        }}
+                        />
+                        <Tabs.Screen
+                        name="seller/[id]"
+                        options={{
+                            title: "Seller",
+                            href: null,
+                            tabBarIcon: ({ color }) => (
+                            <MaterialIcons
+                                name="attach-money"
+                                size={24}
+                                color={color}
+                            />
+                            ),
+                        }}
+                        />
+
+                        <Tabs.Screen
+                        name="schedule/index"
+                        options={{
+                            title: "Schedule",
+                            tabBarLabelStyle: {
+                            display: "none",
+                            },
+                            tabBarIcon: ({ color }) => (
+                            <AntDesign name="calendar" size={24} color={color} />
+                            ),
+                            href: isSignedIn ? "/schedule" : null
+                        }}
+                        />
+
+                        <Tabs.Screen
+                        name="profile"
+                        options={{
+                            title: "Profile",
+                            tabBarLabelStyle: {
+                            display: "none",
+                            },
+                            tabBarIcon: ({ color }) => (
+                            <AntDesign name="user" size={24} color={color} />
+                            ),
+                            href: isSignedIn ? "/profile" : null
+                        }}
+                        />
+
+                        <Tabs.Screen
+                        name="chat/index"
+                        options={{
+                            href: null,
+                            title: "Chat",
+                            tabBarIcon: ({ color }) => (
+                            <MaterialIcons
+                                name="schedule"
+                                size={24}
+                                color={color}
+                            />
+                            ),
+                        }}
+                        />
+
+                        <Tabs.Screen
+                        name="chat/[id]"
+                        options={{
+                            href: null,
+                            title: "ChatBox",
+                            tabBarStyle: {
+                            display: "none",
+                            },
+                            tabBarIcon: ({ color }) => (
+                            <MaterialIcons
+                                name="schedule"
+                                size={24}
+                                color={color}
+                            />
+                            ),
+                        }}
+                        />
+
+                        <Tabs.Screen
+                        name="auth"
+                        options={{
+                            title: "Login",
+                            headerShown: false,
+                            tabBarLabelStyle: {
+                                display: "none",
+                            },
+                            href: isSignedIn ? null : "/auth",
+                            tabBarIcon: ({ color }) => (
+                                <AntDesign name="login" size={24} color={color} />)
+                            }}
+                        />
+
+                        <Tabs.Screen
+                        name="schedule/payment"
+                        options={{
+                            href: null,
+                        }}
+                        />
+                        <Tabs.Screen
+                        name="seller/register"
+                        options={{
+                            href: null,
+                        }}
+                        />
+
+                        <Tabs.Screen
+                        name="Signup"
+                        options={{
+                            title: "Signup",
+                            href: null,
+                        }}
+                        />
+ 
+                        <Tabs.Screen
+                        name="signin"
+                        options={{
+                            title: "Signup",
+                            href: null,
+                        }}
+                        />
+                    </Tabs>
+
+                    <StatusBar />
+                    </>
+    )
+}
+
+export default NavigationProvider

@@ -4,7 +4,13 @@ import { Image } from "expo-image";
 
 import SKText from "../../components/Utils/SKText";
 
-const AppleButton = ({ onPress }: { onPress: () => Promise<void> }) => {
+const AppleButton = ({
+  onPress,
+  mode,
+}: {
+  onPress: () => Promise<void>;
+  mode: "signin" | "signup";
+}) => {
   return (
     <Pressable
       className={`mx-auto my-2 flex w-72  flex-row content-center items-center justify-center rounded-md bg-black py-3 text-black shadow-sm`}
@@ -19,7 +25,7 @@ const AppleButton = ({ onPress }: { onPress: () => Promise<void> }) => {
         className="ml-2 text-xl font-semibold text-white"
         fontWeight="medium"
       >
-        Sign in with Apple
+        {mode === "signin" ? "Sign in" : "Sign up"} with Apple
       </SKText>
     </Pressable>
   );

@@ -10,7 +10,7 @@ import type {} from "react";
 import SKText from "./Utils/SKText";
 
 const Header = () => {
-  const { user } = useUser();
+  const { user, isLoaded, isSignedIn } = useUser();
 
   return (
     <SafeAreaView className="mb-0 flex w-full flex-row items-center justify-between bg-[#F2F2F2] px-2 py-0">
@@ -31,9 +31,9 @@ const Header = () => {
           source={require("../../assets/shopping_cart.svg")}
           alt=":)"
         /> */}
-        <Link href="/chat">
+        {isLoaded && isSignedIn && <Link href="/chat">
           <Ionicons name="ios-chatbox-outline" size={24} color="black" />
-        </Link>
+        </Link>}
 
         <Link href="/profile">
           <Image

@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
+import { Link } from "expo-router";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 import AnimatedLottieView from "lottie-react-native";
@@ -19,12 +20,12 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import FormTextInput from "../components/Utils/FormTextInput";
+import ProtectedLink from "../components/Utils/ProtectedLink";
 import SKTest from "../components/Utils/SKText";
 import SKText from "../components/Utils/SKText";
 import SKTextInput from "../components/Utils/SKTextInput";
 import dataURItoBlob from "../utils/dataURItoBlob";
 import { trpc } from "../utils/trpc";
-import { Link } from "expo-router";
 
 const formSchema = z.object({
   image: z.string().optional(),
@@ -33,7 +34,7 @@ const formSchema = z.object({
 export type ProfileFormSchemaType = z.infer<typeof formSchema>;
 
 const Profile = () => {
-  const {  user, isLoaded, } = useUser();
+  const { user, isLoaded } = useUser();
 
   const [image, setImage] = useState<string | undefined>(user?.imageUrl);
   const [username, setUsername] = useState<string | null | undefined>(
@@ -98,17 +99,23 @@ const Profile = () => {
   };
 
   const handleAccountDeletion = () => {
-    Alert.alert("Account Deletion","Going forward with this will delete your account from Sakpa", [{
-      text: "Cancel",
-      
-    }, {
-      text: "Proceed",
-      onPress: async() => {
-        await deleteUser.mutateAsync();
-        signOut().catch((err) => console.log(err))
-      }
-    }])
-  }
+    Alert.alert(
+      "Account Deletion",
+      "Going forward with this will delete your account from Sakpa",
+      [
+        {
+          text: "Cancel",
+        },
+        {
+          text: "Proceed",
+          onPress: async () => {
+            await deleteUser.mutateAsync();
+            signOut().catch((err) => console.log(err));
+          },
+        },
+      ],
+    );
+  };
   return (
     <View className="">
       <View className="flex-row justify-between">
@@ -199,14 +206,17 @@ const Profile = () => {
       </View>
 
       <View>
-        {user?.publicMetadata?.role === "SELLER" && <Link
-          className={`mx-auto my-2 flex flex-row  content-center items-center justify-center rounded-lg bg-[#72a2f9] px-3 py-1  shadow-sm`}
-          href={`/seller/${user.id}`}
-          asChild={true}
-        >
-          <SKTest className="text-lg font-semibold text-white">Seller Page</SKTest>
-        </Link>}
-
+        {user?.publicMetadata?.role === "SELLER" && (
+          <ProtectedLink
+            className={`mx-auto my-2 flex flex-row  content-center items-center justify-center rounded-lg bg-[#72a2f9] px-3 py-1  shadow-sm`}
+            href={`/seller/${user.id}`}
+            asChild={true}
+          >
+            <SKTest className="text-lg font-semibold text-white">
+              Seller Page
+            </SKTest>
+          </ProtectedLink>
+        )}
 
         <Pressable
           className={`mx-auto my-2 flex flex-row  content-center items-center justify-center rounded-lg bg-[#1dbaa7] px-3 py-1  shadow-sm`}
@@ -215,16 +225,15 @@ const Profile = () => {
           <SKTest className="text-lg font-semibold text-white">Sign Out</SKTest>
         </Pressable>
 
-
         <Pressable
           className={`mx-auto my-2 flex flex-row  content-center items-center justify-center rounded-lg bg-[#E26850] px-3 py-1  shadow-sm`}
           onPress={() => handleAccountDeletion()}
         >
-          <SKTest className="text-lg font-semibold text-white">Delete Account</SKTest>
+          <SKTest className="text-lg font-semibold text-white">
+            Delete Account
+          </SKTest>
         </Pressable>
       </View>
-
-      
     </View>
   );
 };

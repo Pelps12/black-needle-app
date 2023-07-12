@@ -5,6 +5,7 @@ type FontWeight = "normal" | "medium" | "semi-bold" | "bold";
 
 interface CustomTextProps extends TextProps {
   fontWeight?: FontWeight;
+  className?: string
 }
 
 const getFontFamily = (fontWeight?: FontWeight): string => {

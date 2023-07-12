@@ -17,8 +17,7 @@ import {
   useFonts,
 } from "@expo-google-fonts/dev";
 import { AntDesign, FontAwesome, MaterialIcons } from "@expo/vector-icons";
-import { NavigationContainer, useNavigation } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+
 import { StripeProvider } from "@stripe/stripe-react-native";
 
 import Header from "../components/header";
@@ -27,6 +26,7 @@ import NotificationsProvider from "../providers/NotificationsProvider";
 import { TRPCProvider } from "../utils/trpc";
 import SignUp from "./Signup";
 import Login from "./signin";
+import NavigationProvider from "../providers/NavigationProvider";
 
 const tokenCache = {
   getToken(key: string) {
@@ -41,7 +41,6 @@ SplashScreen.preventAutoHideAsync(); //Prevent the splash screen from automatica
 
 // This is the main layout of the app
 // It wraps your pages with the providers they need
-const Stack = createNativeStackNavigator();
 const RootLayout = () => {
   let [fontsLoaded] = useFonts({
     Poppins_500Medium,
@@ -54,11 +53,9 @@ const RootLayout = () => {
     console.log(Constants.expoConfig?.extra?.CLERK_PUBLISHABLE_KEY);
   }, []);
 
-  const onLayoutRootView = useCallback(async () => {
-    if (fontsLoaded) {
-      await SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded]);
+  if(!fontsLoaded) {
+    return null;
+  }
   return (
     <ClerkProvider
       publishableKey={
@@ -66,7 +63,6 @@ const RootLayout = () => {
       }
       tokenCache={tokenCache}
     >
-      <SignedIn>
         <TRPCProvider>
           <SafeAreaProvider>
             <NotificationsProvider>
@@ -77,168 +73,13 @@ const RootLayout = () => {
                       ?.STRIPE_PUBLISHABLE_KEY as string
                   }
                 >
-                  <Tabs
-                    screenOptions={{
-                      headerStyle: {
-                        backgroundColor: "#F2F2F2",
-                      },
-
-                      header: () => <Header />,
-                      headerShadowVisible: false,
-                      tabBarStyle: {
-                        backgroundColor: "#d9d9d9",
-                        borderRadius: 20,
-                        left: 10,
-                        right: 10,
-                        bottom: 10,
-                        elevation: 0,
-                        position: "absolute",
-
-                        height: 90,
-                        paddingTop: 10,
-                      },
-                      tabBarIconStyle: {
-                        marginTop: 10,
-                        color: "#000",
-                      },
-                      tabBarActiveTintColor: "#1dbaa7",
-                    }}
-                    initialRouteName="index"
-                  >
-                    <Tabs.Screen
-                      name="index"
-                      options={{
-                        title: "Home",
-                        tabBarLabelStyle: {
-                          display: "none",
-                        },
-                        tabBarIcon: ({ color }) => (
-                          <AntDesign name="home" size={24} color={color} />
-                        ),
-                      }}
-                    />
-                    <Tabs.Screen
-                      name="seller/[id]"
-                      options={{
-                        title: "Seller",
-                        href: null,
-                        tabBarIcon: ({ color }) => (
-                          <MaterialIcons
-                            name="attach-money"
-                            size={24}
-                            color={color}
-                          />
-                        ),
-                      }}
-                    />
-
-                    <Tabs.Screen
-                      name="schedule"
-                      options={{
-                        title: "Schedule",
-                        tabBarLabelStyle: {
-                          display: "none",
-                        },
-                        tabBarIcon: ({ color }) => (
-                          <AntDesign name="calendar" size={24} color={color} />
-                        ),
-                      }}
-                    />
-
-                    <Tabs.Screen
-                      name="profile"
-                      options={{
-                        title: "Profile",
-                        tabBarLabelStyle: {
-                          display: "none",
-                        },
-                        tabBarIcon: ({ color }) => (
-                          <AntDesign name="user" size={24} color={color} />
-                        ),
-                      }}
-                    />
-
-                    <Tabs.Screen
-                      name="chat/index"
-                      options={{
-                        href: null,
-                        title: "Chat",
-                        tabBarIcon: ({ color }) => (
-                          <MaterialIcons
-                            name="schedule"
-                            size={24}
-                            color={color}
-                          />
-                        ),
-                      }}
-                    />
-
-                    <Tabs.Screen
-                      name="chat/[id]"
-                      options={{
-                        href: null,
-                        title: "ChatBox",
-                        tabBarStyle: {
-                          display: "none",
-                        },
-                        tabBarIcon: ({ color }) => (
-                          <MaterialIcons
-                            name="schedule"
-                            size={24}
-                            color={color}
-                          />
-                        ),
-                      }}
-                    />
-
-                    <Tabs.Screen
-                      name="seller/register"
-                      options={{
-                        title: "Seller",
-                        href: null,
-                      }}
-                    />
-                    <Tabs.Screen
-                      name="Signup"
-                      options={{
-                        title: "Signup",
-                        href: null,
-                      }}
-                    />
-
-                    <Tabs.Screen
-                      name="signin"
-                      options={{
-                        title: "Signup",
-                        href: null,
-                      }}
-                    />
-                  </Tabs>
-
-                  <StatusBar />
+                  <NavigationProvider/>
                 </StripeProvider>
               </AblyProvider>
             </NotificationsProvider>
           </SafeAreaProvider>
         </TRPCProvider>
-      </SignedIn>
 
-      <SignedOut>
-        <Stack.Navigator initialRouteName="signin">
-          <Stack.Screen
-            name="signin"
-            component={Login}
-            options={{ title: "Login" }}
-          />
-          <Stack.Screen
-            name="signup"
-            component={SignUp}
-            options={{ title: "Register" }}
-          />
-        </Stack.Navigator>
-
-        {/* <SignInSignUpScreen /> */}
-      </SignedOut>
     </ClerkProvider>
   );
 };

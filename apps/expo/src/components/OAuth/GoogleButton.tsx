@@ -4,7 +4,13 @@ import { Image } from "expo-image";
 
 import SKText from "../../components/Utils/SKText";
 
-const GoogleButton = ({ onPress }: { onPress: () => Promise<void> }) => {
+const GoogleButton = ({
+  onPress,
+  mode,
+}: {
+  onPress: () => Promise<void>;
+  mode: "signin" | "signup";
+}) => {
   return (
     <Pressable
       className={`mx-auto my-2 flex w-72  flex-row content-center items-center justify-center rounded-md bg-[#d9d9d9] py-3 text-black shadow-sm`}
@@ -17,7 +23,7 @@ const GoogleButton = ({ onPress }: { onPress: () => Promise<void> }) => {
       />
       <SKText className="ml-2 text-xl " fontWeight="medium">
         {" "}
-        Sign in with Google
+        {mode === "signin" ? "Sign in" : "Sign up"} with Google
       </SKText>
     </Pressable>
   );
