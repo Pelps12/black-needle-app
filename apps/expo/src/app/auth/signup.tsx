@@ -101,8 +101,9 @@ const SignUp = () => {
                 Sign up
               </Text>
             </TouchableOpacity>
-
-            <OAuthWrapper mode="signup" />
+            <View className="mb-24">
+              <OAuthWrapper mode="signup" />
+            </View>
           </View>
           {/* <Divider /> */}
           {/* <View>

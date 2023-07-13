@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import {
   Pressable,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -103,6 +104,7 @@ const SignInWithOAuth = () => {
   return (
     <>
       <Stack.Screen options={{ title: "Sign In" }} />
+
       <View className="flex h-full items-center justify-center ">
         <View className="p-6">
           <Image
@@ -156,7 +158,9 @@ const SignInWithOAuth = () => {
           <Divider />
         </View>
 
-        <OAuthWrapper mode="signin" />
+        <View className="mb-24">
+          <OAuthWrapper mode="signin" />
+        </View>
       </View>
     </>
   );
