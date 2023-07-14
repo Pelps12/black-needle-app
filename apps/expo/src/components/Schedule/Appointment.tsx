@@ -80,10 +80,7 @@ const Appointment = ({
                   day: "numeric",
                 })}
               </SKText>
-              <SKText
-                className="font-bold text-[#1dbaa7]"
-                fontWeight="font-bold"
-              >
+              <SKText className="font-bold text-[#1dbaa7]" fontWeight="bold">
                 {appointments.appointmentDate?.toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",

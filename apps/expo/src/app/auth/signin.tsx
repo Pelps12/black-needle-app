@@ -140,7 +140,7 @@ const SignInWithOAuth = () => {
             </SKText>
           </Pressable>
 
-          <Pressable onPress={() => router.push("/auth/forgotpassword")}>
+          <Pressable onPress={() => router.push("auth/forgotpassword")}>
             <SKText className="text-right text-[#2563eb]">
               Forgot password?
             </SKText>

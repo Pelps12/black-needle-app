@@ -137,7 +137,7 @@ const SignInWithOAuth = () => {
           </SKText>
         </Pressable>
 
-        <Pressable onPress={() => router.push("/forgotpassword")}>
+        <Pressable onPress={() => router.push("forgotpassword")}>
           <SKText className="text-right text-[#2563eb]">
             Forgot password?
           </SKText>
@@ -154,11 +154,11 @@ const SignInWithOAuth = () => {
       </View>
 
       <View>
-        <AppleButton onPress={handleSignInWithApplePress} />
+        <AppleButton onPress={handleSignInWithApplePress} mode={"signin"} />
       </View>
 
       <View>
-        <GoogleButton onPress={handleSignInWithGooglePress} />
+        <GoogleButton onPress={handleSignInWithGooglePress} mode={"signin"} />
       </View>
     </View>
   );

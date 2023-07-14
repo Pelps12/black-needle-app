@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 import AnimatedLottieView from "lottie-react-native";
@@ -35,6 +35,7 @@ export type ProfileFormSchemaType = z.infer<typeof formSchema>;
 
 const Profile = () => {
   const { user, isLoaded } = useUser();
+  const router = useRouter();
 
   const [image, setImage] = useState<string | undefined>(user?.imageUrl);
   const [username, setUsername] = useState<string | null | undefined>(
@@ -97,6 +98,15 @@ const Profile = () => {
     setImage(undefined);
     setEditMode(false);
   };
+  const handleSignOut = () => {
+    signOut()
+      .then(() =>
+        router.push({
+          pathname: "auth/signin",
+        }),
+      )
+      .catch((err) => console.log(err));
+  };
 
   const handleAccountDeletion = () => {
     Alert.alert(
@@ -110,7 +120,7 @@ const Profile = () => {
           text: "Proceed",
           onPress: async () => {
             await deleteUser.mutateAsync();
-            signOut().catch((err) => console.log(err));
+            handleSignOut();
           },
         },
       ],
@@ -220,7 +230,7 @@ const Profile = () => {
 
         <Pressable
           className={`mx-auto my-2 flex flex-row  content-center items-center justify-center rounded-lg bg-[#1dbaa7] px-3 py-1  shadow-sm`}
-          onPress={() => signOut().catch((err) => console.log(err))}
+          onPress={() => handleSignOut()}
         >
           <SKTest className="text-lg font-semibold text-white">Sign Out</SKTest>
         </Pressable>

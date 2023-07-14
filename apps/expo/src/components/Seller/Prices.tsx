@@ -64,7 +64,7 @@ const PriceComponent = ({
   sellerId,
 }: {
   price: Price;
-  image: PrismaImage | undefined;
+  image?: PrismaImage;
   modalVisible: boolean;
   setModalVisible: (modalVisible: boolean) => void;
   sellerId: string;

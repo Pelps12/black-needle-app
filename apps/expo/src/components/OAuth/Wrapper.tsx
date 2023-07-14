@@ -1,12 +1,14 @@
 import React from "react";
 import { View } from "react-native";
 import { createURL } from "expo-linking";
+import { useRouter } from "expo-router";
 import { useOAuth } from "@clerk/clerk-expo";
 
 import AppleButton from "./AppleButton";
 import GoogleButton from "./GoogleButton";
 
 const OAuthWrapper = ({ mode }: { mode: "signin" | "signup" }) => {
+  const router = useRouter();
   const { startOAuthFlow } = useOAuth({
     strategy: "oauth_google",
   });
@@ -18,6 +20,7 @@ const OAuthWrapper = ({ mode }: { mode: "signin" | "signup" }) => {
       });
       if (createdSessionId && setActive) {
         setActive({ session: createdSessionId });
+        router.push("/");
       } else {
         // Modify this code to use signIn or signUp to set this missing requirements you set in your dashboard.
         throw new Error(
@@ -37,6 +40,7 @@ const OAuthWrapper = ({ mode }: { mode: "signin" | "signup" }) => {
       });
       if (createdSessionId && setActive) {
         setActive({ session: createdSessionId });
+        router.push("/");
       } else {
         // Modify this code to use signIn or signUp to set this missing requirements you set in your dashboard.
         throw new Error(
