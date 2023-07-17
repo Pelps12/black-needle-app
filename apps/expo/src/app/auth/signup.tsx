@@ -18,6 +18,7 @@ const SignUp = () => {
   const { isLoaded, signUp, setActive } = useSignUp();
 
   const [emailAddress, setEmailAddress] = React.useState("");
+  const [errorMessage, setErrorMessage] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [pendingVerification, setPendingVerification] = React.useState(false);
   const [code, setCode] = React.useState("");
@@ -36,11 +37,12 @@ const SignUp = () => {
 
       // send the email.
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
-
+      // await setErrorMessage("");
       // change the UI to our pending section.
       setPendingVerification(true);
     } catch (err: any) {
       console.error(JSON.stringify(err, null, 2));
+      setErrorMessage(err.errors[0].longMessage);
     }
   };
 
@@ -56,8 +58,10 @@ const SignUp = () => {
       });
 
       await setActive({ session: completeSignUp.createdSessionId });
+      // await setErrorMessage("");
     } catch (err: any) {
       console.error(JSON.stringify(err, null, 2));
+      setErrorMessage(err.errors[0].longMessage);
     }
   };
 
@@ -123,7 +127,14 @@ const SignUp = () => {
               className="h-40 w-40"
             />
           </View>
-          <View className="mx-3">
+          <View>
+            {errorMessage && (
+              <Text className="rounded bg-red-500 p-1 text-center text-white">
+                {errorMessage}
+              </Text>
+            )}
+          </View>
+          <View className="mx-3 mb-72">
             <View>
               <TextInput
                 className="my-1 block  h-16 w-72 rounded-xl border-2 border-[#d9d9d9] bg-gray-100 p-4 text-lg outline-none focus:text-gray-700"

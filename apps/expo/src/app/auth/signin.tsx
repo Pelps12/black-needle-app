@@ -53,6 +53,7 @@ const SignInWithOAuth = () => {
         });
 
         if (result?.status === "complete" && setEmailFlowActive) {
+          setErrorMessage("");
           setEmailFlowActive({ session: result.createdSessionId });
         }
       } catch (err: any) {
@@ -69,6 +70,7 @@ const SignInWithOAuth = () => {
         redirectUrl: `${createURL("oauth-callback")}`,
       });
       if (createdSessionId && setActive) {
+        setErrorMessage("");
         setActive({ session: createdSessionId });
       } else {
         // Modify this code to use signIn or signUp to set this missing requirements you set in your dashboard.
@@ -78,7 +80,8 @@ const SignInWithOAuth = () => {
       }
     } catch (err) {
       console.log(JSON.stringify(err, null, 2));
-      console.log("error signing in", err);
+      // console.log("error signing in", err);
+      setErrorMessage(err.errors[0].message);
     }
   }, [startOAuthFlow]);
 
@@ -88,6 +91,7 @@ const SignInWithOAuth = () => {
         redirectUrl: `${createURL("oauth-callback")}`,
       });
       if (createdSessionId && setActive) {
+        setErrorMessage("");
         setActive({ session: createdSessionId });
       } else {
         // Modify this code to use signIn or signUp to set this missing requirements you set in your dashboard.
@@ -97,7 +101,7 @@ const SignInWithOAuth = () => {
       }
     } catch (err) {
       console.log(JSON.stringify(err, null, 2));
-      console.log("error signing in", err);
+      setErrorMessage(err.errors[0].message);
     }
   }, [appleFlow]);
 
@@ -106,13 +110,19 @@ const SignInWithOAuth = () => {
       <Stack.Screen options={{ title: "Sign In" }} />
 
       <View className="flex h-full items-center justify-center ">
-        <View className="p-6">
+        <View className={errorMessage ? "p-2" : "p-6"}>
           <Image
             source={require("../../../assets/sakpa_small.png")}
-            className="h-40 w-40"
+            className={errorMessage ? "mt-10 h-32 w-32" : "h-40 w-40"}
           />
         </View>
-
+        <View>
+          {errorMessage && (
+            <Text className="rounded bg-red-500 p-1 text-center text-white">
+              {errorMessage}
+            </Text>
+          )}
+        </View>
         <View className="mx-3">
           <SKTextInput
             placeholder="Email Address"
