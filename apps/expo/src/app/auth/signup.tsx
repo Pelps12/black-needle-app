@@ -7,7 +7,7 @@ import {
   View,
 } from "react-native";
 import { Image } from "expo-image";
-import { Stack } from "expo-router";
+import { Link, Stack, useNavigation, useRouter } from "expo-router";
 import { useSignUp } from "@clerk/clerk-expo";
 
 import AppleButton from "../../components/OAuth/AppleButton";
@@ -22,6 +22,7 @@ const SignUp = () => {
   const [password, setPassword] = React.useState("");
   const [pendingVerification, setPendingVerification] = React.useState(false);
   const [code, setCode] = React.useState("");
+  const router = useRouter();
 
   // start the sign up process.
   const onSignUpPress = async () => {
@@ -37,6 +38,7 @@ const SignUp = () => {
 
       // send the email.
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+
       // await setErrorMessage("");
       // change the UI to our pending section.
       setPendingVerification(true);
@@ -58,7 +60,8 @@ const SignUp = () => {
       });
 
       await setActive({ session: completeSignUp.createdSessionId });
-      // await setErrorMessage("");
+      router.push("/");
+      setErrorMessage("");
     } catch (err: any) {
       console.error(JSON.stringify(err, null, 2));
       setErrorMessage(err.errors[0].longMessage);
