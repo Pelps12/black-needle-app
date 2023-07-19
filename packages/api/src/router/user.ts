@@ -67,6 +67,7 @@ export const userRouter = router({
         },
         include: {
           Image: true,
+          seller: true,
         },
       });
 
@@ -77,6 +78,7 @@ export const userRouter = router({
         type: category.type,
         prices: [],
         Image: category.Image,
+        school: category.seller.school,
       });
 
       return category;
