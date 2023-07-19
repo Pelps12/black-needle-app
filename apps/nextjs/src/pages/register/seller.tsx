@@ -197,7 +197,7 @@ const SellerRegister = () => {
 							<option disabled>School</option>
 							<option>UT Dallas</option>
 							<option>UT Arlington</option>
-							<option>Texas A&M</option>
+							<option>UNT</option>
 						</select>
 						{errors.school?.message && <p className="pt-2 text-error">{errors.school?.message}</p>}
 					</div>
