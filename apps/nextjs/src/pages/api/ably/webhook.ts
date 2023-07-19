@@ -45,7 +45,7 @@ export default async function ably(req: NextApiRequest, res: NextApiResponse) {
 										id: roomId
 									}
 								},
-								type: data.extras.headers.type,
+								type: data.extras.headers.type ?? 'TEXT',
 								user: {
 									connect: {
 										id: data.clientId
