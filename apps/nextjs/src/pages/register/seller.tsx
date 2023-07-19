@@ -43,6 +43,12 @@ const SellerRegister = () => {
 	const mutation = trpc.user.createSeller.useMutation();
 	const refreshStripeMut = trpc.payment.refreshStripe.useMutation();
 	const verifyStripe = trpc.payment.verifyStripe.useMutation();
+	const completionStripe = trpc.payment.checkStripeOnboardingCompletion.useQuery(undefined, {
+		staleTime: Infinity,
+		onSuccess: ({ redirect_url }) => {
+			window.open(redirect_url, '_self');
+		}
+	});
 	const { userId, isSignedIn } = useAuth();
 
 	const { query } = useRouter();

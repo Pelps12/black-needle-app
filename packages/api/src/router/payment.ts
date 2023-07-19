@@ -143,4 +143,34 @@ export const paymentRouter = router({
       success: account.details_submitted,
     };
   }),
+  checkStripeOnboardingCompletion: protectedProcedure.query(async ({ ctx }) => {
+    const seller = await ctx.prisma.seller.findFirst({
+      where: {
+        id: ctx.auth.userId,
+      },
+    });
+    if (seller?.subAccountID) {
+      const account = await stripe.accounts.retrieve(seller?.subAccountID);
+
+      const redirect_url = !account.charges_enabled
+        ? (
+            await stripe.accountLinks.create({
+              account: seller.subAccountID,
+              refresh_url: `${env.NEXT_PUBLIC_URL}/seller/register?refresh=true`,
+              return_url: `${env.NEXT_PUBLIC_URL}/seller/register?return=true`,
+              type: "account_onboarding",
+            })
+          ).url
+        : `${env.NEXT_PUBLIC_URL}/seller/${ctx.auth.userId}`;
+
+      return {
+        complete: account.charges_enabled,
+        redirect_url: redirect_url,
+      };
+    } else {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+      });
+    }
+  }),
 });

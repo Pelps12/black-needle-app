@@ -58,6 +58,7 @@ const ChatPage = () => {
   const getRoom = trpc.chat.getRoom.useQuery({
     userId: idString,
   });
+  const createRoomRouter = trpc.chat.createRoom.useMutation();
   const prevMessRouter = trpc.chat.getPreviousChats.useInfiniteQuery(
     {
       limit: 20,
@@ -75,6 +76,17 @@ const ChatPage = () => {
       refetchOnMount: false,
       refetchOnReconnect: false,
       staleTime: Infinity,
+      onError: async (err) => {
+        try {
+          if (err.data?.code === "INTERNAL_SERVER_ERROR") {
+            await createRoomRouter.mutateAsync({
+              userId: idString,
+            });
+          }
+        } catch (err: unknown) {
+          console.log(err);
+        }
+      },
     },
   );
   const utils = trpc.useContext();
@@ -175,7 +187,7 @@ const ChatPage = () => {
             },
             extras: {
               headers: {
-                type: "image",
+                type: "IMAGE",
               },
             },
           });
@@ -204,7 +216,7 @@ const ChatPage = () => {
             },
             extras: {
               headers: {
-                type: "text",
+                type: "TEXT",
               },
             },
           });

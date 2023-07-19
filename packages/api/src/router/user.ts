@@ -23,9 +23,9 @@ export const userRouter = router({
       });
       console.log(result);
     }),
-    deleteUser: protectedProcedure.mutation(async ({ctx}) => {
-     const deletedUser =  await clerkClient.users.deleteUser(ctx.auth.userId);
-    }),
+  deleteUser: protectedProcedure.mutation(async ({ ctx }) => {
+    const deletedUser = await clerkClient.users.deleteUser(ctx.auth.userId);
+  }),
   createCategory: protectedProcedure
     .input(
       z.object({
@@ -368,6 +368,7 @@ export const userRouter = router({
         accountLink,
       };
     }),
+
   createStripeAccountLink: protectedProcedure.mutation(async ({ ctx }) => {
     const { publicMetadata } = await clerkClient.users.getUser(ctx.auth.userId);
     if (publicMetadata.role !== "SELLER") {
