@@ -110,9 +110,9 @@ const Navbar = () => {
 					<div className="dropdown dropdown-end">
 						{!isSignedIn && isLoaded ? (
 							<>
-								<label tabIndex={0} className="btn btn-primary modal-button " htmlFor="my-modal-4">
+								<Link tabIndex={0} className="btn btn-primary modal-button " href="/sign-in">
 									SIGN IN
-								</label>
+								</Link>
 							</>
 						) : !isSignedIn && !isLoaded ? (
 							<label tabIndex={0} className=" avatar">
@@ -153,10 +153,6 @@ const Navbar = () => {
 
 									<li>
 										<p onClick={handleLogout}>Logout</p>
-									</li>
-
-									<li>
-										<Link href="/test">Test</Link>
 									</li>
 								</ul>
 							</>
