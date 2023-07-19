@@ -15,9 +15,9 @@ import { Category, Price, Image as PrismaImage } from "@acme/db";
 
 import Categories from "../../components/Seller/Categories";
 import Prices from "../../components/Seller/Prices";
+import ProtectedLink from "../../components/Utils/ProtectedLink";
 import SKTest from "../../components/Utils/SKText";
 import { trpc } from "../../utils/trpc";
-import ProtectedLink from "../../components/Utils/ProtectedLink";
 
 type SellerPageProps = {
   sellerId?: string | null | undefined;

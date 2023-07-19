@@ -1,5 +1,6 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   FlatList,
   Pressable,
   SafeAreaView,
@@ -82,6 +83,7 @@ const Categories: React.FC<CategoryProps> = ({
           ListHeaderComponent={
             addCategoryButton ? (
               <BlankCategories
+                setCategories={setCategories}
                 endRef={endRef}
                 sellerId={sellerId}
                 setAddCategoryButton={setAddCategoryButton}
@@ -339,7 +341,9 @@ const Category = ({
 
                 const { data, isSuccess } = await getCat.refetch();
                 if (isSuccess) {
+                  setCategories(data?.user?.seller?.Category);
                   console.log(data);
+                  console.log("Ojomojos");
                 }
               }}
             >
@@ -434,7 +438,7 @@ const Category = ({
                 <Image
                   source={item.link}
                   alt="Image"
-                  className="m-2 h-44 w-44 "
+                  className="m-2 h-44 w-44 rounded-lg"
                 />
               </Pressable>
               <View style={{ position: "absolute", top: 0, right: 0 }}>

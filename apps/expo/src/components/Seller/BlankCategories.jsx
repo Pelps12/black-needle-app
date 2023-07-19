@@ -24,10 +24,12 @@ const BlankCategories = ({
   sellerId,
   setAddCategoryButton,
   categories,
+  setCategories,
 }) => {
   return (
     <>
       <BlankCategory
+        setCategories={setCategories}
         endRef={endRef}
         sellerId={sellerId}
         setAddCategoryButton={setAddCategoryButton}
@@ -43,6 +45,7 @@ const BlankCategory = ({
   sellerId,
   setAddCategoryButton,
   categories,
+  setCategories,
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -214,6 +217,7 @@ const BlankCategory = ({
           setAddCategoryButton(false);
           endRef.current?.scrollToEnd();
           console.log(data);
+          setCategories(data.user.seller.Category);
         }
       } else {
         console.log(await response.text(), response.status);

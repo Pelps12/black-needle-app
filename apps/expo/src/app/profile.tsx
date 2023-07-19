@@ -216,16 +216,26 @@ const Profile = () => {
       </View>
 
       <View>
-        {user?.publicMetadata?.role === "SELLER" && (
-          <ProtectedLink
-            className={`mx-auto my-2 flex flex-row  content-center items-center justify-center rounded-lg bg-[#72a2f9] px-3 py-1  shadow-sm`}
-            href={`/seller/${user.id}`}
-            asChild={true}
-          >
-            <SKTest className="text-lg font-semibold text-white">
-              Seller Page
-            </SKTest>
-          </ProtectedLink>
+        {user?.publicMetadata?.role === "SELLER" ? (
+          <View className="mx-auto my-2 flex flex-row  content-center items-center justify-center rounded-lg bg-[#72a2f9] px-3 py-1  shadow-sm">
+            <ProtectedLink
+              className={`mx-auto my-2 flex flex-row  content-center items-center justify-center rounded-lg bg-[#72a2f9] px-3 py-1  shadow-sm`}
+              href={`/seller/${user.id}`}
+              asChild={true}
+            >
+              <SKTest className="text-lg font-semibold text-white">
+                Seller Page
+              </SKTest>
+            </ProtectedLink>
+          </View>
+        ) : (
+          <View className="mx-auto my-2 flex flex-row  content-center items-center justify-center rounded-lg bg-[#72a2f9] px-3 py-1  shadow-sm">
+            <Pressable>
+              <SKTest className="text-lg font-semibold text-white">
+                Become a Seller
+              </SKTest>
+            </Pressable>
+          </View>
         )}
 
         <Pressable
