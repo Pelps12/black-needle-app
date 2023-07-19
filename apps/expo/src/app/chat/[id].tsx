@@ -55,12 +55,9 @@ const ChatPage = () => {
   const [image, setImage] = useState<string>();
   const [ablyMessages, setAblyMessages] = useState<AblyMessage[]>([]);
 
-  const getRoom = trpc.chat.getRoom.useQuery(
-    {
-      userId: idString,
-    },
-    {},
-  );
+  const getRoom = trpc.chat.getRoom.useQuery({
+    userId: idString,
+  });
 
   const createRoomRouter = trpc.chat.createRoom.useMutation();
   const prevMessRouter = trpc.chat.getPreviousChats.useInfiniteQuery(
@@ -99,6 +96,7 @@ const ChatPage = () => {
   const endRef = useRef<FlatList>(null);
 
   const [_, ably] = useChannel(`chat:${userId}`, (message) => {
+    while (getRoom.isFetching) {}
     console.log(getRoom.data?.room?.id, "HY");
     if (message.data.roomId == getRoom.data?.room?.id) {
       setAblyMessages((ablyMessages) => [
