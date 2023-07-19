@@ -169,7 +169,7 @@ const BuyerAppointment = ({
               <View>
                 <Text className="text-3xl  font-medium">Availability in</Text>
               </View>
-              <View className="ml-2 w-32">
+              <View className="z-30 ml-2 w-32">
                 <DropDownPicker
                   open={open}
                   value={selectedMonth}
@@ -203,13 +203,13 @@ const BuyerAppointment = ({
           </View>
           <Pressable
             onPress={closeModal}
-            className=" absolute right-2 top-2 w-4 "
+            className=" absolute -right-1 -top-0 w-4 "
           >
             <Text>✕</Text>
           </Pressable>
 
           <ScrollView
-            className="flex-row gap-3 px-3"
+            className="-z-50 flex-row gap-3 px-3"
             horizontal={true}
             contentOffset={{ x: -20, y: 0 }}
           >
@@ -231,7 +231,7 @@ const BuyerAppointment = ({
             ))}
           </ScrollView>
 
-          <View className=" mx-auto">
+          <View className=" -z-50 mx-auto">
             {getFreeTimeslots.isLoading ? (
               <Image
                 source={require("../../../assets/utils/loader.svg")}
