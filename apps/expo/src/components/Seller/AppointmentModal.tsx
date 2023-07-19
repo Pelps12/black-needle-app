@@ -162,7 +162,7 @@ const BuyerAppointment = ({
   }
   return (
     <>
-      <SafeAreaView className="mx-6 my-auto flex h-auto  rounded-lg bg-[#fafafa]">
+      <SafeAreaView className="mx-6 my-auto flex h-auto  rounded-lg bg-[#fafafa] z-0">
         <View className="">
           <View className="px-4">
             <View className=" mb-4 mt-2 flex flex-row items-center">

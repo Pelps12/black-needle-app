@@ -21,11 +21,11 @@ export function SearchBox(props: any) {
   }
 
   return (
-    <View style={styles.container}>
+    <View className="bg-[#f2f2f2] py-6 pl-2 pr-0 basis-2/3">
       <TextInput
         ref={inputRef}
         style={styles.input}
-        className="rounded-md"
+        className="w-[3/4] rounded-tl-lg rounded-bl-lg"
         value={inputValue}
         onChangeText={setQuery}
         clearButtonMode="while-editing"
@@ -49,7 +49,6 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
     backgroundColor: "#fff",
-    borderRadius: 20,
     borderWidth: 1,
     borderColor: "#ddd",
   },

@@ -6,7 +6,7 @@ import SKTest from "../components/Utils/SKText";
 
 const Index = () => {
   return (
-    <View className="mt-0 bg-[##F2F2F2] pt-0">
+    <View className="mt-0 bg-[##F2F2F2] pt-0 -z-50">
       <SKTest fontWeight="semi-bold" className="mx-4 text-4xl font-bold">
         Home
       </SKTest>

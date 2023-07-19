@@ -3,9 +3,11 @@ import { SafeAreaView, StatusBar, StyleSheet, Text, View } from "react-native";
 import Constants from "expo-constants";
 import { FontAwesome } from "@expo/vector-icons";
 import algoliasearch from "algoliasearch/lite";
-import { InstantSearch } from "react-instantsearch-hooks";
+import { InstantSearch, useRefinementList } from "react-instantsearch-hooks";
 
+import { FacetDropdown } from "./FacetDropDown";
 import { InfiniteHits } from "./InfinteHits";
+import RefinementList from "./RefinementList";
 import Result from "./Result";
 import { SearchBox } from "./SearchBox";
 
@@ -21,7 +23,12 @@ export default function App() {
         searchClient={searchClient}
         indexName={Constants.expoConfig?.extra?.ALGOLIA_INDEX as string}
       >
-        <SearchBox />
+        <View className="flex flex-row items-center gap-0">
+          <SearchBox />
+
+          <RefinementList attribute="school" />
+        </View>
+        
 
         <InfiniteHits maxHitsPerPage={5} hitComponent={Result} />
       </InstantSearch>
