@@ -76,18 +76,7 @@ const ChatPage = () => {
       refetchOnWindowFocus: false,
       refetchOnMount: false,
       refetchOnReconnect: false,
-      staleTime: Infinity,
-      onError: async (err) => {
-        try {
-          if (err.data?.code === "INTERNAL_SERVER_ERROR") {
-            await createRoomRouter.mutateAsync({
-              userId: idString,
-            });
-          }
-        } catch (err: unknown) {
-          console.log(err);
-        }
-      },
+      staleTime: Infinity
     },
   );
   const utils = trpc.useContext();
@@ -169,6 +158,20 @@ const ChatPage = () => {
     }
     return null;
   };
+  const createRoomWrapper = () => {
+		if (id) {
+			createRoomRouter.mutate(
+				{
+					userId: idString
+				},
+				{
+					onSuccess: (data) => {
+						getRoom.refetch();
+					}
+				}
+			);
+		}
+	};
 
   const handleSubmit = async (type: string) => {
     if (getRoom.isSuccess && getRoom.data.room) {
@@ -260,6 +263,10 @@ const ChatPage = () => {
     };
   }, []);
 
+  useEffect(() => {
+    console.log(getRoom?.data?.room?.id)
+  }, [getRoom?.data?.room?.id])
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -297,8 +304,9 @@ const ChatPage = () => {
         </View>
         <View style={{ flex: 1 }}>
           <View className="space-y-2" style={{ flex: 0.9 }}>
-            {prevMessRouter.data?.pages && ablyMessages && (
-              <SectionList
+            {getRoom?.data?.room?.id  ? (
+              <>
+              {prevMessRouter.data?.pages && ablyMessages && <SectionList
                 onEndReached={() => prevMessRouter.fetchNextPage()}
                 className="px-3"
                 sections={[
@@ -331,7 +339,15 @@ const ChatPage = () => {
                 onScrollToTop={() => console.log("SLOPPY TOPPY")}
                 keyExtractor={(item, idx) => idx.toString()}
               />
-            )}
+              }</>
+            ): <Pressable
+            className={`w-32 flex flex-row m-auto content-center items-center justify-center rounded-lg  bg-[#1dbaa7] px-3 py-3  text-black `}
+            onPress={() => createRoomWrapper()}
+          >
+            <SKTest className="mx-auto text-md text-center font-semibold text-white" fontWeight="semi-bold">
+              START CHAT
+            </SKTest>
+          </Pressable>}
           </View>
 
           <View

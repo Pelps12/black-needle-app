@@ -1,14 +1,15 @@
 import React, { useRef, useState } from "react";
 import { StyleSheet, TextInput, View } from "react-native";
-import { useSearchBox } from "react-instantsearch-hooks";
+import { UseSearchBoxProps, useSearchBox } from "react-instantsearch-hooks";
 
-export function SearchBox(props: any) {
+export function SearchBox(props: UseSearchBoxProps)  {
   const { query, refine } = useSearchBox(props);
   const [inputValue, setInputValue] = useState(query);
   const inputRef = useRef<TextInput>(null);
 
   function setQuery(newQuery: string) {
     setInputValue(newQuery);
+    console.log(newQuery)
     refine(newQuery);
   }
 

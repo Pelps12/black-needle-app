@@ -18,9 +18,9 @@ const NavigationProvider = () => {
           headerStyle: {
             backgroundColor: "#F2F2F2",
           },
-
           header: () => <Header />,
           headerShadowVisible: false,
+          
           tabBarStyle: {
             backgroundColor: "#d9d9d9",
             borderRadius: 20,
@@ -30,12 +30,14 @@ const NavigationProvider = () => {
             elevation: 0,
             position: "absolute",
 
-            height: 90,
+            height: 75,
             paddingTop: 10,
+            marginBottom: 0
           },
           tabBarIconStyle: {
             marginTop: 10,
             color: "#000",
+            padding: 0
           },
           tabBarActiveTintColor: "#1dbaa7",
         }}

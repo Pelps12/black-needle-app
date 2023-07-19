@@ -26,6 +26,8 @@ import SKText from "../components/Utils/SKText";
 import SKTextInput from "../components/Utils/SKTextInput";
 import dataURItoBlob from "../utils/dataURItoBlob";
 import { trpc } from "../utils/trpc";
+import { openBrowserAsync } from "expo-web-browser";
+import Constants from "expo-constants";
 
 const formSchema = z.object({
   image: z.string().optional(),
@@ -125,6 +127,10 @@ const Profile = () => {
         },
       ],
     );
+  };
+
+  const _handlePressButtonAsync = async () => {
+    await openBrowserAsync(`${Constants.expoConfig?.extra?.PUBLIC_URL as string}/register/seller?intiator=app`);
   };
   return (
     <View className="">
@@ -226,7 +232,7 @@ const Profile = () => {
           </View>
         ) : (
           <View className="mx-auto my-2 flex flex-row  content-center items-center justify-center rounded-lg bg-[#72a2f9] px-3 py-1  shadow-sm">
-            <Pressable>
+            <Pressable onPress={_handlePressButtonAsync}>
               <SKTest className="text-lg font-semibold text-white">
                 Become a Seller
               </SKTest>

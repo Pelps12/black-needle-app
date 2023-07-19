@@ -16,6 +16,8 @@ const searchClient = algoliasearch(
   "ecd72cebe5c87facc09e9e9884038e0a",
 );
 
+
+
 export default function App() {
   return (
     <View className="flex flex-col bg-[#F2F2F2]">

@@ -43,6 +43,7 @@ const SellerRegister = () => {
 	const mutation = trpc.user.createSeller.useMutation();
 	const refreshStripeMut = trpc.payment.refreshStripe.useMutation();
 	const verifyStripe = trpc.payment.verifyStripe.useMutation();
+
 	const completionStripe = trpc.payment.checkStripeOnboardingCompletion.useQuery(undefined, {
 		staleTime: Infinity,
 		onSuccess: ({ redirect_url }) => {
@@ -52,6 +53,12 @@ const SellerRegister = () => {
 	const { userId, isSignedIn } = useAuth();
 
 	const { query } = useRouter();
+	const intiatorString =
+		typeof query.initator === 'string'
+			? query.initator
+			: typeof query.initator === 'undefined'
+			? ':)'
+			: query.initator[0]!;
 	const [downPaymentValue, setDownPaymentValue] = useState(0);
 	const [viewXInset, setViewXInset] = useState(10);
 	const [hidden, setHidden] = useState(true);
@@ -132,7 +139,11 @@ const SellerRegister = () => {
 				verifyStripe.mutate(undefined, {
 					onSuccess(data) {
 						if (data.success) {
-							window.open(`${env.NEXT_PUBLIC_URL}/seller/${data.seller.id}`, '_self');
+							if (intiatorString === 'app') {
+								window.open(`sakpa://seller/${data.seller.id}`, '_self');
+							} else {
+								window.open(`${env.NEXT_PUBLIC_URL}/seller/${data.seller.id}`, '_self');
+							}
 						} else {
 							alert('You can complete the verification process through the profile page.');
 						}
@@ -141,6 +152,7 @@ const SellerRegister = () => {
 			}
 		}
 	}, [query, userId]);
+
 	return (
 		<>
 			<NextSeo
