@@ -23,7 +23,7 @@ const defineConfig = (): ExpoConfig => ({
   owner: "sakpa",
   slug: "sakpa",
   scheme: "sakpa",
-  version: "1.0.1",
+  version: "1.1.1",
   orientation: "portrait",
   icon: "./assets/sakpa_small_(2).png",
   userInterfaceStyle: "light",

@@ -10,16 +10,20 @@ import {
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 
+import { trpc } from "../../utils/trpc";
 import SKText from "../Utils/SKText";
 import SKTextInput from "../Utils/SKTextInput";
 
 // import SKText from "@components/Utils/SKText";
 // import SKTextInput from "@components/Utils/SKTextInput";
 
-const AddPricesModal = ({ categories }) => {
+const AddPricesModal = ({ setCategories, categories, prices }) => {
   const [productName, setProductName] = useState("");
   const [openDropDown, setOpenDropDown] = useState(false);
   const [dropDownValue, setDropDownValue] = useState(null);
+  const createPrice = trpc.price.createPrice.useMutation();
+  const [openDropDownDuration, setOpenDropDownDuration] = useState(false);
+  const [dropDownValueDuration, setDropDownValueDuration] = useState(null);
   const [openDropDownCategories, setOpenDropDownCategories] = useState(false);
   const [dropDownValueCategories, setDropDownValueCategories] = useState(null);
   const [amount, setAmount] = useState("0.00");
@@ -27,19 +31,83 @@ const AddPricesModal = ({ categories }) => {
     { label: "GOOD", value: "GOOD" },
     { label: "SERVICE", value: "SERVICE" },
   ]);
+  const [duration, setDuration] = useState([
+    { label: "30 min", value: "1800" },
+    { label: "1 hr", value: "3600" },
+    { label: "1 hr 30 min", value: "5400" },
+    { label: "2 hr", value: "7200" },
+    { label: "2 hr 30 min", value: "9000" },
+    { label: "3 hr", value: "10800" },
+    { label: "3 hr 30 min", value: "12600" },
+    { label: "4 hr", value: "14400" },
+    { label: "4 hr 30 min", value: "16200" },
+    { label: "5 hr", value: "18000" },
+  ]);
   const [listCategoryNames, setListCategoryNames] = useState([
     { label: "", value: "" },
   ]);
   useState(() => {
     const namesArray = categories.map((item) => ({
       label: item.name,
-      value: item.name,
+      value: item.id,
     }));
     setListCategoryNames(namesArray);
   });
   const handleNumberChange = (text) => {
     const numericText = text.replace(/[^0-9.]/g, "");
     setAmount(numericText);
+  };
+  const handleSubmitButton = async () => {
+    if (
+      productName === "" ||
+      dropDownValue === null ||
+      dropDownValueCategories === null ||
+      amount === "0.00"
+    ) {
+      console.log(amount);
+    } else if (
+      productName != "" ||
+      dropDownValue != null ||
+      dropDownValueCategories != null ||
+      amount != "0.00"
+    ) {
+      let checkIfDuration = false;
+      if (dropDownValue === "SERVICE" && dropDownValueDuration != null) {
+        checkIfDuration = true;
+      } else if (
+        dropDownValue === "SERVICE" &&
+        dropDownValueDuration === null
+      ) {
+        checkIfDuration = false;
+      } else if (dropDownValue === "GOOD") {
+        checkIfDuration = true;
+      }
+      if (checkIfDuration) {
+        const newProductData = [...prices];
+        await createPrice.mutateAsync(
+          {
+            categoryId: dropDownValueCategories,
+            amount: parseFloat(amount),
+            name: productName,
+            type: dropDownValue,
+            ...(dropDownValueDuration != null &&
+              dropDownValueDuration != undefined &&
+              checkIfDuration === true && { duration: dropDownValueDuration }),
+          },
+          {
+            onSuccess: (data) => {
+              console.log("Done");
+              console.log(data);
+              console.log(prices);
+              setCategories(...prices, data);
+              // setPrice([...price, data.price]);
+              // editSetPrice(data.price);
+            },
+          },
+        );
+        console.log(newProductData[0].prices);
+      }
+    }
   };
 
   return (
@@ -72,7 +140,7 @@ const AddPricesModal = ({ categories }) => {
             ></SKTextInput>
           </View>
 
-          <View className="z-20">
+          <View className="z-30">
             <DropDownPicker
               containerStyle={{
                 marginTop: 4,
@@ -100,7 +168,7 @@ const AddPricesModal = ({ categories }) => {
               setItems={setListCategoryNames}
             />
           </View>
-          <View className="z-10">
+          <View className="z-20">
             <DropDownPicker
               containerStyle={{
                 marginTop: 4,
@@ -149,22 +217,18 @@ const AddPricesModal = ({ categories }) => {
                   padding: 16,
                 }}
                 placeholder="Service Duration"
-                open={openDropDown}
-                value={dropDownValue}
-                items={items}
-                setOpen={setOpenDropDown}
-                setValue={setDropDownValue}
-                setItems={setItems}
+                open={openDropDownDuration}
+                value={dropDownValueDuration}
+                items={duration}
+                setOpen={setOpenDropDownDuration}
+                setValue={setDropDownValueDuration}
+                setItems={setDuration}
               />
             </View>
           )}
           <View className=" center mb-4 mt-2 flex flex-row items-center justify-center"></View>
           <View className="mx-auto my-2 mb-10 flex flex-row  content-center items-center justify-center rounded-lg bg-[#1dbaa7] px-3 py-1  shadow-sm">
-            <Pressable
-              onPress={() => {
-                console.log(dropDownValue);
-              }}
-            >
+            <Pressable onPress={handleSubmitButton}>
               <SKText className="text-lg font-semibold text-white">
                 Add Product
               </SKText>
