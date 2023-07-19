@@ -218,11 +218,7 @@ const Profile = () => {
       <View>
         {user?.publicMetadata?.role === "SELLER" ? (
           <View className="mx-auto my-2 flex flex-row  content-center items-center justify-center rounded-lg bg-[#72a2f9] px-3 py-1  shadow-sm">
-            <ProtectedLink
-              className={`mx-auto my-2 flex flex-row  content-center items-center justify-center rounded-lg bg-[#72a2f9] px-3 py-1  shadow-sm`}
-              href={`/seller/${user.id}`}
-              asChild={true}
-            >
+            <ProtectedLink href={`/seller/${user.id}`} asChild={true}>
               <SKTest className="text-lg font-semibold text-white">
                 Seller Page
               </SKTest>
