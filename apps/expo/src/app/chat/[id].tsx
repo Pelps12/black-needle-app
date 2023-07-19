@@ -96,7 +96,7 @@ const ChatPage = () => {
   const endRef = useRef<FlatList>(null);
 
   const [_, ably] = useChannel(`chat:${userId}`, (message) => {
-    console.log(getRoom.data?.room?.id, "HY");
+    console.log(userId, message);
     if (message.data.receipientId == userId) {
       setAblyMessages((ablyMessages) => [
         ...ablyMessages,
@@ -105,7 +105,6 @@ const ChatPage = () => {
           data: {
             roomId: message.data.roomId,
             message: message.data.message,
-            receipientId: idString,
           },
         },
       ]);
@@ -182,6 +181,7 @@ const ChatPage = () => {
             data: {
               roomId: getRoom.data.room?.id,
               message: result,
+              receipientId: idString,
             },
             extras: {
               headers: {
@@ -211,6 +211,7 @@ const ChatPage = () => {
             data: {
               roomId: getRoom.data.room?.id,
               message: messageText,
+              receipientId: idString,
             },
             extras: {
               headers: {
