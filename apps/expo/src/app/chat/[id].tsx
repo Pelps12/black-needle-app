@@ -96,9 +96,8 @@ const ChatPage = () => {
   const endRef = useRef<FlatList>(null);
 
   const [_, ably] = useChannel(`chat:${userId}`, (message) => {
-    while (getRoom.isFetching) {}
     console.log(getRoom.data?.room?.id, "HY");
-    if (message.data.roomId == getRoom.data?.room?.id) {
+    if (message.data.receipientId == userId) {
       setAblyMessages((ablyMessages) => [
         ...ablyMessages,
         {
@@ -106,6 +105,7 @@ const ChatPage = () => {
           data: {
             roomId: message.data.roomId,
             message: message.data.message,
+            receipientId: idString,
           },
         },
       ]);
