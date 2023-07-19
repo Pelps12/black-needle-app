@@ -139,6 +139,7 @@ const SellerPage: React.FC<SellerPageProps> = ({ sellerId }) => {
       <View>
         {activeTab == "PRICES" && categories && (
           <Prices
+            setCategories={setCategories}
             categories={categories}
             prices={categories}
             sellerId={user?.id}

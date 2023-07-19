@@ -21,6 +21,7 @@ const Prices = ({
   prices,
   sellerId,
   categories,
+  setCategories,
 }: {
   categories: (Category & {
     Image: PrismaImage[];
@@ -31,6 +32,7 @@ const Prices = ({
     Image: PrismaImage[];
   })[];
   sellerId: string;
+  setCategories: any;
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const { isSignedIn } = useAuth();
@@ -44,7 +46,11 @@ const Prices = ({
         setModalVisible={setPriceModalVisible}
         className=""
       >
-        <AddPricesModal categories={categories} />
+        <AddPricesModal
+          setCategories={setCategories}
+          prices={prices}
+          categories={categories}
+        />
       </Modal>
       <Pressable
         onPress={() => {
