@@ -55,9 +55,13 @@ const ChatPage = () => {
   const [image, setImage] = useState<string>();
   const [ablyMessages, setAblyMessages] = useState<AblyMessage[]>([]);
 
-  const getRoom = trpc.chat.getRoom.useQuery({
-    userId: idString,
-  });
+  const getRoom = trpc.chat.getRoom.useQuery(
+    {
+      userId: idString,
+    },
+    {},
+  );
+
   const createRoomRouter = trpc.chat.createRoom.useMutation();
   const prevMessRouter = trpc.chat.getPreviousChats.useInfiniteQuery(
     {
@@ -96,7 +100,7 @@ const ChatPage = () => {
 
   const [_, ably] = useChannel(`chat:${userId}`, (message) => {
     console.log(getRoom.data?.room?.id, "HY");
-    if ((message.data.roomId = getRoom.data?.room?.id)) {
+    if (message.data.roomId == getRoom.data?.room?.id) {
       setAblyMessages((ablyMessages) => [
         ...ablyMessages,
         {
@@ -132,10 +136,6 @@ const ChatPage = () => {
   useEffect(() => {
     prevMessRouter.refetch();
   }, []);
-
-  useEffect(() => {
-    getRoom.refetch();
-  }, [idString]);
 
   const getBlob = async (fileUri: string) => {
     const resp = await fetch(fileUri);
