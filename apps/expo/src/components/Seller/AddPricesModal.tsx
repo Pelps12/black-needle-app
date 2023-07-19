@@ -17,8 +17,7 @@ import SKTextInput from "../Utils/SKTextInput";
 // import SKTextInput from "@components/Utils/SKTextInput";
 
 const AddPricesModal = ({ categories }) => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [productName, setProductName] = useState("");
   const [openDropDown, setOpenDropDown] = useState(false);
   const [dropDownValue, setDropDownValue] = useState(null);
   const [openDropDownCategories, setOpenDropDownCategories] = useState(false);
@@ -38,20 +37,10 @@ const AddPricesModal = ({ categories }) => {
     }));
     setListCategoryNames(namesArray);
   });
-  const handleChangeText = (text) => {
-    // Remove any non-numeric characters from the input
-    const numericText = text.replace(/[^0-9]/g, "");
+  const handleNumberChange = (text) => {
+    const numericText = text.replace(/[^0-9.]/g, "");
     setAmount(numericText);
   };
-
-  // getListCategoryNames(categories.map((getName) => {
-  //   label: getName.name,
-  //   value: getName.name
-  //   // console.log(getName.name);
-  // }))
-
-  // { label: "GOOD", value: "GOOD" },
-  // { label: "SERVICE", value: "SERVICE" },
 
   return (
     <SafeAreaView className="mx-6 my-auto flex h-auto  items-center justify-center rounded-lg bg-[#fafafa]">
@@ -65,19 +54,21 @@ const AddPricesModal = ({ categories }) => {
           </View>
           <View>
             <SKTextInput
-              className=" my-1 block  h-16 w-72 rounded-xl border-2 border-[#d9d9d9] bg-gray-100 p-4 text-lg outline-none focus:text-gray-700"
+              className=" my-1 block  h-16 w-72 rounded-xl border-2 border-[#d9d9d9] bg-gray-100 p-4 text-lg outline-none focus:text-gray-900"
               placeholder="Product Name"
               placeholderTextColor="gray"
+              value={productName}
+              onChangeText={(text) => setProductName(text)}
             ></SKTextInput>
           </View>
           <View>
             <SKTextInput
-              style={{ color: "#808080" }}
+              style={{ color: amount != "0.00" ? "#000000" : "#808080" }}
               className=" my-1 block  h-16 w-72 rounded-xl border-2 border-[#d9d9d9] bg-gray-100 p-4 text-lg outline-none focus:text-gray-700"
               value={`$${amount}`}
               placeholder="0.00"
               keyboardType="numeric"
-              onChangeText={handleChangeText}
+              onChangeText={handleNumberChange}
             ></SKTextInput>
           </View>
 
@@ -90,7 +81,7 @@ const AddPricesModal = ({ categories }) => {
               textStyle={{
                 fontSize: 18,
                 lineHeight: 28,
-                color: openDropDownCategories === true ? "#000000" : "#808080",
+                color: dropDownValueCategories != null ? "#000000" : "#808080",
               }}
               style={{
                 borderRadius: 12,
@@ -118,7 +109,7 @@ const AddPricesModal = ({ categories }) => {
               textStyle={{
                 fontSize: 18,
                 lineHeight: 28,
-                color: openDropDown === true ? "#000000" : "#808080",
+                color: setDropDownValue != null ? "#000000" : "#808080",
               }}
               style={{
                 borderRadius: 12,
@@ -137,9 +128,43 @@ const AddPricesModal = ({ categories }) => {
               setItems={setItems}
             />
           </View>
+          {dropDownValue && dropDownValue === "SERVICE" && (
+            <View className="z-10">
+              <DropDownPicker
+                containerStyle={{
+                  marginTop: 4,
+                  marginBottom: 4,
+                }}
+                textStyle={{
+                  fontSize: 18,
+                  lineHeight: 28,
+                  color: setDropDownValue != null ? "#000000" : "#808080",
+                }}
+                style={{
+                  borderRadius: 12,
+                  borderWidth: 1,
+                  width: 288,
+                  height: 64,
+                  borderColor: " #d9d9d9",
+                  padding: 16,
+                }}
+                placeholder="Service Duration"
+                open={openDropDown}
+                value={dropDownValue}
+                items={items}
+                setOpen={setOpenDropDown}
+                setValue={setDropDownValue}
+                setItems={setItems}
+              />
+            </View>
+          )}
           <View className=" center mb-4 mt-2 flex flex-row items-center justify-center"></View>
           <View className="mx-auto my-2 mb-10 flex flex-row  content-center items-center justify-center rounded-lg bg-[#1dbaa7] px-3 py-1  shadow-sm">
-            <Pressable>
+            <Pressable
+              onPress={() => {
+                console.log(dropDownValue);
+              }}
+            >
               <SKText className="text-lg font-semibold text-white">
                 Add Product
               </SKText>
