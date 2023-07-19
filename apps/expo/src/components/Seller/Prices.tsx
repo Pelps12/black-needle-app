@@ -3,17 +3,29 @@ import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useAuth } from "@clerk/clerk-expo";
+import {
+  Feather,
+  MaterialCommunityIcons,
+  MaterialIcons,
+} from "@expo/vector-icons";
 
 import { type Category, type Price, type Image as PrismaImage } from "@acme/db";
 
 import SKTest from "../../components/Utils/SKText";
+import { trpc } from "../../utils/trpc";
 import Modal from "../Modal";
+import AddPricesModal from "./AddPricesModal";
 import AppointmentModal from "./AppointmentModal";
 
 const Prices = ({
   prices,
   sellerId,
+  categories,
 }: {
+  categories: (Category & {
+    Image: PrismaImage[];
+    prices: Price[];
+  })[];
   prices: (Category & {
     prices: Price[];
     Image: PrismaImage[];
@@ -21,8 +33,33 @@ const Prices = ({
   sellerId: string;
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
+  const { isSignedIn } = useAuth();
+  const [priceModalVisible, setPriceModalVisible] = useState(false);
+  const router = useRouter();
+
   return (
     <View className=" mt-2">
+      <Modal
+        modalVisible={priceModalVisible}
+        setModalVisible={setPriceModalVisible}
+        className=""
+      >
+        <AddPricesModal categories={categories} />
+      </Modal>
+      <Pressable
+        onPress={() => {
+          isSignedIn
+            ? setPriceModalVisible(true)
+            : router.replace("auth/signin");
+        }}
+      >
+        <Feather
+          name="plus-circle"
+          style={{ marginLeft: 350, marginBottom: 5 }}
+          size={24}
+          color="black"
+        />
+      </Pressable>
       <FlatList
         contentContainerStyle={{ paddingBottom: 20 }}
         ListFooterComponent={<View style={{ height: 320 }} />}
@@ -71,45 +108,70 @@ const PriceComponent = ({
 }) => {
   const router = useRouter();
   const { isSignedIn } = useAuth();
+  const catDeletePrice = trpc.price.deletePrice.useMutation();
   return (
-    <View className="mx-2 my-5 mt-2 flex-row items-center  justify-between rounded-lg px-2 py-4 shadow-lg">
-      <Modal
-        modalVisible={modalVisible}
-        setModalVisible={setModalVisible}
-        className=""
-      >
-        <AppointmentModal
-          sellerId={sellerId}
-          priceId={price.id}
-          isOpen={modalVisible}
-          closeModal={() => setModalVisible(false)}
-        />
-      </Modal>
-      <Image source={image?.link ?? ":)"} className="h-40 w-40 rounded-md" />
-      <View className="flex w-48 items-end">
-        <SKTest
-          className=" text-right text-xl font-semibold"
-          fontWeight="semi-bold"
+    <>
+      <View className="mx-2 my-5 mt-2 flex-row items-center  justify-between rounded-lg px-2 py-4 shadow-lg">
+        <Modal
+          modalVisible={modalVisible}
+          setModalVisible={setModalVisible}
+          className=""
         >
-          {price.name}
-        </SKTest>
-        <SKTest className="text-right" fontWeight="semi-bold">
-          ${price.amount}
-        </SKTest>
-        <Pressable
-          className={`my-2 w-24 content-center items-center justify-center  rounded-md bg-[#1dbaa7] text-right   text-black shadow-sm`}
-          onPress={() =>
-            isSignedIn ? setModalVisible(true) : router.replace("auth/signin")
-          }
-        >
+          <AppointmentModal
+            sellerId={sellerId}
+            priceId={price.id}
+            isOpen={modalVisible}
+            closeModal={() => setModalVisible(false)}
+          />
+        </Modal>
+        <Image source={image?.link ?? ":)"} className="h-40 w-40 rounded-md" />
+        <View className="flex w-48 items-end">
           <SKTest
-            className="text-md px-4 py-2 text-center font-semibold text-white"
+            className=" text-right text-xl font-semibold"
             fontWeight="semi-bold"
           >
-            Book
+            {price.name}
           </SKTest>
-        </Pressable>
+          <SKTest className="text-right" fontWeight="semi-bold">
+            ${price.amount}
+          </SKTest>
+          <Pressable
+            className={`my-2 w-24 content-center items-center justify-center  rounded-md bg-[#1dbaa7] text-right   text-black shadow-sm`}
+            onPress={() =>
+              isSignedIn ? setModalVisible(true) : router.replace("auth/signin")
+            }
+          >
+            <SKTest
+              className="text-md px-4 py-2 text-center font-semibold text-white"
+              fontWeight="semi-bold"
+            >
+              Book
+            </SKTest>
+          </Pressable>
+          <View>
+            <View className="flex-row gap-3">
+              <Pressable>
+                <Feather style={{}} name="edit-2" size={24} color="black" />
+              </Pressable>
+              <Pressable
+                onPress={async () => {
+                  await catDeletePrice.mutateAsync({
+                    priceId: price.id,
+                  });
+                  // const { data, isSuccess } = await catDeletePrice.refetch();
+                }}
+              >
+                <MaterialCommunityIcons
+                  style={{}}
+                  name="delete-outline"
+                  size={24}
+                  color="black"
+                />
+              </Pressable>
+            </View>
+          </View>
+        </View>
       </View>
-    </View>
+    </>
   );
 };
