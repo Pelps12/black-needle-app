@@ -65,11 +65,10 @@ export const chatRouter = router({
             const ticket = await expo.sendPushNotificationsAsync([
               {
                 to: expoTokens,
-                title: initiator.user.name || "Unknown User",
+                title: "Sakpa",
                 body: `${
                   initiator.user.name ?? "Someone"
-                } wants to start a chat with you\n
-                    Go to ${env.NEXT_PUBLIC_URL}/chat to respond`,
+                } wants to start a chat with you`,
                 sound: "default",
                 data: {
                   senderId: initiator.userId,

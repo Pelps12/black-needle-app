@@ -85,8 +85,7 @@ const reminder = async (req: NextApiRequest, res: NextApiResponse) => {
 						const expoPackets: ExpoPushMessage[] = expoApts.map((appointments) => ({
 							to: expoTokens,
 							title: appointments.user.name || 'Unknown User',
-							body: `${appointments.user.name ?? 'Someone'} wants to start a chat with you\n
-                    Go to ${env.NEXT_PUBLIC_URL}/chat to respond`,
+							body: `You have an appointment in under 1 hour`,
 							sound: 'default',
 							data: {
 								senderId: appointments.userId
