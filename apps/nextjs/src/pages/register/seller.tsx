@@ -1,7 +1,7 @@
 import { colourOptions as colorOptions, ServicesOption } from '../../utils/data';
 import { trpc } from '../../utils/trpc';
 import { env } from '@acme/env-config/env';
-import { useAuth } from '@clerk/nextjs';
+import { RedirectToSignIn, SignedIn, SignedOut, useAuth } from '@clerk/nextjs';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { NextSeo } from 'next-seo';
 import { useRouter } from 'next/router';
@@ -155,168 +155,175 @@ const SellerRegister = () => {
 
 	return (
 		<>
-			<NextSeo
-				title="Register with Sakpa"
-				description="Get services from fellow students on your campus."
-				openGraph={{
-					title: 'Seller Registration | Sakpa',
-					description: 'Get to offering your services stress free',
-					url: `https://${env.NEXT_PUBLIC_URL}`,
-					images: [
-						{
-							url: 'https://ucarecdn.com/2af64698-0319-4e34-9182-35e82d37cdf5/',
-							alt: 'Benefits for Seller'
-						}
-					]
-				}}
-			/>
-			<div className={`max-w-md mx-auto sm:shadow-md rounded-md drop-shadow-sm p-4`}>
-				<form>
-					<div className="form-control">
-						<label className="label">
-							<span className="label-text">Phone Number</span>
-						</label>
-						<input
-							className={`input   ${
-								!errors.phone_number?.message
-									? 'input-bordered focus:input-secondary'
-									: 'input-error focus:input-error'
-							}`}
-							/* onFocus={() => errors.name?.message === null} */
-							type="text"
-							placeholder="Phone Number"
-							{...register('phone_number')}
-						/>
-						{errors.phone_number?.message && (
-							<p className="pt-2 text-error">{errors.phone_number?.message}</p>
-						)}
-					</div>
-
-					<div className="form-control">
-						<label className="label">
-							<span className="label-text">School</span>
-						</label>
-						<select
-							className={`select w-2/3  ${
-								!errors.school?.message
-									? 'input-bordered focus:select-secondary'
-									: 'select-error focus:select-error'
-							}`}
-							placeholder="Email Address"
-							autoComplete="school"
-							{...register('school')}
-						>
-							<option disabled>School</option>
-							<option>UT Dallas</option>
-							<option>UT Arlington</option>
-							<option>UNT</option>
-						</select>
-						{errors.school?.message && <p className="pt-2 text-error">{errors.school?.message}</p>}
-					</div>
-
-					<div className="form-control ">
-						<label className="label">
-							<span className="label-text">Services</span>
-						</label>
-						<label htmlFor="add-tag-input ">
-							<Controller
-								control={control}
-								defaultValue={[]}
-								name="services"
-								render={({ field: { onChange, value, ref } }) => (
-									<CreatableSelect
-										isMulti
-										ref={ref}
-										options={colorOptions}
-										components={animatedComponents}
-										className="basic-multi-select"
-										classNamePrefix="select"
-										onChange={(val) => onChange(val.map((c) => c.value))}
-										styles={customStyle}
-									/>
-								)}
-							/>
-						</label>
-					</div>
-
-					<div className="form-control">
-						<label className="label">
-							<span className="label-text">Down Payment</span>
-						</label>
-						<div className="relative mt-1 rounded-md shadow-sm flex">
+			<SignedIn>
+				<NextSeo
+					title="Register with Sakpa"
+					description="Get services from fellow students on your campus."
+					openGraph={{
+						title: 'Seller Registration | Sakpa',
+						description: 'Get to offering your services stress free',
+						url: `https://${env.NEXT_PUBLIC_URL}`,
+						images: [
+							{
+								url: 'https://ucarecdn.com/2af64698-0319-4e34-9182-35e82d37cdf5/',
+								alt: 'Benefits for Seller'
+							}
+						]
+					}}
+				/>
+				<div className={`max-w-md mx-auto sm:shadow-md rounded-md drop-shadow-sm p-4`}>
+					<form>
+						<div className="form-control">
+							<label className="label">
+								<span className="label-text">Phone Number</span>
+							</label>
 							<input
-								min="0"
-								max="20"
-								defaultValue={'0'}
-								type="number"
-								className={`input mb-4 input-ghost input-primary focus:outline-none w-full placeholder-gray-500 block  rounded-md border-gray-300 pl-7 pr-12 sm:text-sm ${
-									!errors.downPaymentPercentage?.message
+								className={`input   ${
+									!errors.phone_number?.message
 										? 'input-bordered focus:input-secondary'
 										: 'input-error focus:input-error'
 								}`}
-								placeholder="0"
-								value={downPaymentValue}
-								{...register('downPaymentPercentage', {
-									valueAsNumber: true,
-									required: false
-								})}
-								onChange={(e) => handleChangeDownPayment(e, e.target.value)}
+								/* onFocus={() => errors.name?.message === null} */
+								type="text"
+								placeholder="Phone Number"
+								{...register('phone_number')}
 							/>
-							{/* <div className="pointer-events-none inset-y-3  sm:inset-y-3.5  absolute  sm:inset-x-10 inset-x-12  flex"></div> */}
-							<div
-								className={`pointer-events-none inset-y-3  sm:inset-y-3.5  absolute  sm:inset-x-${viewXInset} inset-x-${viewXInset}  flex`}
-							>
-								<span className="text-[black]  bottom-3.7 absolute ">%</span>
-							</div>
+							{errors.phone_number?.message && (
+								<p className="pt-2 text-error">{errors.phone_number?.message}</p>
+							)}
 						</div>
 
-						{errors.downPaymentPercentage?.message && (
-							<p className="pt-2 text-error">{errors.downPaymentPercentage?.message}</p>
-						)}
-					</div>
-
-					<div className="form-control mt-6">
-						<button
-							onClick={handleSubmit((d) => {
-								registerUser(d);
-							})}
-							className={`btn ${mutation.isLoading ? 'btn-disabled' : ' btn-primary'}`}
-						>
-							{mutation.isLoading && (
-								<svg
-									className="mr-3 h-5 w-5 animate-spin text-white"
-									xmlns="http://www.w3.org/2000/svg"
-									fill="none"
-									viewBox="0 0 24 24"
-								>
-									<circle
-										className="opacity-25"
-										cx="12"
-										cy="12"
-										r="10"
-										stroke="currentColor"
-										strokeWidth="4"
-									></circle>
-									<path
-										className="opacity-75"
-										fill="currentColor"
-										d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-									></path>
-								</svg>
+						<div className="form-control">
+							<label className="label">
+								<span className="label-text">School</span>
+							</label>
+							<select
+								className={`select w-2/3  ${
+									!errors.school?.message
+										? 'input-bordered focus:select-secondary'
+										: 'select-error focus:select-error'
+								}`}
+								placeholder="Email Address"
+								autoComplete="school"
+								{...register('school')}
+							>
+								<option disabled>School</option>
+								<option>UT Dallas</option>
+								<option>UT Arlington</option>
+								<option>UNT</option>
+							</select>
+							{errors.school?.message && (
+								<p className="pt-2 text-error">{errors.school?.message}</p>
 							)}
-							REGISTER
-						</button>
-					</div>
+						</div>
 
-					<div className="border-2 rounded-md border-gray-300 mt-6 flex items-center p-6 gap-4">
-						<p className="text-sm">
-							We use Stripe to make sure you get paid on time and to keep your personal bank and
-							details secure. Click <strong>Register</strong> to set up your payments on Stripe.
-						</p>
-						<img src="/stripe.svg" alt="Stripe" className="h-16 w-32" />
-					</div>
-				</form>
-			</div>
+						<div className="form-control ">
+							<label className="label">
+								<span className="label-text">Services</span>
+							</label>
+							<label htmlFor="add-tag-input ">
+								<Controller
+									control={control}
+									defaultValue={[]}
+									name="services"
+									render={({ field: { onChange, value, ref } }) => (
+										<CreatableSelect
+											isMulti
+											ref={ref}
+											options={colorOptions}
+											components={animatedComponents}
+											className="basic-multi-select"
+											classNamePrefix="select"
+											onChange={(val) => onChange(val.map((c) => c.value))}
+											styles={customStyle}
+										/>
+									)}
+								/>
+							</label>
+						</div>
+
+						<div className="form-control">
+							<label className="label">
+								<span className="label-text">Down Payment</span>
+							</label>
+							<div className="relative mt-1 rounded-md shadow-sm flex">
+								<input
+									min="0"
+									max="20"
+									defaultValue={'0'}
+									type="number"
+									className={`input mb-4 input-ghost input-primary focus:outline-none w-full placeholder-gray-500 block  rounded-md border-gray-300 pl-7 pr-12 sm:text-sm ${
+										!errors.downPaymentPercentage?.message
+											? 'input-bordered focus:input-secondary'
+											: 'input-error focus:input-error'
+									}`}
+									placeholder="0"
+									value={downPaymentValue}
+									{...register('downPaymentPercentage', {
+										valueAsNumber: true,
+										required: false
+									})}
+									onChange={(e) => handleChangeDownPayment(e, e.target.value)}
+								/>
+								{/* <div className="pointer-events-none inset-y-3  sm:inset-y-3.5  absolute  sm:inset-x-10 inset-x-12  flex"></div> */}
+								<div
+									className={`pointer-events-none inset-y-3  sm:inset-y-3.5  absolute  sm:inset-x-${viewXInset} inset-x-${viewXInset}  flex`}
+								>
+									<span className="text-[black]  bottom-3.7 absolute ">%</span>
+								</div>
+							</div>
+
+							{errors.downPaymentPercentage?.message && (
+								<p className="pt-2 text-error">{errors.downPaymentPercentage?.message}</p>
+							)}
+						</div>
+
+						<div className="form-control mt-6">
+							<button
+								onClick={handleSubmit((d) => {
+									registerUser(d);
+								})}
+								className={`btn ${mutation.isLoading ? 'btn-disabled' : ' btn-primary'}`}
+							>
+								{mutation.isLoading && (
+									<svg
+										className="mr-3 h-5 w-5 animate-spin text-white"
+										xmlns="http://www.w3.org/2000/svg"
+										fill="none"
+										viewBox="0 0 24 24"
+									>
+										<circle
+											className="opacity-25"
+											cx="12"
+											cy="12"
+											r="10"
+											stroke="currentColor"
+											strokeWidth="4"
+										></circle>
+										<path
+											className="opacity-75"
+											fill="currentColor"
+											d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+										></path>
+									</svg>
+								)}
+								REGISTER
+							</button>
+						</div>
+
+						<div className="border-2 rounded-md border-gray-300 mt-6 flex items-center p-6 gap-4">
+							<p className="text-sm">
+								We use Stripe to make sure you get paid on time and to keep your personal bank and
+								details secure. Click <strong>Register</strong> to set up your payments on Stripe.
+							</p>
+							<img src="/stripe.svg" alt="Stripe" className="h-16 w-32" />
+						</div>
+					</form>
+				</div>
+			</SignedIn>
+			<SignedOut>
+				<RedirectToSignIn />
+			</SignedOut>
 		</>
 	);
 };
