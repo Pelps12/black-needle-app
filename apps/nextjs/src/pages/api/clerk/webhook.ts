@@ -11,6 +11,19 @@ export const config = {
 	}
 };
 
+const getName: any = (data: any) => {
+	if (data.first_name || data.last_name) {
+		const first_name = data.first_name;
+		if (data.last_name) {
+			return first_name + ' ' + data.last_name;
+		} else {
+			return first_name;
+		}
+	} else {
+		return data.email_addresses[0].email_address;
+	}
+};
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 	const payload = (await buffer(req)).toString();
 	const headers = req.headers as Record<string, string>;
@@ -30,14 +43,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 						},
 						update: {
 							id: msg.data.id,
-							name: msg.data.first_name + ' ' + msg.data.last_name,
+							name: getName(msg.data),
 							image: msg.data.profile_image_url,
 							role: 'BUYER',
 							email: msg.data.email_addresses[0].email_address
 						},
 						create: {
 							id: msg.data.id,
-							name: msg.data.first_name + ' ' + msg.data.last_name,
+							name: getName(msg.data),
 							image: msg.data.profile_image_url,
 							role: 'BUYER',
 							email: msg.data.email_addresses[0].email_address
