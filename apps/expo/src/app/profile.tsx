@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Alert,
   Button,
@@ -71,6 +71,11 @@ const Profile = () => {
       let fileType = uriParts && uriParts[uriParts.length - 1];
       const file = image ? await dataURItoBlob(image) : null;
       console.log(file?.size);
+      const formdata = new FormData();
+      if(file){
+        formdata.append("userId", user.id)
+        formdata.append("file", file)
+      }
       const [userResult, imageResult] = await Promise.all([
         username
           ? updateUser.mutateAsync({
@@ -78,12 +83,15 @@ const Profile = () => {
             })
           : [],
         file
-          ? user.setProfileImage({
-              file,
-            })
+          ? fetch(`${Constants.expoConfig?.extra?.PUBLIC_URL as string}/api/clerk/profile`,{
+            method: "POST",
+            body: formdata
+          })
           : [],
       ]);
-      console.log(imageResult);
+      if(file) {
+        (imageResult as Response).json().then((result: any) => console.log(result))
+      }
       setImage(undefined);
       setUsername(undefined);
       user.reload();
@@ -129,6 +137,10 @@ const Profile = () => {
     );
   };
 
+  useEffect(() => {
+    console.log(username)
+  }, [editMode])
+
   const _handlePressButtonAsync = async () => {
     await openBrowserAsync(`${Constants.expoConfig?.extra?.PUBLIC_URL as string}/register/seller?intiator=app`);
   };
@@ -151,7 +163,7 @@ const Profile = () => {
             </Pressable>
           ) : (
             <View className="mx-3 flex-row gap-2">
-              <Pressable onPress={handleSubmit}>
+              <Pressable onPress={(e) => handleSubmit(e)}>
                 <AntDesign name="save" size={30} color="#1dbaa7" />
               </Pressable>
 
