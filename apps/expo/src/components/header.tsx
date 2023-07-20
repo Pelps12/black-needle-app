@@ -31,9 +31,11 @@ const Header = () => {
           source={require("../../assets/shopping_cart.svg")}
           alt=":)"
         /> */}
-        {isLoaded && isSignedIn && <Link href="/chat">
-          <Ionicons name="ios-chatbox-outline" size={24} color="black" />
-        </Link>}
+        {isLoaded && isSignedIn && (
+          <Link href="/chat">
+            <Ionicons name="ios-chatbox-outline" size={24} color="black" />
+          </Link>
+        )}
 
         <Link href="/profile">
           <Image

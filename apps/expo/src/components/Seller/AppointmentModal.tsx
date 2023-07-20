@@ -14,6 +14,7 @@ import DropDownPicker from "react-native-dropdown-picker";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import type { Day } from "@prisma/client";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import type { inferRouterOutputs } from "@trpc/server";
 import {
   eachDayOfInterval,
@@ -67,6 +68,7 @@ const BuyerAppointment = ({
   const [open, setOpen] = useState(false);
 
   const [selectedDay, setSelectedDay] = useState(today);
+  const tabBarheight = useBottomTabBarHeight();
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot>();
   const [userSelectedDay, setUserSelectedDay] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(format(today, "MMM-yyyy"));
@@ -162,7 +164,10 @@ const BuyerAppointment = ({
   }
   return (
     <>
-      <SafeAreaView className="mx-6 my-auto flex h-auto  rounded-lg bg-[#fafafa] z-0">
+      <SafeAreaView
+        style={{ paddingBottom: tabBarheight }}
+        className=" z-0 mx-6 my-auto flex  h-auto rounded-lg bg-[#fafafa]"
+      >
         <View className="">
           <View className="px-4">
             <View className=" mb-4 mt-2 flex flex-row items-center">

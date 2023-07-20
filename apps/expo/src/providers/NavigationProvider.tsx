@@ -26,16 +26,15 @@ const NavigationProvider = () => {
           tabBarBackground : () => <View className="bg-[#F2f2f2]"/>,
           header: () => <Header />,
           headerShadowVisible: false,
-          
+
           tabBarStyle: {
             backgroundColor: "#d9d9d9",
-
             height: 80,
           },
           tabBarIconStyle: {
             marginTop: 10,
             color: "#000",
-            padding: 0
+            padding: 0,
           },
           tabBarActiveTintColor: "#1dbaa7",
         }}

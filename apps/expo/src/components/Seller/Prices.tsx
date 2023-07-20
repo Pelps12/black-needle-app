@@ -16,6 +16,7 @@ import { trpc } from "../../utils/trpc";
 import Modal from "../Modal";
 import AddPricesModal from "./AddPricesModal";
 import AppointmentModal from "./AppointmentModal";
+import EditPricesModal from "./EditPricesModal";
 
 const Prices = ({
   prices,
@@ -35,37 +36,53 @@ const Prices = ({
   setCategories: any;
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
-  const { isSignedIn } = useAuth();
+  const { userId, isSignedIn } = useAuth();
   const [priceModalVisible, setPriceModalVisible] = useState(false);
   const router = useRouter();
+  const [openEditModal, setOpenEditModal] = useState(false);
+  const getCat = trpc.user.getCategories.useQuery(
+    {
+      id: sellerId,
+    },
+    // {
+    //   refetchInterval: undefined,
+    //   enabled: false,
+    // },
+  );
 
   return (
     <View className=" mt-2">
-      <Modal
-        modalVisible={priceModalVisible}
-        setModalVisible={setPriceModalVisible}
-        className=""
-      >
-        <AddPricesModal
-          setCategories={setCategories}
-          prices={prices}
-          categories={categories}
-        />
-      </Modal>
-      <Pressable
-        onPress={() => {
-          isSignedIn
-            ? setPriceModalVisible(true)
-            : router.replace("auth/signin");
-        }}
-      >
-        <Feather
-          name="plus-circle"
-          style={{ marginLeft: 350, marginBottom: 5 }}
-          size={24}
-          color="black"
-        />
-      </Pressable>
+      {isSignedIn && userId === sellerId ? (
+        <>
+          <Modal
+            modalVisible={priceModalVisible}
+            setModalVisible={setPriceModalVisible}
+            className=""
+          >
+            <AddPricesModal
+              getCat={getCat}
+              setCategories={setCategories}
+              prices={prices}
+              categories={categories}
+              closeModal={() => setPriceModalVisible(false)}
+            />
+          </Modal>
+          <Pressable
+            onPress={() => {
+              isSignedIn
+                ? setPriceModalVisible(true)
+                : router.replace("auth/signin");
+            }}
+          >
+            <Feather
+              name="plus-circle"
+              style={{ marginLeft: 350, marginBottom: 5 }}
+              size={24}
+              color="black"
+            />
+          </Pressable>
+        </>
+      ) : null}
       <FlatList
         contentContainerStyle={{ paddingBottom: 20 }}
         ListFooterComponent={<View style={{ height: 320 }} />}
@@ -81,6 +98,11 @@ const Prices = ({
             )}
             renderItem={({ item }) => (
               <PriceComponent
+                categories={categories}
+                setOpenEditModal={setOpenEditModal}
+                openEditModal={openEditModal}
+                setCategories={setCategories}
+                getCat={getCat}
                 price={item}
                 image={category.Image[0]}
                 modalVisible={modalVisible}
@@ -105,19 +127,35 @@ const PriceComponent = ({
   modalVisible,
   setModalVisible,
   sellerId,
+  getCat,
+  setCategories,
+  setOpenEditModal,
+  openEditModal,
+  categories,
 }: {
+  categories: (Category & {
+    Image: PrismaImage[];
+    prices: Price[];
+  })[];
   price: Price;
   image?: PrismaImage;
   modalVisible: boolean;
   setModalVisible: (modalVisible: boolean) => void;
   sellerId: string;
+  getCat: any;
+  setCategories: any;
+  setOpenEditModal: any;
+  openEditModal: any;
 }) => {
   const router = useRouter();
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, userId } = useAuth();
   const catDeletePrice = trpc.price.deletePrice.useMutation();
+
+  const [editPriceModalVisible, setEditPriceModalVisible] = useState(false);
+
   return (
     <>
-      <View className="mx-2 my-5 mt-2 flex-row items-center  justify-between rounded-lg px-2 py-4 shadow-lg">
+      <View className=" mx-2 my-5 mt-2 flex-row items-center  justify-between rounded-lg px-2 py-4 shadow-lg">
         <Modal
           modalVisible={modalVisible}
           setModalVisible={setModalVisible}
@@ -155,26 +193,60 @@ const PriceComponent = ({
             </SKTest>
           </Pressable>
           <View>
-            <View className="flex-row gap-3">
-              <Pressable>
-                <Feather style={{}} name="edit-2" size={24} color="black" />
-              </Pressable>
-              <Pressable
-                onPress={async () => {
-                  await catDeletePrice.mutateAsync({
-                    priceId: price.id,
-                  });
-                  // const { data, isSuccess } = await catDeletePrice.refetch();
-                }}
-              >
-                <MaterialCommunityIcons
-                  style={{}}
-                  name="delete-outline"
-                  size={24}
-                  color="black"
-                />
-              </Pressable>
-            </View>
+            {isSignedIn && sellerId === userId ? (
+              <>
+                <View className="flex-row gap-3">
+                  <Modal
+                    modalVisible={editPriceModalVisible}
+                    setModalVisible={setEditPriceModalVisible}
+                  >
+                    <EditPricesModal
+                      getCat={getCat}
+                      setCategories={setCategories}
+                      categories={categories}
+                      price={price}
+                      closeModal={() => setEditPriceModalVisible(false)}
+                    ></EditPricesModal>
+                  </Modal>
+
+                  <Pressable
+                    onPress={() => {
+                      setOpenEditModal(!openEditModal);
+                      console.log(price);
+
+                      setEditPriceModalVisible(!editPriceModalVisible);
+                    }}
+                  >
+                    <Feather style={{}} name="edit-2" size={24} color="black" />
+                  </Pressable>
+                  <Pressable
+                    onPress={async () => {
+                      await catDeletePrice.mutateAsync(
+                        {
+                          priceId: price.id,
+                        },
+                        {
+                          onSuccess: async () => {
+                            const { data, isSuccess } = await getCat.refetch();
+                            if (isSuccess) {
+                              setCategories(data?.user?.seller?.Category);
+                            }
+                          },
+                        },
+                      );
+                      // const { data, isSuccess } = await catDeletePrice.refetch();
+                    }}
+                  >
+                    <MaterialCommunityIcons
+                      style={{}}
+                      name="delete-outline"
+                      size={24}
+                      color="black"
+                    />
+                  </Pressable>
+                </View>
+              </>
+            ) : null}
           </View>
         </View>
       </View>
