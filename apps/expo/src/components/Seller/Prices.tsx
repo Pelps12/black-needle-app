@@ -234,7 +234,6 @@ const PriceComponent = ({
                           },
                         },
                       );
-                      // const { data, isSuccess } = await catDeletePrice.refetch();
                     }}
                   >
                     <MaterialCommunityIcons
