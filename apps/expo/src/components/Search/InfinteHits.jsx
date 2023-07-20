@@ -12,7 +12,7 @@ export function InfiniteHits({ hitComponent: Hit, ...props }) {
       keyExtractor={(item, idx) => idx.toString()}
       ItemSeparatorComponent={() => <View style={styles.separator} />}
       contentContainerStyle={{ paddingBottom: 150 }}
-      ListFooterComponent={<View style={{ height: 200 }} />}
+      ListFooterComponent={<View style={{ height: 110 }} />}
       renderItem={({ item }) => (
         <View style={styles.item} className="p-3">
           <Hit result={item} />

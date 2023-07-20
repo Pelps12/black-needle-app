@@ -5,6 +5,7 @@ import { useAuth, useUser } from "@clerk/clerk-expo";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 
 import Header from "../components/header";
+import { View } from "react-native";
 
 const NavigationProvider = () => {
   const { isSignedIn, isLoaded } = useUser();
@@ -14,25 +15,22 @@ const NavigationProvider = () => {
   return (
     <>
       <Tabs
+      sceneContainerStyle={{
+        backgroundColor: "#f2f2f2"
+      }}
+      
         screenOptions={{
           headerStyle: {
             backgroundColor: "#F2F2F2",
           },
+          tabBarBackground : () => <View className="bg-[#F2f2f2]"/>,
           header: () => <Header />,
           headerShadowVisible: false,
           
           tabBarStyle: {
             backgroundColor: "#d9d9d9",
-            borderRadius: 20,
-            left: 10,
-            right: 10,
-            bottom: 10,
-            elevation: 0,
-            position: "absolute",
 
-            height: 75,
-            paddingTop: 10,
-            marginBottom: 0
+            height: 80,
           },
           tabBarIconStyle: {
             marginTop: 10,

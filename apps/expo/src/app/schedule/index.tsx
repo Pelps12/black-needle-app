@@ -120,7 +120,6 @@ const SellerPage = () => {
           }
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ paddingBottom: 170 }}
-          ListFooterComponent={<View style={{ height: 100 }} />}
           renderItem={({ item }) => (
             <>
               {activeTab === "APPOINTMENTS" ? (

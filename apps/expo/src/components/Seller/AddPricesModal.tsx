@@ -17,7 +17,7 @@ import SKTextInput from "../Utils/SKTextInput";
 // import SKText from "@components/Utils/SKText";
 // import SKTextInput from "@components/Utils/SKTextInput";
 
-const AddPricesModal = ({ setCategories, categories, prices }) => {
+const AddPricesModal: React.FC<any> = ({ setCategories, categories, prices }) => {
   const [productName, setProductName] = useState("");
   const [openDropDown, setOpenDropDown] = useState(false);
   const [dropDownValue, setDropDownValue] = useState(null);
@@ -47,13 +47,13 @@ const AddPricesModal = ({ setCategories, categories, prices }) => {
     { label: "", value: "" },
   ]);
   useState(() => {
-    const namesArray = categories.map((item) => ({
+    const namesArray = categories.map((item: any) => ({
       label: item.name,
       value: item.id,
     }));
     setListCategoryNames(namesArray);
   });
-  const handleNumberChange = (text) => {
+  const handleNumberChange = (text: string) => {
     const numericText = text.replace(/[^0-9.]/g, "");
     setAmount(numericText);
   };
