@@ -14,6 +14,7 @@ import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { useAuth } from "@clerk/clerk-expo";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 
 import dataURItoBlob from "../../utils/dataURItoBlob";
 import { trpc } from "../../utils/trpc";
@@ -50,6 +51,7 @@ const BlankCategory = ({
   const [modalVisible, setModalVisible] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [pressedImage, setPressedImage] = useState("");
+  const tabBarheight = useBottomTabBarHeight();
   const [categoryTitle, onChangecategoryTitle] = React.useState("");
   const [selectedImage, setImage] = useState("");
   const [disableSaveButton, setDisableSaveButton] = useState(true);

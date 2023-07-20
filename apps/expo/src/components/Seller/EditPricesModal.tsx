@@ -14,26 +14,31 @@ import { trpc } from "../../utils/trpc";
 import SKText from "../Utils/SKText";
 import SKTextInput from "../Utils/SKTextInput";
 
-// import SKText from "@components/Utils/SKText";
-// import SKTextInput from "@components/Utils/SKTextInput";
-
-const AddPricesModal = ({
+const EditPricesModal = ({
   closeModal,
-  getCat,
   setCategories,
+  getCat,
   categories,
-  prices,
+  price,
 }) => {
-  const [productName, setProductName] = useState("");
-  const [openDropDown, setOpenDropDown] = useState(false);
-  const [dropDownValue, setDropDownValue] = useState(null);
-  const createPrice = trpc.price.createPrice.useMutation();
-  const [openDropDownDuration, setOpenDropDownDuration] = useState(false);
-  const [dropDownValueDuration, setDropDownValueDuration] = useState(null);
+  const [editProductName, setEditProductName] = useState(price.name);
+  const [editAmount, setEditAmount] = useState(price.amount);
+  const searchResult = categories.filter((item) =>
+    item.id.includes(price.categoryId),
+  );
+  console.log();
+
+  const [editCategoriesDropDownValue, setEditCategoriesDropDownValue] =
+    useState(searchResult[0].name);
+
   const [openDropDownCategories, setOpenDropDownCategories] = useState(false);
-  const [dropDownValueCategories, setDropDownValueCategories] = useState(null);
-  const [errorMessage, setErrorMessage] = useState<string>();
-  const [amount, setAmount] = useState("0.00");
+  const [openDropDownDuration, setOpenDropDownDuration] = useState(false);
+  const [dropDownValueDuration, setDropDownValueDuration] = useState(
+    price.duration,
+  );
+  const updatePrice = trpc.price.updatePrice.useMutation();
+  const [openDropDown, setOpenDropDown] = useState(false);
+  const [dropDownValue, setDropDownValue] = useState(price.type);
   const [items, setItems] = useState([
     { label: "GOOD", value: "GOOD" },
     { label: "SERVICE", value: "SERVICE" },
@@ -53,6 +58,7 @@ const AddPricesModal = ({
   const [listCategoryNames, setListCategoryNames] = useState([
     { label: "", value: "" },
   ]);
+
   useState(() => {
     const namesArray = categories.map((item) => ({
       label: item.name,
@@ -60,24 +66,19 @@ const AddPricesModal = ({
     }));
     setListCategoryNames(namesArray);
   });
-  const handleNumberChange = (text) => {
-    const numericText = text.replace(/[^0-9.]/g, "");
-    setAmount(numericText);
-  };
-  const handleSubmitButton = async () => {
+  const handleEditSubmitButton = async () => {
     if (
-      productName === "" ||
+      editProductName === "" ||
       dropDownValue === null ||
-      dropDownValueCategories === null ||
-      amount === "0.00"
+      editCategoriesDropDownValue === null ||
+      editAmount === "0.00"
     ) {
-      setErrorMessage("Error: Required field(s) missing.");
-      console.log(amount);
+      console.log(editAmount);
     } else if (
-      productName != "" ||
+      editProductName != "" ||
       dropDownValue != null ||
-      dropDownValueCategories != null ||
-      amount != "0.00"
+      editCategoriesDropDownValue != null ||
+      editAmount != "0.00"
     ) {
       let checkIfDuration = false;
       if (dropDownValue === "SERVICE" && dropDownValueDuration != null) {
@@ -91,12 +92,12 @@ const AddPricesModal = ({
         checkIfDuration = true;
       }
       if (checkIfDuration) {
-        const newProductData = [...prices];
-        await createPrice.mutateAsync(
+        console.log("In");
+        await updatePrice.mutateAsync(
           {
-            categoryId: dropDownValueCategories,
-            amount: parseFloat(amount),
-            name: productName,
+            priceId: price.id,
+            amount: parseFloat(editAmount),
+            name: editProductName,
             type: dropDownValue,
             ...(dropDownValueDuration != null &&
               dropDownValueDuration != undefined &&
@@ -111,7 +112,7 @@ const AddPricesModal = ({
               if (isSuccess) {
                 setCategories(data?.user?.seller?.Category);
                 closeModal();
-                setErrorMessage("");
+                console.log("in");
               }
 
               // setPrice([...price, data.price]);
@@ -119,25 +120,21 @@ const AddPricesModal = ({
             },
           },
         );
-        console.log(newProductData[0].prices);
       }
     }
   };
-
+  const handleNumberChange = (text) => {
+    const numericText = text.replace(/[^0-9.]/g, "");
+    setEditAmount(numericText);
+  };
   return (
     <SafeAreaView className="mx-6 my-auto flex h-auto  items-center justify-center rounded-lg bg-[#fafafa]">
       <View className="">
         <View className="px-4">
           <View className=" center mb-4 mt-2 flex flex-row items-center justify-center"></View>
-
-          {errorMessage && (
-            <SKText className="rounded bg-red-500 p-2 text-center text-white">
-              {errorMessage}
-            </SKText>
-          )}
           <View className="pb-4 pt-4">
             <Text className="text-center text-3xl  font-medium">
-              Add Product
+              Edit Product
             </Text>
           </View>
           <View>
@@ -145,21 +142,20 @@ const AddPricesModal = ({
               className=" my-1 block  h-16 w-72 rounded-xl border-2 border-[#d9d9d9] bg-gray-100 p-4 text-lg outline-none focus:text-gray-900"
               placeholder="Product Name"
               placeholderTextColor="gray"
-              value={productName}
-              onChangeText={(text) => setProductName(text)}
+              value={editProductName}
+              onChangeText={(text) => setEditProductName(text)}
             ></SKTextInput>
           </View>
           <View>
             <SKTextInput
-              style={{ color: amount != "0.00" ? "#000000" : "#808080" }}
+              style={{ color: editAmount != "0.00" ? "#000000" : "#808080" }}
               className=" my-1 block  h-16 w-72 rounded-xl border-2 border-[#d9d9d9] bg-gray-100 p-4 text-lg outline-none focus:text-gray-700"
-              value={`$${amount}`}
+              value={`$${editAmount}`}
               placeholder="0.00"
               keyboardType="numeric"
               onChangeText={handleNumberChange}
             ></SKTextInput>
           </View>
-
           <View className="z-30">
             <DropDownPicker
               containerStyle={{
@@ -169,7 +165,8 @@ const AddPricesModal = ({
               textStyle={{
                 fontSize: 18,
                 lineHeight: 28,
-                color: dropDownValueCategories != null ? "#000000" : "#808080",
+                color:
+                  editCategoriesDropDownValue != null ? "#000000" : "#808080",
               }}
               style={{
                 borderRadius: 12,
@@ -179,12 +176,12 @@ const AddPricesModal = ({
                 borderColor: " #d9d9d9",
                 padding: 16,
               }}
-              placeholder="Category"
+              placeholder={searchResult[0].name}
               open={openDropDownCategories}
-              value={dropDownValueCategories}
+              value={editCategoriesDropDownValue}
               items={listCategoryNames}
               setOpen={setOpenDropDownCategories}
-              setValue={setDropDownValueCategories}
+              setValue={setEditCategoriesDropDownValue}
               setItems={setListCategoryNames}
             />
           </View>
@@ -207,7 +204,7 @@ const AddPricesModal = ({
                 borderColor: " #d9d9d9",
                 padding: 16,
               }}
-              placeholder="Type of Product"
+              placeholder={price.type}
               open={openDropDown}
               value={dropDownValue}
               items={items}
@@ -236,7 +233,7 @@ const AddPricesModal = ({
                   borderColor: " #d9d9d9",
                   padding: 16,
                 }}
-                placeholder="Service Duration"
+                placeholder={price.duration}
                 open={openDropDownDuration}
                 value={dropDownValueDuration}
                 items={duration}
@@ -246,18 +243,18 @@ const AddPricesModal = ({
               />
             </View>
           )}
-          <View className=" center mb-4 mt-2 flex flex-row items-center justify-center"></View>
-          <View className="mx-auto my-2 mb-10 flex flex-row  content-center items-center justify-center rounded-lg bg-[#1dbaa7] px-3 py-1  shadow-sm">
-            <Pressable onPress={handleSubmitButton}>
-              <SKText className="text-lg font-semibold text-white">
-                Add Product
-              </SKText>
-            </Pressable>
-          </View>
+        </View>
+        <View className=" center mb-4 mt-2 flex flex-row items-center justify-center"></View>
+        <View className=" -z-10 mx-auto my-2 mb-10 flex flex-row  content-center items-center justify-center rounded-lg bg-[#1dbaa7] px-3 py-1  shadow-sm">
+          <Pressable onPress={handleEditSubmitButton}>
+            <SKText className="text-lg font-semibold text-white">
+              Save Changes
+            </SKText>
+          </Pressable>
         </View>
       </View>
     </SafeAreaView>
   );
 };
 
-export default AddPricesModal;
+export default EditPricesModal;
