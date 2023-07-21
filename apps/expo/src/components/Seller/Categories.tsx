@@ -158,12 +158,12 @@ const Category = ({
       alert("You did not select any image.");
     }
   };
-  const checkInputBoxChange = (newTitle) => {
+  const checkInputBoxChange = (newTitle: any) => {
     onChangecategoryTitle(newTitle);
-    const newCategory = [...categories];
+    const newCategory: any = [...categories];
     var categoryIndex;
     if (newCategory !== undefined) {
-      categoryIndex = newCategory.map((cate) => cate.id).indexOf(category.id);
+      categoryIndex = newCategory.map((cate: any) => cate.id).indexOf(category.id);
     }
     // setOldCategory(newCategory[categoryIndex].name);
     newCategory[categoryIndex].name = newTitle;
@@ -171,8 +171,8 @@ const Category = ({
       setCategories(newCategory);
     }
   };
-  const imageUpload = async (files) => {
-    const formData = new FormData();
+  const imageUpload = async (files: any) => {
+    const formData: any = new FormData();
     formData.append(
       "UPLOADCARE_PUB_KEY",
       Constants.expoConfig?.extra?.NEXT_PUBLIC_UPLOADCARE_PUB_KEY,
@@ -181,7 +181,7 @@ const Category = ({
 
     // formData.append("metadata[user]", uid);
 
-    files.forEach((file, index) => {
+    files.forEach((file: any, index: number) => {
       console.log("John Ojo");
       console.log(file);
       let uriParts = file.uri.split(".");
@@ -246,13 +246,13 @@ const Category = ({
             <Pressable
               onPress={async () => {
                 setEditButton(!editButton);
-                var categoryIndex;
+                var categoryIndex: any;
                 var imageIndex;
 
-                const newCategory = [...categories];
+                const newCategory: any = [...categories];
                 if (newCategory !== undefined) {
                   categoryIndex = newCategory
-                    .map((cate) => cate.id)
+                    .map((cate: any) => cate.id)
                     .indexOf(category.id);
                 }
                 console.log("here");
@@ -262,7 +262,7 @@ const Category = ({
                     name: newCategory[categoryIndex].name,
                   });
                 }
-                newCategory[categoryIndex].Image.map((image) =>
+                newCategory[categoryIndex].Image.map((image: any) =>
                   console.log(image),
                 );
                 console.log(oldCategory);
@@ -271,8 +271,8 @@ const Category = ({
                 const getFileObjects = async () => {
                   return Promise.all(
                     newCategory[categoryIndex].Image.filter(
-                      (image) => typeof image.link != "string",
-                    ).map((image) => dataURItoBlob(image.link.uri)),
+                      (image: any) => typeof image.link != "string",
+                    ).map((image: any) => dataURItoBlob(image.link.uri)),
                     // newCategory[categoryIndex].Image.map((image) =>
                     //   dataURItoBlob(image.link.uri),
                     // ),
@@ -287,12 +287,12 @@ const Category = ({
                   console.log(files);
                   console.log("Helo");
                   newCategory[categoryIndex].Image.filter(
-                    (image) => typeof image.link != "string",
-                  ).map((image) => console.log(image));
+                    (image: any) => typeof image.link != "string",
+                  ).map((image: any) => console.log(image));
                   const response = await imageUpload(
                     newCategory[categoryIndex].Image.filter(
-                      (image) => typeof image.link != "string",
-                    ).map((image) => image.link),
+                      (image: any) => typeof image.link != "string",
+                    ).map((image: any) => image.link),
                   );
                   console.log("Ho");
 
@@ -304,8 +304,8 @@ const Category = ({
                     console.log("We are here");
                     await updateCatImage.mutate(
                       newCategory[categoryIndex].Image.filter(
-                        (image) => typeof image.link != "string",
-                      ).map((image, idx) => {
+                        (image: any) => typeof image.link != "string",
+                      ).map((image: any, idx: number) => {
                         return {
                           link: `https://ucarecdn.com/${
                             result[`my_file(${idx}).jpg`]
@@ -369,7 +369,7 @@ const Category = ({
           </View>
         )}
       </View>
-      {/* <Modal
+      <Modal
         modalVisible={modalVisible}
         setModalVisible={setModalVisible}
         className=""
@@ -379,7 +379,7 @@ const Category = ({
           placeholder={require("../../../assets/placeholder.png")}
           source={pressedImage ?? ""}
         />
-      </Modal> */}
+      </Modal>
       <FlatList
         data={category.Image}
         className="mx-auto"
@@ -404,16 +404,16 @@ const Category = ({
                         categoryId: item.categoryId,
                       };
                       var categoryIndex;
-                      var imageIndex;
-                      const newCategory = [...categories];
+                      var imageIndex: any;
+                      const newCategory: any = [...categories];
                       if (newCategory !== undefined) {
                         categoryIndex = newCategory
-                          .map((cate) => cate.id)
+                          .map((cate: any) => cate.id)
                           .indexOf(item.categoryId);
-                        newCategory.map((cate) => {
+                        newCategory.map((cate: any) => {
                           if (cate.id === item.categoryId) {
                             imageIndex = cate.Image.map(
-                              (img) => img.id,
+                              (img: any) => img.id,
                             ).indexOf(item.id);
                           }
                         });
@@ -437,7 +437,7 @@ const Category = ({
               >
                 <Image
                   source={item.link}
-                  alt="Image"
+                  placeholder={require("../../../assets/placeholder.png")}
                   className="m-2 h-44 w-44 rounded-lg"
                 />
               </Pressable>
@@ -452,16 +452,16 @@ const Category = ({
                         categoryId: category.id,
                       };
                       var categoryIndex;
-                      var imageIndex;
-                      const newCategory = [...categories];
+                      var imageIndex: any;
+                      const newCategory: any = [...categories];
                       if (newCategory !== undefined) {
                         categoryIndex = newCategory
-                          .map((cate) => cate.id)
+                          .map((cate: any) => cate.id)
                           .indexOf(category.id);
-                        newCategory.map((cate) => {
+                        newCategory.map((cate: any) => {
                           if (cate.id === category.id) {
                             imageIndex = cate.Image.map(
-                              (img) => img.id,
+                              (img: any) => img.id,
                             ).indexOf(item.id);
                           }
                         });
