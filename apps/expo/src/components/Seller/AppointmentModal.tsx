@@ -59,7 +59,7 @@ const BuyerAppointment = ({
 }) => {
   const router = useRouter();
 
-  const getFreeTimeslots = trpc.appointment.getFreeTimeslots.useMutation();
+  
   const createAppointment = trpc.appointment.createAppointment.useMutation();
   const rescheduleAppointment =
     trpc.appointment.rescheduleAppointment.useMutation();
@@ -68,6 +68,12 @@ const BuyerAppointment = ({
   const [open, setOpen] = useState(false);
 
   const [selectedDay, setSelectedDay] = useState(today);
+  const getFreeTimeslots = trpc.appointment.getFreeTimeslots.useQuery({
+    sellerId: sellerId,
+		day: format(selectedDay, 'EEEE').toUpperCase() as Day,
+		priceId: priceId,
+		date: selectedDay
+  });
   const tabBarheight = useBottomTabBarHeight();
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot>();
   const [userSelectedDay, setUserSelectedDay] = useState(false);
@@ -154,13 +160,6 @@ const BuyerAppointment = ({
       setUserSelectedDay(true);
     }
     setSelectedDay(day);
-
-    const selectDate = getFreeTimeslots.mutate({
-      sellerId: sellerId,
-      day: format(day, "EEEE").toUpperCase() as Day,
-      priceId: priceId,
-      date: day,
-    });
   }
   return (
     <>
