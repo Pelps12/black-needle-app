@@ -13,6 +13,7 @@ import {
   CardField,
   PlatformPay,
   PlatformPayButton,
+  confirmPlatformPayPayment,
   isPlatformPaySupported,
   useConfirmPayment,
 } from "@stripe/stripe-react-native";
@@ -25,6 +26,7 @@ import {
 } from "@acme/db";
 
 import { trpc } from "../../utils/trpc";
+import { router } from "expo-router";
 
 const PaymentModal = ({
   appointment,
@@ -43,10 +45,9 @@ const PaymentModal = ({
   closeModal: () => void;
 }) => {
   const getPaymentIntentSecret = trpc.payment.getPaymentSheet.useMutation();
-
  
   const [isApplePaySupported, setIsApplePaySupported] = useState(false);
-  const { confirmPayment, loading } = useConfirmPayment();
+  const { confirmPayment, loading: stripeLoading } = useConfirmPayment();
 
   //NOT IDEAL PLEASE FIX THIS
   const totalAmount  =
@@ -72,12 +73,37 @@ const PaymentModal = ({
           Alert.alert(`Error code: ${error.code}`, error.message);
         } else if (paymentIntent) {
           Alert.alert("Success", "Payment Successful");
+          closeModal()
+        }
+      }
+    }); 
+  };
+
+  const handleApplePayPress = async () => {
+    getPaymentIntentSecret.mutate({
+      appointmentId: appointment.id,
+    }, {
+      onSuccess: async ({client_secret}) => {
+        const { error, paymentIntent } = await confirmPlatformPayPayment(client_secret, {
+          applePay: {
+            cartItems: [{
+              label: appointment.price.name,
+              amount: String(totalAmount),
+              paymentType: PlatformPay.PaymentType.Immediate
+            }],
+            merchantCountryCode: "US",
+            currencyCode: "US"
+          }
+        });
+        if (error) {
+          Alert.alert(`Error code: ${error.code}`, error.message);
+        } else if (paymentIntent) {
+          Alert.alert("Success", "Payment Successful");
+         closeModal()
         }
       }
     });
-
-    
-  };
+  }
   
 
   useEffect(() => {
@@ -85,20 +111,20 @@ const PaymentModal = ({
       setIsApplePaySupported(await isPlatformPaySupported());
     })();
   }, [isPlatformPaySupported]);
+
   return (
     <SafeAreaView
-      className={`mx-6 my-auto flex h-auto rounded-lg bg-[#fafafa]  `}
+      className={`mx-6 my-auto flex h-auto rounded-lg bg-[#fafafa]`}
     >
       <View className="flex flex-row items-center gap-3 p-2">
         <Image
           source={appointment.price.category.Image[0]?.link ?? ""}
-          alt="Picture"
           className="h-32 w-32 rounded-lg"
         />
         <View>
           <Text className="text-2xl font-semibold">
-            {appointment.price.name.substring(0, 20)}
-            {appointment.price.name.length > 20 && "..."}
+            {appointment.price.name.substring(0, 13)}
+            {appointment.price.name.length > 13 && "..."}
           </Text>
           <View className="flex flex-row items-center gap-2">
             <Text className="text-lg">
@@ -132,12 +158,13 @@ const PaymentModal = ({
       <Pressable
         className="mx-auto mb-5 w-24 rounded-xl bg-[#5433FF] p-2"
         onPress={handlePayPress}
+        disabled={getPaymentIntentSecret.isLoading || stripeLoading}
       >
         <Text className="mx-auto text-2xl font-semibold text-white">PAY</Text>
       </Pressable>
 
-      <PlatformPayButton
-        onPress={() => console.log("HI")}
+      {isApplePaySupported && <PlatformPayButton
+        onPress={() => handleApplePayPress()}
         type={PlatformPay.ButtonType.Book}
         appearance={PlatformPay.ButtonStyle.Black}
         borderRadius={4}
@@ -149,7 +176,7 @@ const PaymentModal = ({
           borderRadius: 10,
           marginBottom: 10,
         }}
-      />
+      />}
     </SafeAreaView>
   );
 };
