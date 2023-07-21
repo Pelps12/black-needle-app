@@ -59,8 +59,8 @@ const Appointment = ({
   }
   return (
     <View className="mx-2 my-4">
-      <View className="flex flex-row justify-between">
-        <View className="flex flex-row items-center gap-2">
+      <View className="flex flex-row justify-between items-center">
+        <View className="flex flex-row items-center gap-2 ">
           <Image
             source={
               `${appointments.price.category.Image[0]?.link}-/preview/-/quality/smart/-/format/auto/` ||
@@ -94,8 +94,8 @@ const Appointment = ({
       <View>
         <View className="flex  flex-row items-center justify-end gap-5">
           {sellerMode && appointments.status === "PENDING" && (
-            <>
-              <Pressable /* onPress={() => chargeAppointmentStatus('APPROVED', appointments.id)} */
+            <View className="flex flex-row items-center">
+              <Pressable className=""/* onPress={() => chargeAppointmentStatus('APPROVED', appointments.id)} */
               >
                 <Image
                   source={require("../../../assets/yes.svg")}
@@ -109,7 +109,7 @@ const Appointment = ({
                   className="mx-5 h-5 w-5 rounded-md object-cover"
                 />
               </Pressable>
-            </>
+            </View>
           )}
           <View className="flex w-auto  flex-row items-center justify-center rounded-lg bg-[#d9d9d9]">
             {!sellerMode && appointments.status === "APPROVED" && (
