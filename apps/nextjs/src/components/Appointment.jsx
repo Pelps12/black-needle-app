@@ -123,17 +123,19 @@ const Appointment = ({ refetch, appointments, sellerMode }) => {
 							</button>
 						</>
 					)}
-					{!sellerMode && appointments.status === 'APPROVED' && (
+					{appointments.status === 'APPROVED' && (
 						<>
 							<button className={`btn btn-outline btn-sm btn-error`} onClick={() => openModal()}>
 								CANCEL
 							</button>
-							<button
-								className={`btn btn-outline btn-sm btn-secondary`}
-								onClick={() => payForAppointment(appointments.id)}
-							>
-								PAY
-							</button>
+							{!sellerMode && (
+								<button
+									className={`btn btn-outline btn-sm btn-secondary`}
+									onClick={() => payForAppointment(appointments.id)}
+								>
+									PAY
+								</button>
+							)}
 						</>
 					)}
 
@@ -169,6 +171,7 @@ const Appointment = ({ refetch, appointments, sellerMode }) => {
 
 			<Modal isOpen={isOpen} closeModal={closeModal}>
 				<Cancellation
+					downPaymentEnabled={appointments.price.category.seller.downPaymentPercentage !== null}
 					sellerMode={sellerMode}
 					appointmentId={appointments.id}
 					closeModal={closeModal}

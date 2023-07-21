@@ -549,6 +549,7 @@ export const appointmentRouter = router({
         }
       }
     }),
+    
   completePayment: protectedProcedure
     .input(
       z.object({

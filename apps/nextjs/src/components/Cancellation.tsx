@@ -5,11 +5,13 @@ import React, { Fragment, useState } from 'react';
 const Cancellation = ({
 	sellerMode,
 	appointmentId,
-	closeModal
+	closeModal,
+	downPaymentEnabled
 }: {
 	sellerMode: boolean;
 	appointmentId: string;
 	closeModal: () => void;
+	downPaymentEnabled: boolean;
 }) => {
 	const refundMutation = trpc.appointment.refundPayment.useMutation();
 	const [reason, setReason] = useState<string | undefined>(undefined);
@@ -44,9 +46,15 @@ const Cancellation = ({
 					</Dialog.Title>
 
 					<Dialog.Description>
-						{sellerMode
-							? 'The down payment goes back to the buyer'
-							: 'You forfeit for down payment'}
+						{downPaymentEnabled ? (
+							sellerMode ? (
+								'The down payment goes back to the buyer'
+							) : (
+								'You forfeit your down payment'
+							)
+						) : (
+							<></>
+						)}
 					</Dialog.Description>
 					<textarea
 						className="textarea w-full"
