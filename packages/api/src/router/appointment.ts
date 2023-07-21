@@ -8,11 +8,12 @@ import { clerkClient } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { Day, Role } from "@acme/db";
+import { Day, OrderStatus, Role } from "@acme/db";
 import { env } from "@acme/env-config/env";
 
 import { protectedProcedure, publicProcedure, router } from "../trpc";
 import { stripe } from "../utils/stripe";
+import {twilio} from "../utils/twilio"
 
 const expo = new Expo({ accessToken: env.EXPO_ACCESS_TOKEN });
 
@@ -598,4 +599,111 @@ export const appointmentRouter = router({
         });
       }
     }),
+    updateAppointmentStatus: protectedProcedure
+		.input(
+			z.object({
+				newStatus: z.nativeEnum(OrderStatus),
+				itemId: z.string()
+			})
+		)
+		.mutation(async ({ input, ctx }) => {
+			{
+				const appointment = await ctx.prisma.appointment.findFirst({
+					where: {
+						id: input.itemId,
+						price: {
+							category: {
+								sellerId: ctx.auth.userId
+							}
+						}
+					}
+				});
+				if (appointment) {
+					const updatedAppointment = await ctx.prisma.appointment.update({
+						where: {
+							id: input.itemId
+						},
+						data: {
+							status: input.newStatus,
+							updatedAt: new Date()
+						},
+						include: {
+							price: true,
+              seller: {
+                select: {
+                  user: true
+                }
+              },
+							user: {
+                include: {
+                  tokens: true
+                }
+              },
+              
+						}
+					});
+          const expoTokens = updatedAppointment.user.tokens.map((token) => token.token as ExpoPushToken)
+            .filter((token) => Expo.isExpoPushToken(token));
+					if (updatedAppointment.status === 'APPROVED') {
+            
+            if (expoTokens.length > 0) {
+              const ticket = await expo.sendPushNotificationsAsync([
+                {
+                  to: expoTokens,
+                  title: updatedAppointment.seller.user.name || 'Unknown User',
+                  body: `Appointment for ${updatedAppointment.price.name} approved`,
+                  sound: 'default',
+                  data: {
+                    senderId: updatedAppointment.userId,
+                    type: "schedule"
+                  }
+                }
+              ]);
+              console.log(ticket);
+            } else {
+              twilio.messages.create({
+                body: `Appointment for ${updatedAppointment.price.name} approved by ${
+                  updatedAppointment.seller.user.name || 'Seller'
+                }.\nGo to https://sakpa.co/profile to pay for the order`,
+                to: `+1${updatedAppointment.user.phoneNumber}`,
+                messagingServiceSid: env.MESSAGING_SID
+              });
+						
+					} 
+        }else {
+          if (expoTokens.length > 0) {
+            const ticket = await expo.sendPushNotificationsAsync([
+              {
+                to: expoTokens,
+                title: updatedAppointment.seller.user.name || 'Unknown User',
+                body: `Appointment for ${updatedAppointment.price.name} declined`,
+                sound: 'default',
+                data: {
+                  senderId: updatedAppointment.userId,
+                  type: "schedule"
+                }
+              }
+            ]);
+          } else {
+            twilio.messages.create({
+              body: `Appointment for ${updatedAppointment.price.name} declined by ${
+								updatedAppointment.seller.user.name || 'Seller'
+
+              }.\nGo to https://sakpa.co/profile to pay for the order`,
+              to: `+1${updatedAppointment.user.phoneNumber}`,
+              messagingServiceSid: env.MESSAGING_SID
+            });
+          
+        }
+					}
+
+					return updatedAppointment;
+				} else {
+					throw new TRPCError({
+						code: 'BAD_REQUEST',
+						message: 'Invalid input'
+					});
+				}
+			}
+		}),
 });
