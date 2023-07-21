@@ -1,9 +1,8 @@
+import { trpc } from '../utils/trpc';
 import { Dialog, Tab, Transition } from '@headlessui/react';
 import React, { Fragment, useEffect, useRef, useState } from 'react';
-import { trpc } from '../utils/trpc';
-
 import 'react-datepicker/dist/react-datepicker.css';
-
+import Modal from './Modal';
 import {
 	add,
 	eachDayOfInterval,
@@ -20,9 +19,7 @@ import {
 	endOfWeek,
 	startOfToday
 } from 'date-fns';
-import Modal from './Modal';
 import { filterProps } from 'framer-motion';
-
 
 const Availability = ({ uid }) => {
 	function classNames(...classes) {
@@ -210,6 +207,7 @@ const Availability = ({ uid }) => {
 			// 	secondMinutes: addFormData.secondMinutes,
 			// 	secondampm: addFormData.secondampm
 			// };
+
 			createAvailiability.mutate(
 				{
 					from: from,

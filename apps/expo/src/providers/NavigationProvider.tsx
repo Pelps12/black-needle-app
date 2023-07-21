@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { View } from "react-native";
 import { Tabs } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 
 import Header from "../components/header";
-import { View } from "react-native";
 
 const NavigationProvider = () => {
   const { isSignedIn, isLoaded } = useUser();
@@ -15,15 +15,14 @@ const NavigationProvider = () => {
   return (
     <>
       <Tabs
-      sceneContainerStyle={{
-        backgroundColor: "#f2f2f2"
-      }}
-      
+        sceneContainerStyle={{
+          backgroundColor: "#f2f2f2",
+        }}
         screenOptions={{
           headerStyle: {
             backgroundColor: "#F2F2F2",
           },
-          tabBarBackground : () => <View className="bg-[#F2f2f2]"/>,
+          tabBarBackground: () => <View className="bg-[#F2f2f2]" />,
           header: () => <Header />,
           headerShadowVisible: false,
 
@@ -71,7 +70,7 @@ const NavigationProvider = () => {
               display: "none",
             },
             tabBarIcon: ({ color }) => (
-              <AntDesign name="calendar" size={24} color={color} />
+              <AntDesign name="clockcircleo" size={24} color={color} />
             ),
             href: isSignedIn ? "/schedule" : null,
           }}

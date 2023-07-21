@@ -16,8 +16,58 @@ import { stripe } from "../utils/stripe";
 import {twilio} from "../utils/twilio"
 
 const expo = new Expo({ accessToken: env.EXPO_ACCESS_TOKEN });
+function addSeconds(date: Date, seconds: number) {
+  const newDate = new Date(date);
+  newDate.setSeconds(date.getSeconds() + seconds);
+  return newDate;
+}
 
 export const appointmentRouter = router({
+  deleteSellerAvailability: protectedProcedure
+    .input(
+      z.object({
+        availabilityId: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const deletedAvailability =
+        await ctx.prisma.sellerAvailability.deleteMany({
+          where: {
+            id: input.availabilityId,
+            sellerId: ctx.auth.userId,
+          },
+        });
+      return deletedAvailability.count !== 0;
+    }),
+  getSellerAvailabilty: protectedProcedure
+    .input(
+      z.object({
+        sellerId: z.string(),
+        day: z.nativeEnum(Day),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const sellerAvailability = await ctx.prisma.sellerAvailability.findMany({
+        where: {
+          sellerId: ctx.auth.userId,
+          day: input.day,
+        },
+      });
+      const newDate = new Date(new Date().setHours(0, 0, 0, 0));
+      console.log(newDate);
+
+      const availability = sellerAvailability.map((av) => {
+        console.log(addSeconds(newDate, av.from), addSeconds(newDate, av.to));
+        return {
+          id: av.id,
+          from: av.from,
+          to: av.to,
+          day: av.day,
+          sellerId: av.sellerId,
+        };
+      });
+      return availability;
+    }),
   getFreeTimeslots: publicProcedure
     .input(
       z.object({

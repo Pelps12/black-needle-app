@@ -10,9 +10,12 @@ import {
 import { Image } from "expo-image";
 import { Link, useSearchParams } from "expo-router";
 import { useUser } from "@clerk/clerk-expo";
+import { AntDesign } from "@expo/vector-icons";
 
 import { Category, Price, Image as PrismaImage } from "@acme/db";
 
+import Modal from "../../components/Modal";
+import AvailabilityModal from "../../components/Seller/AvailabilityModal";
 import Categories from "../../components/Seller/Categories";
 import Prices from "../../components/Seller/Prices";
 import ProtectedLink from "../../components/Utils/ProtectedLink";
@@ -30,6 +33,7 @@ const SellerPage: React.FC<SellerPageProps> = ({ sellerId }) => {
     typeof id === "string" ? id : typeof id === "undefined" ? ":)" : id[0]!;
   const [activeTab, setActiveTab] = useState<string>("CATEGORIES");
   const [user, setUser] = useState<any>(undefined);
+  const [calendarModalVisible, setCalendarModalVisible] = useState(false);
 
   const { user: clerkUser } = useUser();
 
@@ -72,7 +76,14 @@ const SellerPage: React.FC<SellerPageProps> = ({ sellerId }) => {
             placeholder={require("../../../assets/placeholder.png")}
           />
         </View>
-
+        <View>
+          <Modal
+            modalVisible={calendarModalVisible}
+            setModalVisible={setCalendarModalVisible}
+          >
+            <AvailabilityModal></AvailabilityModal>
+          </Modal>
+        </View>
         <View className="ml-2 w-72 flex-col items-start">
           {categoriesEndpoint.isLoading ? (
             <Image
@@ -85,6 +96,18 @@ const SellerPage: React.FC<SellerPageProps> = ({ sellerId }) => {
               fontWeight="semi-bold"
             >
               {categoriesEndpoint.data?.user?.name ?? "Unknown"}
+              {categoriesEndpoint.isSuccess &&
+                categoriesEndpoint.data?.user?.id === clerkUser?.id &&
+                user?.role === "SELLER" && (
+                  <Pressable
+                    className=" mt-1 pl-2"
+                    onPress={() => {
+                      setCalendarModalVisible(true);
+                    }}
+                  >
+                    <AntDesign name="calendar" size={18} color="black" />
+                  </Pressable>
+                )}
             </SKTest>
           )}
           {categoriesEndpoint.isSuccess &&
