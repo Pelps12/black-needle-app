@@ -22,6 +22,22 @@ function addSeconds(date: Date, seconds: number) {
 }
 
 export const appointmentRouter = router({
+  deleteSellerAvailability: protectedProcedure
+    .input(
+      z.object({
+        availabilityId: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const deletedAvailability =
+        await ctx.prisma.sellerAvailability.deleteMany({
+          where: {
+            id: input.availabilityId,
+            sellerId: ctx.auth.userId,
+          },
+        });
+      return deletedAvailability.count !== 0;
+    }),
   getSellerAvailabilty: protectedProcedure
     .input(
       z.object({
