@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
 import { trpc } from '../utils/trpc';
-import Modal from './Modal';
 import Cancellation from './Cancellation';
+import Modal from './Modal';
+import Image from 'next/image';
+import React, { useEffect, useState } from 'react';
 
 const Appointment = ({ refetch, appointments, sellerMode }) => {
 	const appointmentMutation = trpc.appointment.updateAppointmentStatus.useMutation();
@@ -124,12 +124,17 @@ const Appointment = ({ refetch, appointments, sellerMode }) => {
 						</>
 					)}
 					{!sellerMode && appointments.status === 'APPROVED' && (
-						<button
-							className={`btn btn-outline btn-sm btn-secondary`}
-							onClick={() => payForAppointment(appointments.id)}
-						>
-							PAY
-						</button>
+						<>
+							<button className={`btn btn-outline btn-sm btn-error`} onClick={() => openModal()}>
+								CANCEL
+							</button>
+							<button
+								className={`btn btn-outline btn-sm btn-secondary`}
+								onClick={() => payForAppointment(appointments.id)}
+							>
+								PAY
+							</button>
+						</>
 					)}
 
 					{(appointments.status === 'DOWNPAID' ||
