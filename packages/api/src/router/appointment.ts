@@ -77,7 +77,7 @@ export const appointmentRouter = router({
         date: z.date(),
       }),
     )
-    .mutation(async ({ input, ctx }) => {
+    .query(async ({ input, ctx }) => {
       const offset = input.date.getTimezoneOffset();
       console.log(input.date);
       const diff = (offset - new Date().getTimezoneOffset()) / 60;
