@@ -126,7 +126,7 @@ const SellerPage = () => {
                 <Appointment
                   refetch={appointments.refetch}
                   appointments={item}
-                  sellerMode={false}
+                  sellerMode={sellerMode}
                 />
               ) : (
                 <></>
