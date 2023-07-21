@@ -49,11 +49,17 @@ const BuyerAppointment = ({
 		return classes.filter(Boolean).join(' ');
 	}
 	const router = useRouter();
-	const getFreeTimeslots = trpc.appointment.getFreeTimeslots.useMutation();
+
 	const createAppointment = trpc.appointment.createAppointment.useMutation();
 	const today = startOfToday();
 
 	const [selectedDay, setSelectedDay] = useState(today);
+	const getFreeTimeslots = trpc.appointment.getFreeTimeslots.useQuery({
+		sellerId: sellerId,
+		day: format(selectedDay, 'EEEE').toUpperCase() as Day,
+		priceId: priceId,
+		date: selectedDay
+	});
 	const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot>();
 	const [userSelectedDay, setUserSelectedDay] = useState(false);
 	const [currentMonth, setCurrentMonth] = useState(format(today, 'MMM-yyyy'));
@@ -124,13 +130,6 @@ const BuyerAppointment = ({
 			setUserSelectedDay(true);
 		}
 		setSelectedDay(day);
-
-		const selectDate = getFreeTimeslots.mutate({
-			sellerId: sellerId,
-			day: format(day, 'EEEE').toUpperCase() as Day,
-			priceId: priceId,
-			date: day
-		});
 	}
 	return (
 		<>
