@@ -244,6 +244,7 @@ export const appointmentRouter = router({
               },
             },
           },
+          user: true
         },
       });
       if (appointment) {
@@ -256,12 +257,13 @@ export const appointmentRouter = router({
             {
               to: expoTokens,
               title: `New Appointment from ${
-                ctx.auth.user?.username ?? "User"
+                appointment.user.name ?? "User"
               }`,
               body: "Respond to their request",
               sound: "default",
               data: {
                 senderId: ctx.auth.userId,
+                type: "schedule"
               },
             },
           ]);
