@@ -4,6 +4,7 @@ import algoliasearch from "algoliasearch";
 import Stripe from "stripe";
 import { z } from "zod";
 
+import { Day, Role } from "@acme/db";
 import { env } from "@acme/env-config";
 
 import { protectedProcedure, publicProcedure, router } from "../trpc";
@@ -26,6 +27,7 @@ export const userRouter = router({
   deleteUser: protectedProcedure.mutation(async ({ ctx }) => {
     const deletedUser = await clerkClient.users.deleteUser(ctx.auth.userId);
   }),
+
   createCategory: protectedProcedure
     .input(
       z.object({
@@ -396,4 +398,27 @@ export const userRouter = router({
       });
     }
   }),
+  createNewAvailability: protectedProcedure
+    .input(
+      z.object({
+        from: z.number(),
+        to: z.number(),
+        day: z.nativeEnum(Day),
+        sellerId: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const timeslot = await ctx.prisma.sellerAvailability.create({
+        data: {
+          from: input.from,
+          to: input.to,
+          day: input.day,
+          sellerId: input.sellerId,
+        },
+      });
+
+      return {
+        timeslot,
+      };
+    }),
 });
