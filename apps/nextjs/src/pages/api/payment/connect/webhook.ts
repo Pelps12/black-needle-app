@@ -1,11 +1,10 @@
-import { NextApiRequest, NextApiResponse } from 'next/types';
-import Stripe from 'stripe';
-import { buffer } from 'node:stream/consumers';
-import { env } from '../../../../env/server.mjs';
-import { prisma } from '../../../../server/db/client';
+import { prisma } from '@acme/db';
+import { env } from '@acme/env-config';
 import Mixpanel from 'mixpanel';
-import parser from 'ua-parser-js';
+import { NextApiRequest, NextApiResponse } from 'next/types';
 import { randomUUID } from 'node:crypto';
+import { buffer } from 'node:stream/consumers';
+import Stripe from 'stripe';
 
 const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
 	apiVersion: '2022-11-15'
