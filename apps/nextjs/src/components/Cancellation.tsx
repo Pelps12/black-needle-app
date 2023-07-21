@@ -78,7 +78,6 @@ const Cancellation = ({
 						)}
 						CANCEL APPOINTMENT
 					</button>
-					<p className="text-xs">Think twice o</p>
 				</Dialog.Panel>
 			</Transition.Child>
 		</>
