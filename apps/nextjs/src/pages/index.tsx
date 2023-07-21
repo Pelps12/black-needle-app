@@ -1,4 +1,5 @@
 import { env } from '@acme/env-config/env';
+import SearchBar from '@components/SearchBar';
 import ImageWithFallback from '@components/Utils/ImageWithFallback';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import algoliasearch from 'algoliasearch/lite';
@@ -176,15 +177,7 @@ const Home: NextPage<HomePageProps> = ({ serverState, url }) => {
 							</div>
 						)}
 
-						<SearchBox
-							classNames={{
-								root: 'flex px-2',
-								form: 'w-full flex gap-3',
-								submitIcon: 'h-5 w-5 fill-primary',
-								input: 'w-full h-8 rounded-md px-3',
-								resetIcon: 'hidden'
-							}}
-						/>
+						<SearchBar attribute="school" />
 						<CustomHits />
 					</main>
 					{/* {resultMut.isSuccess && (
