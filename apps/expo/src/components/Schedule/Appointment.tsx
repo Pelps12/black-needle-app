@@ -8,6 +8,7 @@ import {
 } from "@stripe/stripe-react-native";
 
 import {
+  OrderStatus,
   type Category,
   type Price,
   type Appointment as PrismaAppointment,
@@ -41,7 +42,7 @@ const Appointment = ({
   };
   sellerMode: boolean;
 }) => {
-  //const appointmentMutation = trpc.appointment.updateAppointmentStatus.useMutation();
+  const appointmentMutation = trpc.appointment.updateAppointmentStatus.useMutation();
 
   const [isOpen, setIsOpen] = useState(false);
   const [stripeModalOpen, setStripeModalOpen] = useState(false);
@@ -49,6 +50,14 @@ const Appointment = ({
   const [loading, setLoading] = useState(false);
 
   const fetchPaymentSheetParams = trpc.payment.getPaymentSheet.useMutation();
+
+  const chargeAppointmentStatus = async (newStatus: OrderStatus, itemId: string) => {
+		await appointmentMutation.mutateAsync({
+			newStatus,
+			itemId
+		});
+		refetch();
+	};
 
   function closeModal() {
     setIsOpen(false);
@@ -95,14 +104,14 @@ const Appointment = ({
         <View className="flex  flex-row items-center justify-end gap-5">
           {sellerMode && appointments.status === "PENDING" && (
             <View className="flex flex-row items-center">
-              <Pressable className=""/* onPress={() => chargeAppointmentStatus('APPROVED', appointments.id)} */
+              <Pressable className=""onPress={() => chargeAppointmentStatus('APPROVED', appointments.id)}
               >
                 <Image
                   source={require("../../../assets/yes.svg")}
                   className="mx-5 h-5 w-5 rounded-md object-cover"
                 />
               </Pressable>
-              <Pressable /* onPress={() => chargeAppointmentStatus('DECLINED', appointments.id)} */
+              <Pressable onPress={() => chargeAppointmentStatus('DECLINED', appointments.id)}
               >
                 <Image
                   source={require("../../../assets/no.svg")}
