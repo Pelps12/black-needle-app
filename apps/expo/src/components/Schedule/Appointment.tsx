@@ -112,16 +112,14 @@ const Appointment = ({
             </>
           )}
           <View className="flex w-auto  flex-row items-center justify-center rounded-lg bg-[#d9d9d9]">
-            {!sellerMode &&
-              appointments.status === "APPROVED" &&
-              !appointments.price.category.seller.downPaymentPercentage && (
-                <Link
-                  className={`btn btn-outline btn-sm btn-secondary  border-r p-2`}
-                  href={`/schedule/payment?appointmentId=${appointments.id}`}
-                >
-                  <Text className="font-semibold ">Pay</Text>
-                </Link>
-              )}
+            {!sellerMode && appointments.status === "APPROVED" && (
+              <Link
+                className={`btn btn-outline btn-sm btn-secondary  border-r p-2`}
+                href={`/schedule/payment?appointmentId=${appointments.id}`}
+              >
+                <Text className="font-semibold ">Pay</Text>
+              </Link>
+            )}
 
             {
               <Pressable
