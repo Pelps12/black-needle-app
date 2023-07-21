@@ -340,7 +340,7 @@ const ChatPage = () => {
                 keyExtractor={(item, idx) => idx.toString()}
               />
               }</>
-            ): <Pressable
+            ): getRoom.isFetched && <Pressable
             className={`w-32 flex flex-row m-auto content-center items-center justify-center rounded-lg  bg-[#1dbaa7] px-3 py-3  text-black `}
             onPress={() => createRoomWrapper()}
           >
