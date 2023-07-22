@@ -75,8 +75,10 @@ export const paymentRouter = router({
         amount: totalAmount,
         currency: "usd",
         customer: stripeCustomerId,
-        payment_method_types: ["card"],
         transfer_group: appointment.id,
+        automatic_payment_methods: {
+          enabled: true
+        },
         metadata: {
           userId: ctx.auth.userId,
           type: "appointment",
