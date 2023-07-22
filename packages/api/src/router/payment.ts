@@ -48,7 +48,7 @@ export const paymentRouter = router({
         stripeCustomerId = customer.id;
       }
 
-      const [_] = await Promise.all([
+      const [ephemeralKey, _] = await Promise.all([
         stripe.ephemeralKeys.create(
           { customer: stripeCustomerId },
           { apiVersion: "2022-11-15" },
@@ -99,6 +99,9 @@ export const paymentRouter = router({
       console.log(paymentIntent.amount);
       return {
         client_secret: paymentIntent.client_secret,
+        paymentIntent,
+        ephemeralKey: ephemeralKey.secret,
+        customer: stripeCustomerId,
         price: paymentIntent.amount,
       };
     }),
