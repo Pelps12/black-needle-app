@@ -39,6 +39,28 @@ export const appointmentRouter = router({
         });
       return deletedAvailability.count !== 0;
     }),
+  editSellerAvailibility: protectedProcedure
+		.input(
+			z.object({
+				availiabilityId: z.string(),
+				from: z.number().optional(),
+				to: z.number().optional(),
+				day: z.nativeEnum(Day).optional(),
+			})
+		).mutation(async({input, ctx}) => {
+			const updatedTimeslot = await ctx.prisma.sellerAvailability.update({
+				where: {
+					id: input.availiabilityId
+				},
+				data: {
+					from: input.from,
+					to: input.to,
+					day: input.day,
+					sellerId: ctx.auth.userId
+				}
+			})
+			return updatedTimeslot;
+		}),
   getSellerAvailabilty: protectedProcedure
     .input(
       z.object({

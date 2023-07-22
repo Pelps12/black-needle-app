@@ -413,7 +413,7 @@ export const userRouter = router({
           from: input.from,
           to: input.to,
           day: input.day,
-          sellerId: input.sellerId,
+          sellerId: ctx.auth.userId,
         },
       });
 
