@@ -186,7 +186,12 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 							data: {
 								paymentIntent: paymentIntent.id,
 								status: downPayment === 'true' ? 'DOWNPAID' : 'PAID',
-								updatedAt: new Date()
+								updatedAt: new Date(),
+								history: {
+									create: {
+										status: downPayment === 'true' ? 'DOWNPAID' : 'PAID'
+									}
+								}
 							},
 							include: {
 								price: true,

@@ -249,12 +249,22 @@ model Appointment {
   price                Price              @relation(fields: [priceId], references: [id])
   code                 Code?              @relation(fields: [codeId], references: [id])
   timeslot             SellerAvailability @relation(fields: [sellerAvailabilityId], references: [id])
+  history              AppointmentHistory[]
 
   //@@index([userId])
   //@@index([codeId])
   //@@index([priceId])
   //@@index([sellerId])
   //@@index([sellerAvailabilityId])
+}
+
+model AppointmentHistory{
+  id                   String             @id @default(cuid())
+  status OrderStatus
+  time DateTime @default(now())
+  appointmentId String
+  appointment Appointment @relation(fields: [appointmentId], references: [id])
+  @@unique([status, time, appointmentId])
 }
 
 //Shopping Cart Schema
