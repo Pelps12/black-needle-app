@@ -1,5 +1,5 @@
 import "react-native-gesture-handler";
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Constants from "expo-constants";
@@ -24,8 +24,6 @@ import Header from "../components/header";
 import AblyProvider from "../providers/AblyProvider";
 import NotificationsProvider from "../providers/NotificationsProvider";
 import { TRPCProvider } from "../utils/trpc";
-import SignUp from "./Signup";
-import Login from "./signin";
 import NavigationProvider from "../providers/NavigationProvider";
 
 const tokenCache = {
@@ -48,6 +46,7 @@ const RootLayout = () => {
     Poppins_600SemiBold,
     Poppins_700Bold,
   });
+  const [appIsReady, setAppIsReady] = useState(false);
 
   useEffect(() => {
     console.log(Constants.expoConfig?.extra?.CLERK_PUBLISHABLE_KEY);
@@ -65,13 +64,15 @@ const RootLayout = () => {
     >
         <TRPCProvider>
           <SafeAreaProvider>
-            <NotificationsProvider>
+            <NotificationsProvider appIsReady={fontsLoaded}>
               <AblyProvider>
                 <StripeProvider
                   publishableKey={
                     Constants.expoConfig?.extra
                       ?.STRIPE_PUBLISHABLE_KEY as string
                   }
+                  merchantIdentifier={Constants.expoConfig?.extra
+                  ?.MERCHANT_ID as string}
                 >
                   <NavigationProvider/>
                 </StripeProvider>

@@ -30,7 +30,7 @@
 		"@trpc/react-query": "^10.1.0",
 		"@trpc/server": "^10.1.0",
 		"argon2": "^0.30.3",
-		"daisyui": "^2.51.6",
+		"daisyui": "^3.3.1",
 		"framer-motion": "^10.12.4",
 		"isbot": "^3.6.10",
 		"micro": "^10.0.1",

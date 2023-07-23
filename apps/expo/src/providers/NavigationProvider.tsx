@@ -143,21 +143,6 @@ const NavigationProvider = () => {
           }}
         />
 
-        <Tabs.Screen
-          name="Signup"
-          options={{
-            title: "Signup",
-            href: null,
-          }}
-        />
-
-        <Tabs.Screen
-          name="signin"
-          options={{
-            title: "Signup",
-            href: null,
-          }}
-        />
       </Tabs>
 
       <StatusBar />

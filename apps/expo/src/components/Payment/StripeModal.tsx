@@ -163,8 +163,8 @@ const PaymentModal = ({
         <Text className="mx-auto text-2xl font-semibold text-white">PAY</Text>
       </Pressable>
 
-      {isApplePaySupported && <PlatformPayButton
-        onPress={() => handleApplePayPress()}
+      {<PlatformPayButton
+        onPress={handleApplePayPress}
         type={PlatformPay.ButtonType.Book}
         appearance={PlatformPay.ButtonStyle.Black}
         borderRadius={4}
