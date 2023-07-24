@@ -177,7 +177,7 @@ const Home: NextPage<HomePageProps> = ({ serverState, url }) => {
 							</div>
 						)}
 
-						<SearchBar attribute="school" />
+						<SearchBar attribute="school" text={text}/>
 						<CustomHits />
 					</main>
 					{/* {resultMut.isSuccess && (

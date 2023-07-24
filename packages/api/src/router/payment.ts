@@ -48,7 +48,7 @@ export const paymentRouter = router({
         stripeCustomerId = customer.id;
       }
 
-      const [_] = await Promise.all([
+      const [ephemeralKey, _] = await Promise.all([
         stripe.ephemeralKeys.create(
           { customer: stripeCustomerId },
           { apiVersion: "2022-11-15" },
@@ -75,8 +75,10 @@ export const paymentRouter = router({
         amount: totalAmount,
         currency: "usd",
         customer: stripeCustomerId,
-        payment_method_types: ["card"],
         transfer_group: appointment.id,
+        automatic_payment_methods: {
+          enabled: true
+        },
         metadata: {
           userId: ctx.auth.userId,
           type: "appointment",
@@ -97,6 +99,9 @@ export const paymentRouter = router({
       console.log(paymentIntent.amount);
       return {
         client_secret: paymentIntent.client_secret,
+        paymentIntent,
+        ephemeralKey: ephemeralKey.secret,
+        customer: stripeCustomerId,
         price: paymentIntent.amount,
       };
     }),

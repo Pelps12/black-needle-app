@@ -15,7 +15,7 @@ enum UserStatus {
 	DESC = 'desc'
 }
 
-const SearchBar: React.FC<UseRefinementListProps & UseSearchBoxProps> = (props) => {
+const SearchBar: React.FC<UseRefinementListProps & UseSearchBoxProps & {text?: string}> = (props) => {
 	const [searchInput, setSearchInput] = useState<string | null>(null);
 	const [selectedSchool, setSelectedSchool] = useState<string | undefined>('UT Dallas');
 
@@ -40,8 +40,8 @@ const SearchBar: React.FC<UseRefinementListProps & UseSearchBoxProps> = (props) 
 		setInputValue(query);
 	}
 	return (
-		<div className="mx-auto flex gap-2 flex-col md:flex-row md:justify-between max-w-3xl md:join">
-			<div className="mx-auto md:join-item">
+		<div className="mx-auto flex gap-2 flex-col md:flex-row md:justify-between max-w-3xl ">
+			<div className="mx-auto ">
 				<select
 					className="select  max-w-xs select-secondary mx-auto"
 					value={selectedSchool}
@@ -55,13 +55,14 @@ const SearchBar: React.FC<UseRefinementListProps & UseSearchBoxProps> = (props) 
 				</select>
 			</div>
 
-			<div className="flex gap-4 basis-3/4 mx-auto w-full justify-center join">
+			<div className="flex basis-3/4 gap-4 mx-auto w-96 justify-center  ">
 				<input
-					className="input input-bordered basis-3/4 h-12 join-item"
+					className="input input-lg input-bordered basis-3/4 h-12 "
 					ref={inputRef}
+					placeholder={`Search for ${props.text || 'services'}`}
 					onChange={(e) => setQuery(e.target.value)}
 				/>
-				<button onClick={() => console.log('HMM')} className="join-item">
+				<button onClick={() => console.log('HMM')} className="">
 					<svg
 						version="1.1"
 						id="Layer_1"

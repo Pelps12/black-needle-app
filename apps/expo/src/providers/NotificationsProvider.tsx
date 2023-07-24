@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Platform, View } from "react-native";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-import { useRouter } from "expo-router";
+import { router, useRootNavigation } from "expo-router";
 import { useAuth } from "@clerk/clerk-expo";
 
 import { trpc } from "../utils/trpc";
@@ -47,15 +47,16 @@ async function registerForPushNotificationsAsync() {
   return token;
 }
 
-const NotificationsProvider = ({ children }: { children: React.ReactNode }) => {
+const NotificationsProvider = ({ children, appIsReady }: { children: React.ReactNode; appIsReady: boolean }) => {
   const [expoPushToken, setExpoPushToken] = useState<string | undefined>("");
   const [notification, setNotification] = useState<
     Notifications.Notification | boolean
   >(false);
+  const [notificationResponse, setNotificationResponse] = useState<Notifications.NotificationResponse | boolean>(false)
   const tokenMutation = trpc.user.setExpoToken.useMutation();
   const notificationListener = useRef<any>();
   const responseListener = useRef<any>();
-  const router = useRouter();
+  const navigation = useRootNavigation();
   useEffect(() => {
     console.log("I AM HER IN JERICO");
     registerForPushNotificationsAsync().then((token) => {
@@ -69,19 +70,18 @@ const NotificationsProvider = ({ children }: { children: React.ReactNode }) => {
     notificationListener.current =
       Notifications.addNotificationReceivedListener((notification) => {
         console.log(notification);
-        setNotification(notification);
+        
       });
 
     responseListener.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
-        console.log(response);
+        setNotificationResponse(response);
         router.push({
           pathname: "chat/[id]",
           params: {
-            id: response.notification.request.content.data["senderId"],
+            id: response.notification.request.content.data.senderId,
           },
         });
-        console.log(response.notification.request.content.data["senderId"]);
       });
 
     return () => {
@@ -91,6 +91,29 @@ const NotificationsProvider = ({ children }: { children: React.ReactNode }) => {
       Notifications.removeNotificationSubscription(responseListener.current);
     };
   }, []);
+
+  useEffect(() => {
+   
+    
+    if(navigation?.isReady && typeof notificationResponse !== "boolean"){
+      setTimeout(() => {
+        if(notificationResponse.notification.request.content.data.type === "schedule"){
+          router.push({
+            pathname: "/schedule"
+          });
+        }else{
+          router.push({
+            pathname: "chat/[id]",
+            params: {
+              id: notificationResponse.notification.request.content.data.senderId,
+            },
+          });
+        }
+      }, 2000)
+      
+      
+    }
+  }, [notificationResponse, navigation?.isReady])
   return <>{children}</>;
 };
 

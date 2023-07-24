@@ -33,7 +33,11 @@ const defineConfig = (): ExpoConfig => ({
     backgroundColor: "#f2f2f2",
   },
   updates: {
-    fallbackToCacheTimeout: 0,
+    fallbackToCacheTimeout: 500,
+    url: "https://u.expo.dev/bcef5ffc-e91d-49a5-9287-7f60dba8a190"
+  },
+  runtimeVersion: {
+    policy: "sdkVersion"
   },
   assetBundlePatterns: ["**/*"],
   ios: {
@@ -41,6 +45,7 @@ const defineConfig = (): ExpoConfig => ({
     bundleIdentifier: "co.sakpa",
     entitlements: {
       "com.apple.developer.applesignin": ["Default"],
+      "com.apple.developer.in-app-payments": ["merchant.co.sakpa"]
     },
   },
   android: {
@@ -66,7 +71,15 @@ const defineConfig = (): ExpoConfig => ({
         photosPermission:
           "The app accesses your photos to let you share them clients or service providers",
       },
+      
     ],
+    [
+      "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "merchant.co.sakpa",
+          "enableGooglePay": true
+        }
+    ]
   ],
 });
 

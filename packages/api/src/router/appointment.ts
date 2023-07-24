@@ -246,6 +246,11 @@ export const appointmentRouter = router({
           userId: ctx.auth.userId,
           sellerId: timeslot.sellerId,
           priceId: input.priceId,
+          history: {
+            create: {
+              status: "PENDING",
+            }
+          }
         },
         include: {
           price: {
@@ -418,6 +423,11 @@ export const appointmentRouter = router({
           appointmentDate: input.date,
           sellerAvailabilityId: input.sellerAvailability,
           status: "PENDING",
+          history: {
+            create: {
+              status: "PENDING"
+            }
+          }
         },
         include: {
           price: {
@@ -506,6 +516,11 @@ export const appointmentRouter = router({
                 canceler: "BUYER",
                 cancellationReason: input.reason,
                 status: "CANCELED",
+                history: {
+                  create: {
+                    status: "CANCELED"
+                  }
+                }
               },
             });
           } else if (
@@ -520,6 +535,11 @@ export const appointmentRouter = router({
                 canceler: "BUYER",
                 cancellationReason: input.reason,
                 status: "CANCELED",
+                history: {
+                  create: {
+                    status: "CANCELED"
+                  }
+                }
               },
             });
           }
@@ -553,6 +573,11 @@ export const appointmentRouter = router({
                 canceler: "SELLER",
                 cancellationReason: input.reason,
                 status: "CANCELED",
+                history: {
+                  create: {
+                    status: "CANCELED"
+                  }
+                }
               },
             });
           } else if (
@@ -567,6 +592,11 @@ export const appointmentRouter = router({
                 canceler: "SELLER",
                 cancellationReason: input.reason,
                 status: "CANCELED",
+                history: {
+                  create: {
+                    status: "CANCELED"
+                  }
+                }
               },
             });
           }
@@ -674,6 +704,7 @@ export const appointmentRouter = router({
         });
       }
     }),
+    /**Very vulnerable to bad actors that are sellers */
     updateAppointmentStatus: protectedProcedure
 		.input(
 			z.object({
@@ -700,7 +731,12 @@ export const appointmentRouter = router({
 						},
 						data: {
 							status: input.newStatus,
-							updatedAt: new Date()
+							updatedAt: new Date(),
+              history: {
+                create: {
+                  status: input.newStatus
+                }
+              }
 						},
 						include: {
 							price: true,
