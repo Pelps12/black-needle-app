@@ -368,10 +368,13 @@ const ShowAvailabilityList = ({
                 onChange={onNewToAvailabilityChange}
               />
               <Pressable
-                disabled={!enableNewAvailabilitySave}
                 onPress={() => {
-                  onNewAvailabilitySave();
-                  console.log(format(selectedDay, "EEEE").toUpperCase());
+                  if (enableNewAvailabilitySave) {
+                    onNewAvailabilitySave();
+                    console.log(format(selectedDay, "EEEE").toUpperCase());
+                  } else {
+                    alert("Set values for both From and To");
+                  }
                 }}
               >
                 <AntDesign name="save" size={24} color="black" />

@@ -162,12 +162,13 @@ const AvailabilityModal = ({ sellerId }) => {
       </View>
       <View className=" -z-50 mx-6 flex p-2">
         <View className=" flex-row justify-start space-x-48">
-          <View className=" flex-row space-x-4 ">
-            <Text className="text-1xl font-bold">From </Text>
+          <View className=" flex-row space-x-20 ">
+            <Text className="text-1xl text-center font-bold ">From </Text>
             <Text className="text-1xl font-bold">To</Text>
           </View>
-          <View className="">
+          <View className=" ">
             <Pressable
+              style={{ marginLeft: -55 }}
               onPress={() => {
                 setIsCreateButtonEnabled(!isCreateButtonEnabled);
               }}
