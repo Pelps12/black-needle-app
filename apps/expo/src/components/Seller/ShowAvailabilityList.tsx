@@ -376,14 +376,14 @@ const ShowAvailabilityList = ({
               >
                 <AntDesign name="save" size={24} color="black" />
               </Pressable>
-              <Button
+              {/* <Button
                 title="Save"
                 disabled={!enableNewAvailabilitySave}
                 onPress={() => {
                   onNewAvailabilitySave();
                   console.log(format(selectedDay, "EEEE").toUpperCase());
                 }} // Replace "New Name" with the desired new name
-              />
+              /> */}
             </View>
           </View>
         )}
