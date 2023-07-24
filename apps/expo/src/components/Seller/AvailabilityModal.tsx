@@ -28,7 +28,12 @@ import {
   startOfWeek,
 } from "date-fns";
 
-const AvailabilityModal = () => {
+import type { Day, SellerAvailability } from "@acme/db";
+
+import { trpc } from "../../utils/trpc";
+import ShowAvailabilityList from "./ShowAvailabilityList";
+
+const AvailabilityModal = ({ sellerId }) => {
   const today = startOfToday();
   const [currentMonth, setCurrentMonth] = useState(format(today, "MMM-yyyy"));
   const firstDayCurrentMonth = parse(currentMonth, "MMM-yyyy", new Date());
@@ -36,18 +41,31 @@ const AvailabilityModal = () => {
   const [userSelectedDay, setUserSelectedDay] = useState(false);
   const weekStart = startOfWeek(today);
   const weekEnd = endOfWeek(today);
+  const [isCreateButtonEnabled, setIsCreateButtonEnabled] = useState(false);
+
+  const getSellerAvailabilty = trpc.appointment.getSellerAvailabilty.useQuery(
+    {
+      sellerId: sellerId,
+      day: format(selectedDay, "EEEE").toUpperCase() as Day,
+    },
+    {
+      refetchInterval: undefined,
+      enabled: true,
+      staleTime: undefined,
+    },
+  );
   const [selectedMonth, setSelectedMonth] = React.useState(
     firstDayCurrentMonth.toISOString(),
   );
 
   function onSelectDate(day: Date) {
+    getSellerAvailabilty.refetch();
     if (day.toISOString() === selectedDay.toISOString()) {
       setUserSelectedDay(!userSelectedDay);
     } else {
       setUserSelectedDay(true);
     }
     setSelectedDay(day);
-    console.log(day);
   }
   const newDays = eachDayOfInterval({
     start: isSameMonth(today, firstDayCurrentMonth)
@@ -75,10 +93,36 @@ const AvailabilityModal = () => {
   //     const daysFromStartToEnd = daysOfWeek.splice(currentDayIndex);
   //     daysOfWeek.unshift(...daysFromStartToEnd);
   //   }
+  const [sellerAvailability, setSellerAvailability] = useState<
+    SellerAvailability[]
+  >([]);
 
   useEffect(() => {
-    console.log(currentMonth);
-    console.log(newDays);
+    let newArray = [];
+    var i = 0;
+    var j = 0;
+    while (
+      getSellerAvailabilty.data &&
+      getSellerAvailabilty.data != undefined &&
+      i < getSellerAvailabilty.data.length
+    ) {
+      console.log(getSellerAvailabilty.data[i]);
+      const obj = {
+        from: getSellerAvailabilty?.data[i]?.from,
+        to: getSellerAvailabilty?.data[i]?.to,
+        id: getSellerAvailabilty?.data[i]?.id,
+      };
+
+      newArray.push(obj);
+      i++;
+    }
+
+    // console.log(newArray);
+    setSellerAvailability(newArray);
+  }, [getSellerAvailabilty.data]);
+  useEffect(() => {
+    // console.log(currentMonth);
+    // console.log(newDays);
   }, [currentMonth]);
   useEffect(() => {
     onSelectDate(selectedDay);
@@ -123,11 +167,42 @@ const AvailabilityModal = () => {
             <Text className="text-1xl font-bold">To</Text>
           </View>
           <View className="">
-            <Feather name="plus-circle" size={17} color="black" />
+            <Pressable
+              onPress={() => {
+                setIsCreateButtonEnabled(!isCreateButtonEnabled);
+              }}
+            >
+              <Feather name="plus-circle" size={19} color="black" />
+            </Pressable>
           </View>
         </View>
         <View className="flex  p-2">
-          <Text>CONTENT HERE</Text>
+          <ShowAvailabilityList
+            setIsCreateButtonEnabled={setIsCreateButtonEnabled}
+            isCreateButtonEnabled={isCreateButtonEnabled}
+            selectedDay={selectedDay}
+            setSellerAvailability={setSellerAvailability}
+            getSellerAvailabilty={sellerAvailability}
+            sellerAvailability={sellerAvailability}
+            sellerId={sellerId}
+          ></ShowAvailabilityList>
+          {/* <FlatList
+            contentContainerStyle={{ paddingBottom: 20 }}
+            ListFooterComponent={<View style={{ height: 320 }} />}
+            data={sellerAvailability}
+            ItemSeparatorComponent={() => (
+              <View className="border-b-2 border-[#ddd]" />
+            )}
+            renderItem={({ item: freePeriod }) => (
+              <ShowAvailabilityList
+                setSellerAvailability={setSellerAvailability}
+                getSellerAvailabilty={freePeriod}
+                sellerAvailability={sellerAvailability}
+                sellerId={sellerId}
+              ></ShowAvailabilityList>
+            )}
+            keyExtractor={(item) => item?.id.toString()}
+          /> */}
         </View>
       </View>
     </SafeAreaView>

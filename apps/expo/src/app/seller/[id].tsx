@@ -81,7 +81,7 @@ const SellerPage: React.FC<SellerPageProps> = ({ sellerId }) => {
             modalVisible={calendarModalVisible}
             setModalVisible={setCalendarModalVisible}
           >
-            <AvailabilityModal></AvailabilityModal>
+            <AvailabilityModal sellerId={user?.id}></AvailabilityModal>
           </Modal>
         </View>
         <View className="ml-2 w-72 flex-col items-start">

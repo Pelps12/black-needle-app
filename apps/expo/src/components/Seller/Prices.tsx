@@ -232,6 +232,11 @@ const PriceComponent = ({
                               setCategories(data?.user?.seller?.Category);
                             }
                           },
+                          onError: () => {
+                            alert(
+                              "Cannot Delete Product with Active Appointments",
+                            );
+                          },
                         },
                       );
                     }}
