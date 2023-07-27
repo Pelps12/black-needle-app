@@ -15,7 +15,45 @@ Notifications.setNotificationHandler({
   }),
 });
 
-async function registerForPushNotificationsAsync() {
+function useNotificationObserver() {
+  React.useEffect(() => {
+    let isMounted = true;
+
+    function redirect(notification: Notifications.Notification) {
+      if(notification.request.content.data.type === "schedule"){
+        router.push({
+          pathname: "/schedule"
+        });
+      }else{
+        router.push({
+          pathname: "chat/[id]",
+          params: {
+            id: notification.request.content.data.senderId,
+          },
+        });
+      }
+    }
+
+    Notifications.getLastNotificationResponseAsync()
+      .then(response => {
+        if (!isMounted || !response?.notification) {
+          return;
+        }
+        redirect(response?.notification);
+      });
+
+    const subscription = Notifications.addNotificationResponseReceivedListener(response => {
+      redirect(response.notification);
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.remove();
+    };
+  }, []);
+}
+
+/* async function registerForPushNotificationsAsync() {
   let token;
   if (Device.isDevice) {
     const { status: existingStatus } =
@@ -45,75 +83,11 @@ async function registerForPushNotificationsAsync() {
   }
 
   return token;
-}
+} */
 
 const NotificationsProvider = ({ children, appIsReady }: { children: React.ReactNode; appIsReady: boolean }) => {
-  const [expoPushToken, setExpoPushToken] = useState<string | undefined>("");
-  const [notification, setNotification] = useState<
-    Notifications.Notification | boolean
-  >(false);
-  const [notificationResponse, setNotificationResponse] = useState<Notifications.NotificationResponse | boolean>(false)
-  const tokenMutation = trpc.user.setExpoToken.useMutation();
-  const notificationListener = useRef<any>();
-  const responseListener = useRef<any>();
-  const navigation = useRootNavigation();
-  useEffect(() => {
-    console.log("I AM HER IN JERICO");
-    registerForPushNotificationsAsync().then((token) => {
-      token &&
-        tokenMutation.mutate({
-          expoToken: token,
-        });
-      setExpoPushToken(token);
-    });
-
-    notificationListener.current =
-      Notifications.addNotificationReceivedListener((notification) => {
-        console.log(notification);
-        
-      });
-
-    responseListener.current =
-      Notifications.addNotificationResponseReceivedListener((response) => {
-        setNotificationResponse(response);
-        router.push({
-          pathname: "chat/[id]",
-          params: {
-            id: response.notification.request.content.data.senderId,
-          },
-        });
-      });
-
-    return () => {
-      Notifications.removeNotificationSubscription(
-        notificationListener.current,
-      );
-      Notifications.removeNotificationSubscription(responseListener.current);
-    };
-  }, []);
-
-  useEffect(() => {
-   
-    
-    if(navigation?.isReady && typeof notificationResponse !== "boolean"){
-      setTimeout(() => {
-        if(notificationResponse.notification.request.content.data.type === "schedule"){
-          router.push({
-            pathname: "/schedule"
-          });
-        }else{
-          router.push({
-            pathname: "chat/[id]",
-            params: {
-              id: notificationResponse.notification.request.content.data.senderId,
-            },
-          });
-        }
-      }, 2000)
-      
-      
-    }
-  }, [notificationResponse, navigation?.isReady])
+  
+  useNotificationObserver();
   return <>{children}</>;
 };
 
