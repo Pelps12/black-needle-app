@@ -23,7 +23,7 @@ const defineConfig = (): ExpoConfig => ({
   owner: "sakpa",
   slug: "sakpa",
   scheme: "sakpa",
-  version: "1.1.2",
+  version: "1.1.3",
   orientation: "portrait",
   icon: "./assets/sakpa_small_(2).png",
   userInterfaceStyle: "light",
@@ -34,10 +34,10 @@ const defineConfig = (): ExpoConfig => ({
   },
   updates: {
     fallbackToCacheTimeout: 500,
-    url: "https://u.expo.dev/bcef5ffc-e91d-49a5-9287-7f60dba8a190"
+    url: "https://u.expo.dev/bcef5ffc-e91d-49a5-9287-7f60dba8a190",
   },
   runtimeVersion: {
-    policy: "sdkVersion"
+    policy: "sdkVersion",
   },
   assetBundlePatterns: ["**/*"],
   ios: {
@@ -45,7 +45,7 @@ const defineConfig = (): ExpoConfig => ({
     bundleIdentifier: "co.sakpa",
     entitlements: {
       "com.apple.developer.applesignin": ["Default"],
-      "com.apple.developer.in-app-payments": ["merchant.co.sakpa"]
+      "com.apple.developer.in-app-payments": ["merchant.co.sakpa"],
     },
   },
   android: {
@@ -71,15 +71,14 @@ const defineConfig = (): ExpoConfig => ({
         photosPermission:
           "The app accesses your photos to let you share them clients or service providers",
       },
-      
     ],
     [
       "@stripe/stripe-react-native",
-        {
-          "merchantIdentifier": "merchant.co.sakpa",
-          "enableGooglePay": true
-        }
-    ]
+      {
+        merchantIdentifier: "merchant.co.sakpa",
+        enableGooglePay: true,
+      },
+    ],
   ],
 });
 
