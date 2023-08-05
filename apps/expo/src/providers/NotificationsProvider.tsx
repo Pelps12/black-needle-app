@@ -15,42 +15,54 @@ Notifications.setNotificationHandler({
   }),
 });
 
-function useNotificationObserver() {
+function useNotificationObserver({
+  appIsReady,
+  mutation,
+}: {
+  appIsReady: boolean;
+  mutation: any;
+}) {
   React.useEffect(() => {
-    let isMounted = true;
+    try {
+      let isMounted = true;
 
-    function redirect(notification: Notifications.Notification) {
-      if(notification.request.content.data.type === "schedule"){
-        router.push({
-          pathname: "/schedule"
-        });
-      }else{
-        router.push({
-          pathname: "chat/[id]",
-          params: {
-            id: notification.request.content.data.senderId,
-          },
-        });
+      function redirect(notification: Notifications.Notification) {
+        if (notification.request.content.data.type === "schedule") {
+          router.push({
+            pathname: "/schedule",
+          });
+        } else {
+          router.push({
+            pathname: "chat/[id]",
+            params: {
+              id: notification.request.content.data.senderId,
+            },
+          });
+        }
       }
-    }
 
-    Notifications.getLastNotificationResponseAsync()
-      .then(response => {
+      Notifications.getLastNotificationResponseAsync().then((response) => {
         if (!isMounted || !response?.notification) {
           return;
         }
         redirect(response?.notification);
       });
 
-    const subscription = Notifications.addNotificationResponseReceivedListener(response => {
-      redirect(response.notification);
-    });
+      const subscription =
+        Notifications.addNotificationResponseReceivedListener((response) => {
+          redirect(response.notification);
+        });
 
-    return () => {
-      isMounted = false;
-      subscription.remove();
-    };
-  }, []);
+      return () => {
+        isMounted = false;
+        subscription.remove();
+      };
+    } catch (err: any) {
+      mutation.mutate({
+        message: err.message,
+      });
+    }
+  }, [appIsReady]);
 }
 
 /* async function registerForPushNotificationsAsync() {
@@ -85,9 +97,15 @@ function useNotificationObserver() {
   return token;
 } */
 
-const NotificationsProvider = ({ children, appIsReady }: { children: React.ReactNode; appIsReady: boolean }) => {
-  
-  useNotificationObserver();
+const NotificationsProvider = ({
+  children,
+  appIsReady,
+}: {
+  children: React.ReactNode;
+  appIsReady: boolean;
+}) => {
+  const mutation = trpc.user.errorLog.useMutation();
+  useNotificationObserver({ appIsReady, mutation });
   return <>{children}</>;
 };
 
