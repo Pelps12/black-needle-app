@@ -12,7 +12,7 @@ let Config = {
 };
 
 if (Updates.channel === "production") {
-  Config.CLERK_PUBLISHABLE_KEY = "https://api.production.com";
+  Config.CLERK_PUBLISHABLE_KEY = "pk_live_Y2xlcmsuc2FrcGEuY28k";
   Config.PUBLIC_URL = "https://www.sakpa.co";
   Config.ALGOLIA_INDEX = "sakpa";
   Config.STRIPE_PUBLISHABLE_KEY =
