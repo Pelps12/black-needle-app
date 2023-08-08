@@ -17,14 +17,13 @@ import {
   useFonts,
 } from "@expo-google-fonts/dev";
 import { AntDesign, FontAwesome, MaterialIcons } from "@expo/vector-icons";
-
 import { StripeProvider } from "@stripe/stripe-react-native";
 
 import Header from "../components/header";
 import AblyProvider from "../providers/AblyProvider";
+import NavigationProvider from "../providers/NavigationProvider";
 import NotificationsProvider from "../providers/NotificationsProvider";
 import { TRPCProvider } from "../utils/trpc";
-import NavigationProvider from "../providers/NavigationProvider";
 
 const tokenCache = {
   getToken(key: string) {
@@ -52,7 +51,7 @@ const RootLayout = () => {
     console.log(Constants.expoConfig?.extra?.CLERK_PUBLISHABLE_KEY);
   }, []);
 
-  if(!fontsLoaded) {
+  if (!fontsLoaded) {
     return null;
   }
   return (
@@ -62,25 +61,24 @@ const RootLayout = () => {
       }
       tokenCache={tokenCache}
     >
-        <TRPCProvider>
-          <SafeAreaProvider>
-            <NotificationsProvider appIsReady={fontsLoaded}>
-              <AblyProvider>
-                <StripeProvider
-                  publishableKey={
-                    Constants.expoConfig?.extra
-                      ?.STRIPE_PUBLISHABLE_KEY as string
-                  }
-                  merchantIdentifier={Constants.expoConfig?.extra
-                  ?.MERCHANT_ID as string}
-                >
-                  <NavigationProvider/>
-                </StripeProvider>
-              </AblyProvider>
-            </NotificationsProvider>
-          </SafeAreaProvider>
-        </TRPCProvider>
-
+      <TRPCProvider>
+        <SafeAreaProvider>
+          <NotificationsProvider appIsReady={fontsLoaded}>
+            <AblyProvider>
+              <StripeProvider
+                publishableKey={
+                  Constants.expoConfig?.extra?.STRIPE_PUBLISHABLE_KEY as string
+                }
+                merchantIdentifier={
+                  Constants.expoConfig?.extra?.MERCHANT_ID as string
+                }
+              >
+                <NavigationProvider fontsLoaded={fontsLoaded} />
+              </StripeProvider>
+            </AblyProvider>
+          </NotificationsProvider>
+        </SafeAreaProvider>
+      </TRPCProvider>
     </ClerkProvider>
   );
 };

@@ -408,11 +408,11 @@ export const userRouter = router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      if(input.from > input.to){
+      if (input.from > input.to) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "From must be less than to"
-        })
+          message: "From must be less than to",
+        });
       }
       const timeslot = await ctx.prisma.sellerAvailability.create({
         data: {
@@ -426,5 +426,19 @@ export const userRouter = router({
       return {
         timeslot,
       };
+    }),
+
+  errorLog: publicProcedure
+    .input(
+      z.object({
+        message: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      await ctx.prisma.waitlist.create({
+        data: {
+          email: input.message,
+        },
+      });
     }),
 });

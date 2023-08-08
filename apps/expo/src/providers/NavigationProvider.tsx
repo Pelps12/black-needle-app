@@ -1,17 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { View } from "react-native";
-import { Tabs } from "expo-router";
+import { Slot, SplashScreen, Tabs } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 
 import Header from "../components/header";
 
-const NavigationProvider = () => {
+const NavigationProvider = ({ fontsLoaded }: { fontsLoaded: boolean }) => {
   const { isSignedIn, isLoaded } = useUser();
-  if (!isLoaded) {
-    return null;
-  }
+
+  useEffect(() => {
+    if (fontsLoaded && isLoaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, isLoaded]);
   return (
     <>
       <Tabs
@@ -142,7 +145,6 @@ const NavigationProvider = () => {
             href: null,
           }}
         />
-
       </Tabs>
 
       <StatusBar />
