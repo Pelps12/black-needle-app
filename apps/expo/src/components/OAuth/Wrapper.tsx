@@ -1,14 +1,19 @@
 import React from "react";
 import { View } from "react-native";
+import Constants from "expo-constants";
+import * as Device from "expo-device";
 import { createURL } from "expo-linking";
+import { getExpoPushTokenAsync } from "expo-notifications";
 import { useRouter } from "expo-router";
 import { useOAuth } from "@clerk/clerk-expo";
+import { trpc } from "@utils/trpc";
 
 import AppleButton from "./AppleButton";
 import GoogleButton from "./GoogleButton";
 
 const OAuthWrapper = ({ mode }: { mode: "signin" | "signup" }) => {
   const router = useRouter();
+  const tokenMutation = trpc.user.setExpoToken.useMutation();
   const { startOAuthFlow } = useOAuth({
     strategy: "oauth_google",
   });
@@ -20,6 +25,15 @@ const OAuthWrapper = ({ mode }: { mode: "signin" | "signup" }) => {
       });
       if (createdSessionId && setActive) {
         setActive({ session: createdSessionId });
+        if (Device.isDevice) {
+          const token = await getExpoPushTokenAsync({
+            projectId: Constants.expoConfig?.extra?.eas?.projectId,
+          });
+          tokenMutation.mutate({
+            expoToken: token.data,
+          });
+        }
+
         router.push("/");
       } else {
         // Modify this code to use signIn or signUp to set this missing requirements you set in your dashboard.
