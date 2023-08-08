@@ -123,6 +123,7 @@ const Appointment = ({
                     onPress={() =>
                       chargeAppointmentStatus("APPROVED", appointments.id)
                     }
+                    key={value}
                   >
                     <Image
                       source={require("../../../assets/yes.svg")}
@@ -136,6 +137,7 @@ const Appointment = ({
                     onPress={() =>
                       chargeAppointmentStatus("DECLINED", appointments.id)
                     }
+                    key={value}
                   >
                     <Image
                       source={require("../../../assets/no.svg")}
@@ -148,6 +150,7 @@ const Appointment = ({
                   <Pressable
                     className={`btn btn-outline btn-sm btn-secondary  p-2`}
                     onPress={() => setRescheduleModalOpen(true)}
+                    key={value}
                   >
                     <SKText className="font-semibold " fontWeight="semi-bold">
                       Reschedule
@@ -160,6 +163,7 @@ const Appointment = ({
                   <Link
                     className={`btn btn-outline btn-sm btn-secondary  border-r p-2`}
                     href={`/schedule/payment?appointmentId=${appointments.id}`}
+                    key={value}
                   >
                     <Text className="font-semibold ">Pay</Text>
                   </Link>
@@ -169,6 +173,7 @@ const Appointment = ({
                   <Link
                     className={`btn btn-outline btn-sm btn-secondary  border-r p-2`}
                     href={`/schedule/payment?appointmentId=${appointments.id}`}
+                    key={value}
                   >
                     <Text className="font-semibold ">Pay</Text>
                   </Link>
@@ -178,6 +183,7 @@ const Appointment = ({
                   <Pressable
                     className={`btn btn-outline btn-sm btn-error   p-2`}
                     onPress={() => openModal()}
+                    key={value}
                   >
                     <SKText
                       className="font-semibold text-[#E26850]"

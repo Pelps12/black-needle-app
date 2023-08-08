@@ -749,7 +749,7 @@ export const appointmentRouter = router({
               updatedAt: new Date(),
               history: {
                 create: {
-                  status: input.newStatus,
+                  status: newStatus || input.newStatus,
                 },
               },
             },
@@ -770,7 +770,7 @@ export const appointmentRouter = router({
           const expoTokens = updatedAppointment.user.tokens
             .map((token) => token.token as ExpoPushToken)
             .filter((token) => Expo.isExpoPushToken(token));
-          if (updatedAppointment.status === "APPROVED") {
+          if (updatedAppointment.status !== "DECLINED") {
             if (expoTokens.length > 0) {
               const ticket = await expo.sendPushNotificationsAsync([
                 {
