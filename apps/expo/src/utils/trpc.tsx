@@ -9,6 +9,8 @@ import { createTRPCReact } from "@trpc/react-query";
 import { type AppRouter } from "@acme/api";
 import { transformer } from "@acme/api/transformer";
 
+import Config from "./config";
+
 /**
  * A set of typesafe hooks for consuming your API.
  */
@@ -31,10 +33,9 @@ const getBaseUrl = () => {
   const localhost = Constants.manifest?.debuggerHost?.split(":")[0];
 
   if (!localhost) {
-    return Constants.expoConfig?.extra?.PUBLIC_URL;
-
+    return Config?.PUBLIC_URL;
   }
-  return Constants.expoConfig?.extra?.PUBLIC_URL;
+  return Config?.PUBLIC_URL;
 };
 
 /**
