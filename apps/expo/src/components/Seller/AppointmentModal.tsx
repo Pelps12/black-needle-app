@@ -59,7 +59,6 @@ const BuyerAppointment = ({
 }) => {
   const router = useRouter();
 
-  
   const createAppointment = trpc.appointment.createAppointment.useMutation();
   const rescheduleAppointment =
     trpc.appointment.rescheduleAppointment.useMutation();
@@ -70,9 +69,9 @@ const BuyerAppointment = ({
   const [selectedDay, setSelectedDay] = useState(today);
   const getFreeTimeslots = trpc.appointment.getFreeTimeslots.useQuery({
     sellerId: sellerId,
-		day: format(selectedDay, 'EEEE').toUpperCase() as Day,
-		priceId: priceId,
-		date: selectedDay
+    day: format(selectedDay, "EEEE").toUpperCase() as Day,
+    priceId: priceId,
+    date: selectedDay,
   });
   const tabBarheight = useBottomTabBarHeight();
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot>();
@@ -82,6 +81,7 @@ const BuyerAppointment = ({
   const [selectedMonth, setSelectedMonth] = React.useState(
     firstDayCurrentMonth.toISOString(),
   );
+  const utils = trpc.useContext();
 
   const newDays = eachDayOfInterval({
     start: isSameMonth(today, firstDayCurrentMonth)
@@ -91,6 +91,10 @@ const BuyerAppointment = ({
       isSameMonth(today, firstDayCurrentMonth) ? today : firstDayCurrentMonth,
     ),
   });
+
+  useEffect(() => {
+    utils.appointment.getFreeTimeslots.invalidate();
+  }, [sellerId, priceId]);
 
   useEffect(() => {
     console.log(currentMonth);
@@ -185,6 +189,7 @@ const BuyerAppointment = ({
                   })}
                   setOpen={setOpen}
                   setValue={setSelectedMonth}
+                  listMode="MODAL"
                 />
               </View>
 
