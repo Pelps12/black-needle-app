@@ -35,7 +35,7 @@ const Prices = ({
   sellerId: string;
   setCategories: any;
 }) => {
-  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedPriceId, setSelectedPriceId] = useState<string>();
   const { userId, isSignedIn } = useAuth();
   const [priceModalVisible, setPriceModalVisible] = useState(false);
   const router = useRouter();
@@ -105,8 +105,8 @@ const Prices = ({
                 getCat={getCat}
                 price={item}
                 image={category.Image[0]}
-                modalVisible={modalVisible}
-                setModalVisible={setModalVisible}
+                modalVisible={selectedPriceId !== undefined}
+                setModalVisible={setSelectedPriceId}
                 sellerId={sellerId}
               />
             )}
@@ -115,6 +115,21 @@ const Prices = ({
         )}
         keyExtractor={(item) => item.id.toString()}
       />
+
+      <Modal
+        modalVisible={!!selectedPriceId}
+        setModalVisible={() => setSelectedPriceId(undefined)}
+        className=""
+      >
+        {selectedPriceId && (
+          <AppointmentModal
+            sellerId={sellerId}
+            priceId={selectedPriceId}
+            isOpen={!!selectedPriceId}
+            closeModal={() => setSelectedPriceId(undefined)}
+          />
+        )}
+      </Modal>
     </View>
   );
 };
@@ -140,7 +155,7 @@ const PriceComponent = ({
   price: Price;
   image?: PrismaImage;
   modalVisible: boolean;
-  setModalVisible: (modalVisible: boolean) => void;
+  setModalVisible: (modalVisible: string) => void;
   sellerId: string;
   getCat: any;
   setCategories: any;
@@ -156,18 +171,6 @@ const PriceComponent = ({
   return (
     <>
       <View className=" mx-2 my-5 mt-2 flex-row items-center  justify-between rounded-lg px-2 py-4 shadow-lg">
-        <Modal
-          modalVisible={modalVisible}
-          setModalVisible={setModalVisible}
-          className=""
-        >
-          <AppointmentModal
-            sellerId={sellerId}
-            priceId={price.id}
-            isOpen={modalVisible}
-            closeModal={() => setModalVisible(false)}
-          />
-        </Modal>
         <Image source={image?.link ?? ":)"} className="h-40 w-40 rounded-md" />
         <View className="flex w-48 items-end">
           <SKTest
@@ -182,7 +185,9 @@ const PriceComponent = ({
           <Pressable
             className={`my-2 w-24 content-center items-center justify-center  rounded-md bg-[#1dbaa7] text-right   text-black shadow-sm`}
             onPress={() =>
-              isSignedIn ? setModalVisible(true) : router.replace("auth/signin")
+              isSignedIn
+                ? setModalVisible(price.id)
+                : router.replace("auth/signin")
             }
           >
             <SKTest
