@@ -143,6 +143,7 @@ const BuyerAppointment = ({
             // var windowReference = window.open();
             // windowReference.location.assign(`${env.NEXT_PUBLIC_URL}/profile`)
             // window.open(`${env.NEXT_PUBLIC_URL}/profile`, '_self');
+            utils.appointment.getAppointments.invalidate();
             router.push(`/schedule`);
           },
           onError: (err) => {
@@ -151,6 +152,10 @@ const BuyerAppointment = ({
               if (err.message !== "UNAUTHORIZED") {
                 Alert.alert(err.message);
               }
+            }
+
+            if (err.data?.code === "CONFLICT") {
+              Alert.alert(err.message);
             }
           },
         },

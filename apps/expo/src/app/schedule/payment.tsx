@@ -9,48 +9,44 @@ import {
   View,
 } from "react-native";
 import { Image } from "expo-image";
-import {SellerAvailability} from "@acme/db"
+import { router, useLocalSearchParams } from "expo-router";
 import {
   CardField,
   PlatformPay,
   PlatformPayButton,
   confirmPlatformPayPayment,
-  presentPaymentSheet,
-  isPlatformPaySupported,
-  useConfirmPayment,
-  updatePlatformPaySheet,
   initPaymentSheet,
+  isPlatformPaySupported,
+  presentPaymentSheet,
+  updatePlatformPaySheet,
+  useConfirmPayment,
 } from "@stripe/stripe-react-native";
 
 import {
+  SellerAvailability,
   type Category,
   type Price,
   type Appointment as PrismaAppointment,
   type Image as PrismaImage,
 } from "@acme/db";
 
-import { trpc } from "../../utils/trpc";
-import { router, useLocalSearchParams } from "expo-router";
 import SKText from "../../components/Utils/SKText";
+import { trpc } from "../../utils/trpc";
 
-const PaymentModal = ({
-  closeModal,
-}: {
-  closeModal: () => void;
-}) => {
-  
-  const {appointmentId} = useLocalSearchParams();
-  const appointment = trpc.useContext().appointment.getAppointments.getData({
-    sellerMode: false,
+const PaymentModal = ({ closeModal }: { closeModal: () => void }) => {
+  const { appointmentId } = useLocalSearchParams();
+  const appointment = trpc
+    .useContext()
+    .appointment.getAppointments.getData({
+      sellerMode: false,
+    })
+    ?.find((appointment) => appointment.id === appointmentId);
 
-  })?.find(appointment => appointment.id === appointmentId)
-
-
-
-  return(
-    (appointment && <PaymentModalHidden appointment={appointment} closeModal={closeModal}/>)
-  )
-
+  return (
+    appointment && (
+      <PaymentModalHidden appointment={appointment} closeModal={closeModal} />
+    )
+  );
 };
 
 const styles = StyleSheet.create({
@@ -66,7 +62,10 @@ const styles = StyleSheet.create({
 
 export default PaymentModal;
 
-const PaymentModalHidden = ({appointment, closeModal}:{
+const PaymentModalHidden = ({
+  appointment,
+  closeModal,
+}: {
   appointment: PrismaAppointment & {
     price: Price & {
       category: Category & {
@@ -80,89 +79,92 @@ const PaymentModalHidden = ({appointment, closeModal}:{
   closeModal: () => void;
 }) => {
   const getPaymentIntentSecret = trpc.payment.getPaymentSheet.useMutation();
- 
+
   const [isApplePaySupported, setIsApplePaySupported] = useState(false);
   const { confirmPayment, loading: stripeLoading } = useConfirmPayment();
-  const [state, setState] = useState<string|undefined>("Not started");
+  const [state, setState] = useState<string | undefined>("Not started");
   const [loading, setLoading] = useState(false);
 
-  const totalAmount  =
-  (appointment.price.category.seller.downPaymentPercentage
-    ? appointment.price.category.seller.downPaymentPercentage *
-      appointment.price.amount *
-      100
-    : appointment.price.amount * 100) +
-  (appointment.price.amount < 9
-    ? 135
-    : Math.ceil(appointment.price.amount * 7));
+  const totalAmount =
+    (appointment.price.category.seller.downPaymentPercentage
+      ? appointment.price.category.seller.downPaymentPercentage *
+        appointment.price.amount *
+        100
+      : appointment.price.amount * 100) +
+    (appointment.price.amount < 9
+      ? 135
+      : Math.ceil(appointment.price.amount * 7));
 
   const handlePayPress = async () => {
-    getPaymentIntentSecret.mutate({
-      appointmentId: appointment.id,
-    }, {
-      onSuccess: async ({client_secret}) => {
-        const { error, paymentIntent } = await confirmPayment(client_secret, {
-          paymentMethodType: "Card",
-        });
-    
-        if (error) {
-          Alert.alert(`Error code: ${error.code}`, error.message);
-        } else if (paymentIntent) {
-          Alert.alert("Success", "Payment Successful");
-          router.push("/schedule")
-        }
-      }
-    }); 
+    getPaymentIntentSecret.mutate(
+      {
+        appointmentId: appointment.id,
+      },
+      {
+        onSuccess: async ({ client_secret }) => {
+          const { error, paymentIntent } = await confirmPayment(client_secret, {
+            paymentMethodType: "Card",
+          });
+
+          if (error) {
+            Alert.alert(`Error code: ${error.code}`, error.message);
+          } else if (paymentIntent) {
+            Alert.alert("Success", "Payment Successful");
+            router.push("/schedule");
+          }
+        },
+      },
+    );
   };
 
   const handleApplePayPress = async () => {
-    setState("A")
-    getPaymentIntentSecret.mutate({
-      appointmentId: appointment.id,
-    }, {
-      onSuccess: async ({client_secret}) => {
+    setState("A");
+    getPaymentIntentSecret.mutate(
+      {
+        appointmentId: appointment.id,
+      },
+      {
+        onSuccess: async ({ client_secret }) => {
           setState("B");
-          try{
-            const { error, paymentIntent } = await confirmPlatformPayPayment(client_secret, {
-              applePay: {
-                cartItems: [{
-                  label: appointment.price.name,
-                  amount: (totalAmount/100).toFixed(2),
-                  paymentType: PlatformPay.PaymentType.Immediate
-                }],
-                merchantCountryCode: "US",
-                currencyCode: "US"
-              }
-            });
-            setState("C")
+          try {
+            const { error, paymentIntent } = await confirmPlatformPayPayment(
+              client_secret,
+              {
+                applePay: {
+                  cartItems: [
+                    {
+                      label: appointment.price.name,
+                      amount: (totalAmount / 100).toFixed(2),
+                      paymentType: PlatformPay.PaymentType.Immediate,
+                    },
+                  ],
+                  merchantCountryCode: "US",
+                  currencyCode: "US",
+                },
+              },
+            );
+            setState("C");
             if (error) {
               Alert.alert(`Error code: ${error.code}`, error.message);
             } else if (paymentIntent) {
               Alert.alert("Success", "Payment Successful");
-             router.push("/schedule")
-            }else{
-              Alert.alert("Serious issue")
+              router.push("/schedule");
+            } else {
+              Alert.alert("Serious issue");
             }
-          }catch(err: any){
-            setState(err.message)
+          } catch (err: any) {
+            setState(err.message);
           }
-
-          
-        
-        
-      }
-    });
-  }
+        },
+      },
+    );
+  };
 
   const initializePaymentSheet = async () => {
-    const {
-      paymentIntent,
-      ephemeralKey,
-      client_secret,
-      customer,
-    } = await getPaymentIntentSecret.mutateAsync({
-      appointmentId: appointment.id
-    });
+    const { paymentIntent, ephemeralKey, client_secret, customer } =
+      await getPaymentIntentSecret.mutateAsync({
+        appointmentId: appointment.id,
+      });
 
     const { error } = await initPaymentSheet({
       merchantDisplayName: "Sakpa",
@@ -173,13 +175,13 @@ const PaymentModalHidden = ({appointment, closeModal}:{
       //methods that complete payment after a delay, like SEPA Debit and Sofort.
       allowsDelayedPaymentMethods: false,
       applePay: {
-        merchantCountryCode: "US"
+        merchantCountryCode: "US",
       },
       appearance: {
         colors: {
           primary: "#1dbaa7",
-        }
-      }
+        },
+      },
     });
     if (!error) {
       setLoading(true);
@@ -192,10 +194,9 @@ const PaymentModalHidden = ({appointment, closeModal}:{
     if (error) {
       Alert.alert(`Error code: ${error.code}`, error.message);
     } else {
-      router.push("/schedule")
+      router.push("/schedule");
     }
   };
-  
 
   useEffect(() => {
     (async function () {
@@ -236,44 +237,23 @@ const PaymentModalHidden = ({appointment, closeModal}:{
             </SKText>
           </View>
           <SKText className="text-xl font-extrabold" fontWeight="bold">
-            ${(totalAmount/100).toFixed(2)}
+            ${(totalAmount / 100).toFixed(2)}
           </SKText>
         </View>
       </View>
-      <CardField
-        style={styles.cardField}
-        cardStyle={{
-          borderColor: "#25252d",
-          borderWidth: 1,
-          borderRadius: 8,
-          textColor: "#25252D",
-        }}
-      ></CardField>
 
       <Pressable
         className="mx-auto mb-5 w-24 rounded-xl bg-[#5433FF] p-2"
         onPress={openPaymentSheet}
         disabled={getPaymentIntentSecret.isLoading || stripeLoading}
       >
-        <SKText className="mx-auto text-2xl font-semibold text-white" fontWeight="semi-bold">PAY</SKText>
+        <SKText
+          className="mx-auto text-2xl font-semibold text-white"
+          fontWeight="semi-bold"
+        >
+          PAY
+        </SKText>
       </Pressable>
-
-      {isApplePaySupported && <PlatformPayButton
-        onPress={handleApplePayPress}
-        type={PlatformPay.ButtonType.Book}
-        appearance={PlatformPay.ButtonStyle.Black}
-        borderRadius={4}
-        style={{
-          width: "60%",
-          height: 50,
-          marginLeft: "auto",
-          marginRight: "auto",
-          borderRadius: 10,
-          marginBottom: 10,
-        }}
-      />}
-
-      <Text>{state}</Text>
     </SafeAreaView>
   );
-}
+};
