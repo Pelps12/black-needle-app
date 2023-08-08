@@ -50,14 +50,9 @@ const RootLayout = () => {
   useEffect(() => {
     console.log(Constants.expoConfig?.extra?.CLERK_PUBLISHABLE_KEY);
   }, []);
-  const onLayoutRootView = useCallback(async () => {
-    if (fontsLoaded) {
-      await SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded]);
 
   if (!fontsLoaded) {
-    return <></>;
+    return null;
   }
   return (
     <ClerkProvider
@@ -78,7 +73,7 @@ const RootLayout = () => {
                   Constants.expoConfig?.extra?.MERCHANT_ID as string
                 }
               >
-                <NavigationProvider />
+                <NavigationProvider fontsLoaded={fontsLoaded} />
               </StripeProvider>
             </AblyProvider>
           </NotificationsProvider>
