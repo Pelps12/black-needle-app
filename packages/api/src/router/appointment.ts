@@ -13,7 +13,7 @@ import { env } from "@acme/env-config/env";
 
 import { protectedProcedure, publicProcedure, router } from "../trpc";
 import { stripe } from "../utils/stripe";
-import {twilio} from "../utils/twilio"
+import { twilio } from "../utils/twilio";
 
 const expo = new Expo({ accessToken: env.EXPO_ACCESS_TOKEN });
 function addSeconds(date: Date, seconds: number) {
@@ -40,27 +40,28 @@ export const appointmentRouter = router({
       return deletedAvailability.count !== 0;
     }),
   editSellerAvailibility: protectedProcedure
-		.input(
-			z.object({
-				availiabilityId: z.string(),
-				from: z.number().optional(),
-				to: z.number().optional(),
-				day: z.nativeEnum(Day).optional(),
-			})
-		).mutation(async({input, ctx}) => {
-			const updatedTimeslot = await ctx.prisma.sellerAvailability.update({
-				where: {
-					id: input.availiabilityId
-				},
-				data: {
-					from: input.from,
-					to: input.to,
-					day: input.day,
-					sellerId: ctx.auth.userId
-				}
-			})
-			return updatedTimeslot;
-		}),
+    .input(
+      z.object({
+        availiabilityId: z.string(),
+        from: z.number().optional(),
+        to: z.number().optional(),
+        day: z.nativeEnum(Day).optional(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const updatedTimeslot = await ctx.prisma.sellerAvailability.update({
+        where: {
+          id: input.availiabilityId,
+        },
+        data: {
+          from: input.from,
+          to: input.to,
+          day: input.day,
+          sellerId: ctx.auth.userId,
+        },
+      });
+      return updatedTimeslot;
+    }),
   getSellerAvailabilty: protectedProcedure
     .input(
       z.object({
@@ -249,8 +250,8 @@ export const appointmentRouter = router({
           history: {
             create: {
               status: "PENDING",
-            }
-          }
+            },
+          },
         },
         include: {
           price: {
@@ -271,7 +272,7 @@ export const appointmentRouter = router({
               },
             },
           },
-          user: true
+          user: true,
         },
       });
       if (appointment) {
@@ -283,14 +284,12 @@ export const appointmentRouter = router({
           const ticket = await expo.sendPushNotificationsAsync([
             {
               to: expoTokens,
-              title: `New Appointment from ${
-                appointment.user.name ?? "User"
-              }`,
+              title: `New Appointment from ${appointment.user.name ?? "User"}`,
               body: "Respond to their request",
               sound: "default",
               data: {
                 senderId: ctx.auth.userId,
-                type: "schedule"
+                type: "schedule",
               },
             },
           ]);
@@ -331,6 +330,7 @@ export const appointmentRouter = router({
                 },
               },
             },
+            history: true,
           },
           orderBy: {
             createdAt: "desc",
@@ -358,6 +358,7 @@ export const appointmentRouter = router({
                 },
               },
             },
+            history: true,
           },
           orderBy: {
             createdAt: "desc",
@@ -425,9 +426,9 @@ export const appointmentRouter = router({
           status: "PENDING",
           history: {
             create: {
-              status: "PENDING"
-            }
-          }
+              status: "PENDING",
+            },
+          },
         },
         include: {
           price: {
@@ -518,9 +519,9 @@ export const appointmentRouter = router({
                 status: "CANCELED",
                 history: {
                   create: {
-                    status: "CANCELED"
-                  }
-                }
+                    status: "CANCELED",
+                  },
+                },
               },
             });
           } else if (
@@ -537,9 +538,9 @@ export const appointmentRouter = router({
                 status: "CANCELED",
                 history: {
                   create: {
-                    status: "CANCELED"
-                  }
-                }
+                    status: "CANCELED",
+                  },
+                },
               },
             });
           }
@@ -575,9 +576,9 @@ export const appointmentRouter = router({
                 status: "CANCELED",
                 history: {
                   create: {
-                    status: "CANCELED"
-                  }
-                }
+                    status: "CANCELED",
+                  },
+                },
               },
             });
           } else if (
@@ -594,16 +595,16 @@ export const appointmentRouter = router({
                 status: "CANCELED",
                 history: {
                   create: {
-                    status: "CANCELED"
-                  }
-                }
+                    status: "CANCELED",
+                  },
+                },
               },
             });
           }
         }
       }
     }),
-    
+
   completePayment: protectedProcedure
     .input(
       z.object({
@@ -704,117 +705,131 @@ export const appointmentRouter = router({
         });
       }
     }),
-    /**Very vulnerable to bad actors that are sellers */
-    updateAppointmentStatus: protectedProcedure
-		.input(
-			z.object({
-				newStatus: z.nativeEnum(OrderStatus),
-				itemId: z.string()
-			})
-		)
-		.mutation(async ({ input, ctx }) => {
-			{
-				const appointment = await ctx.prisma.appointment.findFirst({
-					where: {
-						id: input.itemId,
-						price: {
-							category: {
-								sellerId: ctx.auth.userId
-							}
-						}
-					}
-				});
-				if (appointment) {
-					const updatedAppointment = await ctx.prisma.appointment.update({
-						where: {
-							id: input.itemId
-						},
-						data: {
-							status: input.newStatus,
-							updatedAt: new Date(),
+  /**Very vulnerable to bad actors that are sellers */
+  updateAppointmentStatus: protectedProcedure
+    .input(
+      z.object({
+        newStatus: z.enum(["APPROVED", "DECLINED"]),
+        itemId: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      {
+        const appointment = await ctx.prisma.appointment.findFirst({
+          where: {
+            id: input.itemId,
+            price: {
+              category: {
+                sellerId: ctx.auth.userId,
+              },
+            },
+          },
+          include: {
+            history: true,
+          },
+        });
+        let newStatus: OrderStatus | undefined;
+
+        if (input.newStatus === "APPROVED") {
+          if (appointment?.history.find((prev) => prev.status === "PAID")) {
+            newStatus = "PAID";
+          } else if (
+            appointment?.history.find((prev) => prev.status === "DOWNPAID")
+          ) {
+            newStatus = "DOWNPAID";
+          }
+        }
+        if (appointment) {
+          const updatedAppointment = await ctx.prisma.appointment.update({
+            where: {
+              id: input.itemId,
+            },
+            data: {
+              status: newStatus || input.newStatus,
+              updatedAt: new Date(),
               history: {
                 create: {
-                  status: input.newStatus
-                }
-              }
-						},
-						include: {
-							price: true,
+                  status: input.newStatus,
+                },
+              },
+            },
+            include: {
+              price: true,
               seller: {
                 select: {
-                  user: true
-                }
+                  user: true,
+                },
               },
-							user: {
+              user: {
                 include: {
-                  tokens: true
-                }
+                  tokens: true,
+                },
               },
-              
-						}
-					});
-          const expoTokens = updatedAppointment.user.tokens.map((token) => token.token as ExpoPushToken)
+            },
+          });
+          const expoTokens = updatedAppointment.user.tokens
+            .map((token) => token.token as ExpoPushToken)
             .filter((token) => Expo.isExpoPushToken(token));
-					if (updatedAppointment.status === 'APPROVED') {
-            
+          if (updatedAppointment.status === "APPROVED") {
             if (expoTokens.length > 0) {
               const ticket = await expo.sendPushNotificationsAsync([
                 {
                   to: expoTokens,
-                  title: updatedAppointment.seller.user.name || 'Unknown User',
+                  title: updatedAppointment.seller.user.name || "Unknown User",
                   body: `Appointment for ${updatedAppointment.price.name} approved`,
-                  sound: 'default',
+                  sound: "default",
                   data: {
                     senderId: updatedAppointment.userId,
-                    type: "schedule"
-                  }
-                }
+                    type: "schedule",
+                  },
+                },
               ]);
               console.log(ticket);
             } else {
               twilio.messages.create({
-                body: `Appointment for ${updatedAppointment.price.name} approved by ${
-                  updatedAppointment.seller.user.name || 'Seller'
+                body: `Appointment for ${
+                  updatedAppointment.price.name
+                } approved by ${
+                  updatedAppointment.seller.user.name || "Seller"
                 }.\nGo to https://sakpa.co/profile to pay for the order`,
                 to: `+1${updatedAppointment.user.phoneNumber}`,
-                messagingServiceSid: env.MESSAGING_SID
+                messagingServiceSid: env.MESSAGING_SID,
               });
-						
-					} 
-        }else {
-          if (expoTokens.length > 0) {
-            const ticket = await expo.sendPushNotificationsAsync([
-              {
-                to: expoTokens,
-                title: updatedAppointment.seller.user.name || 'Unknown User',
-                body: `Appointment for ${updatedAppointment.price.name} declined`,
-                sound: 'default',
-                data: {
-                  senderId: updatedAppointment.userId,
-                  type: "schedule"
-                }
-              }
-            ]);
+            }
           } else {
-            twilio.messages.create({
-              body: `Appointment for ${updatedAppointment.price.name} declined by ${
-								updatedAppointment.seller.user.name || 'Seller'
+            if (expoTokens.length > 0) {
+              const ticket = await expo.sendPushNotificationsAsync([
+                {
+                  to: expoTokens,
+                  title: updatedAppointment.seller.user.name || "Unknown User",
+                  body: `Appointment for ${updatedAppointment.price.name} declined`,
+                  sound: "default",
+                  data: {
+                    senderId: updatedAppointment.userId,
+                    type: "schedule",
+                  },
+                },
+              ]);
+            } else {
+              twilio.messages.create({
+                body: `Appointment for ${
+                  updatedAppointment.price.name
+                } declined by ${
+                  updatedAppointment.seller.user.name || "Seller"
+                }.\nGo to https://sakpa.co/profile to pay for the order`,
+                to: `+1${updatedAppointment.user.phoneNumber}`,
+                messagingServiceSid: env.MESSAGING_SID,
+              });
+            }
+          }
 
-              }.\nGo to https://sakpa.co/profile to pay for the order`,
-              to: `+1${updatedAppointment.user.phoneNumber}`,
-              messagingServiceSid: env.MESSAGING_SID
-            });
-          
+          return updatedAppointment;
+        } else {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Invalid input",
+          });
         }
-					}
-
-					return updatedAppointment;
-				} else {
-					throw new TRPCError({
-						code: 'BAD_REQUEST',
-						message: 'Invalid input'
-					});
-				}
-			}
-		}),
+      }
+    }),
 });
