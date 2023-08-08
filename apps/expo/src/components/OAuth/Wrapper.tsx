@@ -6,8 +6,8 @@ import { createURL } from "expo-linking";
 import * as Notifications from "expo-notifications";
 import { useRouter } from "expo-router";
 import { useOAuth } from "@clerk/clerk-expo";
-import { trpc } from "@utils/trpc";
 
+import { trpc } from "../../utils/trpc";
 import AppleButton from "./AppleButton";
 import GoogleButton from "./GoogleButton";
 
@@ -60,14 +60,13 @@ const OAuthWrapper = ({ mode }: { mode: "signin" | "signup" }) => {
       });
       if (createdSessionId && setActive) {
         setActive({ session: createdSessionId });
+        router.push("/");
         const token = await registerForPushNotificationsAsync();
         if (token) {
           tokenMutation.mutate({
             expoToken: token.data,
           });
         }
-
-        router.push("/");
       } else {
         // Modify this code to use signIn or signUp to set this missing requirements you set in your dashboard.
         throw new Error(

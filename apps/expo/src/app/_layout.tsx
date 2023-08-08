@@ -50,6 +50,11 @@ const RootLayout = () => {
   useEffect(() => {
     console.log(Constants.expoConfig?.extra?.CLERK_PUBLISHABLE_KEY);
   }, []);
+  const onLayoutRootView = useCallback(async () => {
+    if (fontsLoaded) {
+      await SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
 
   if (!fontsLoaded) {
     return <></>;
