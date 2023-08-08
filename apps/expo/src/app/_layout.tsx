@@ -23,6 +23,7 @@ import Header from "../components/header";
 import AblyProvider from "../providers/AblyProvider";
 import NavigationProvider from "../providers/NavigationProvider";
 import NotificationsProvider from "../providers/NotificationsProvider";
+import Config from "../utils/config";
 import { TRPCProvider } from "../utils/trpc";
 
 const tokenCache = {
@@ -48,7 +49,7 @@ const RootLayout = () => {
   const [appIsReady, setAppIsReady] = useState(false);
 
   useEffect(() => {
-    console.log(Constants.expoConfig?.extra?.CLERK_PUBLISHABLE_KEY);
+    console.log(Config?.CLERK_PUBLISHABLE_KEY);
   }, []);
 
   if (!fontsLoaded) {
@@ -56,9 +57,7 @@ const RootLayout = () => {
   }
   return (
     <ClerkProvider
-      publishableKey={
-        Constants.expoConfig?.extra?.CLERK_PUBLISHABLE_KEY as string
-      }
+      publishableKey={Config?.CLERK_PUBLISHABLE_KEY as string}
       tokenCache={tokenCache}
     >
       <TRPCProvider>
@@ -66,12 +65,8 @@ const RootLayout = () => {
           <NotificationsProvider appIsReady={fontsLoaded}>
             <AblyProvider>
               <StripeProvider
-                publishableKey={
-                  Constants.expoConfig?.extra?.STRIPE_PUBLISHABLE_KEY as string
-                }
-                merchantIdentifier={
-                  Constants.expoConfig?.extra?.MERCHANT_ID as string
-                }
+                publishableKey={Config?.STRIPE_PUBLISHABLE_KEY as string}
+                merchantIdentifier={Config?.MERCHANT_ID as string}
               >
                 <NavigationProvider fontsLoaded={fontsLoaded} />
               </StripeProvider>

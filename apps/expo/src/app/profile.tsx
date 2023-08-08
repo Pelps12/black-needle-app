@@ -10,9 +10,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Constants from "expo-constants";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { Link, useRouter } from "expo-router";
+import { openBrowserAsync } from "expo-web-browser";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 import AnimatedLottieView from "lottie-react-native";
@@ -24,10 +26,9 @@ import ProtectedLink from "../components/Utils/ProtectedLink";
 import SKTest from "../components/Utils/SKText";
 import SKText from "../components/Utils/SKText";
 import SKTextInput from "../components/Utils/SKTextInput";
+import Config from "../utils/config";
 import dataURItoBlob from "../utils/dataURItoBlob";
 import { trpc } from "../utils/trpc";
-import { openBrowserAsync } from "expo-web-browser";
-import Constants from "expo-constants";
 
 const formSchema = z.object({
   image: z.string().optional(),
@@ -72,9 +73,9 @@ const Profile = () => {
       const file = image ? await dataURItoBlob(image) : null;
       console.log(file?.size);
       const formdata = new FormData();
-      if(file){
-        formdata.append("userId", user.id)
-        formdata.append("file", file)
+      if (file) {
+        formdata.append("userId", user.id);
+        formdata.append("file", file);
       }
       const [userResult, imageResult] = await Promise.all([
         username
@@ -83,14 +84,16 @@ const Profile = () => {
             })
           : [],
         file
-          ? fetch(`${Constants.expoConfig?.extra?.PUBLIC_URL as string}/api/clerk/profile`,{
-            method: "POST",
-            body: formdata
-          })
+          ? fetch(`${Config?.PUBLIC_URL as string}/api/clerk/profile`, {
+              method: "POST",
+              body: formdata,
+            })
           : [],
       ]);
-      if(file) {
-        (imageResult as Response).json().then((result: any) => console.log(result))
+      if (file) {
+        (imageResult as Response)
+          .json()
+          .then((result: any) => console.log(result));
       }
       setImage(undefined);
       setUsername(undefined);
@@ -138,11 +141,13 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    console.log(username)
-  }, [editMode])
+    console.log(username);
+  }, [editMode]);
 
   const _handlePressButtonAsync = async () => {
-    await openBrowserAsync(`${Constants.expoConfig?.extra?.PUBLIC_URL as string}/register/seller?intiator=app`);
+    await openBrowserAsync(
+      `${Config?.PUBLIC_URL as string}/register/seller?intiator=app`,
+    );
   };
   return (
     <View className="">

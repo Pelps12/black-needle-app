@@ -8,6 +8,7 @@ import {
   useChannel,
 } from "@ably-labs/react-hooks";
 
+import Config from "../utils/config";
 import { trpc } from "../utils/trpc";
 
 const tokenStore = {
@@ -21,7 +22,7 @@ const tokenStore = {
 
 const AblyProvider = ({ children }: { children: React.ReactNode }) => {
   const ref = React.useRef<any>();
-  const URL = Constants.expoConfig?.extra?.PUBLIC_URL as string;
+  const URL = Config?.PUBLIC_URL as string;
   const getAblyToken = trpc.chat.getToken.useMutation();
   useEffect(() => {
     const setUpAbly = async () => {

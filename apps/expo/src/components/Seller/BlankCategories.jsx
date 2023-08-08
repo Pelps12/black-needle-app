@@ -16,6 +16,7 @@ import { useAuth } from "@clerk/clerk-expo";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 
+import Config from "../../utils/config";
 import dataURItoBlob from "../../utils/dataURItoBlob";
 import { trpc } from "../../utils/trpc";
 import Modal from "../Modal";
@@ -136,7 +137,7 @@ const BlankCategory = ({
     const formData = new FormData();
     formData.append(
       "UPLOADCARE_PUB_KEY",
-      Constants.expoConfig?.extra?.NEXT_PUBLIC_UPLOADCARE_PUB_KEY,
+      Config?.NEXT_PUBLIC_UPLOADCARE_PUB_KEY,
     );
     formData.append("UPLOADCARE_STORE", "auto");
 

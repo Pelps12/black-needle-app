@@ -22,6 +22,7 @@ import {
 import { type Category, type Price, type Image as PrismaImage } from "@acme/db";
 
 import SKTest from "../../components/Utils/SKText";
+import Config from "../../utils/config";
 import dataURItoBlob from "../../utils/dataURItoBlob";
 import { trpc } from "../../utils/trpc";
 import Modal from "../Modal";
@@ -163,7 +164,9 @@ const Category = ({
     const newCategory: any = [...categories];
     var categoryIndex;
     if (newCategory !== undefined) {
-      categoryIndex = newCategory.map((cate: any) => cate.id).indexOf(category.id);
+      categoryIndex = newCategory
+        .map((cate: any) => cate.id)
+        .indexOf(category.id);
     }
     // setOldCategory(newCategory[categoryIndex].name);
     newCategory[categoryIndex].name = newTitle;
@@ -175,7 +178,7 @@ const Category = ({
     const formData: any = new FormData();
     formData.append(
       "UPLOADCARE_PUB_KEY",
-      Constants.expoConfig?.extra?.NEXT_PUBLIC_UPLOADCARE_PUB_KEY,
+      Config?.NEXT_PUBLIC_UPLOADCARE_PUB_KEY,
     );
     formData.append("UPLOADCARE_STORE", "auto");
 
