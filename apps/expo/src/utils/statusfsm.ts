@@ -42,7 +42,7 @@ const statusHelper = (
     if (sellerMode) {
       if (
         appointment.appointmentDate &&
-        appointment.appointmentDate > new Date()
+        appointment.appointmentDate <= new Date()
       ) {
         return ["CANCEL", "COMPLETE"];
       }

@@ -46,9 +46,6 @@ const Appointment = ({
   const [isOpen, setIsOpen] = useState(false);
   const [stripeModalOpen, setStripeModalOpen] = useState(false);
   const [rescheduleModalOpen, setRescheduleModalOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  const fetchPaymentSheetParams = trpc.payment.getPaymentSheet.useMutation();
 
   const chargeAppointmentStatus = async (
     newStatus: "APPROVED" | "DECLINED" | "COMPLETED",
@@ -113,6 +110,7 @@ const Appointment = ({
                     onPress={() =>
                       chargeAppointmentStatus("APPROVED", appointments.id)
                     }
+                    disabled={appointmentMutation.isLoading}
                     key={value}
                   >
                     <Image
@@ -127,6 +125,7 @@ const Appointment = ({
                     onPress={() =>
                       chargeAppointmentStatus("DECLINED", appointments.id)
                     }
+                    disabled={appointmentMutation.isLoading}
                     key={value}
                   >
                     <Image
@@ -190,10 +189,11 @@ const Appointment = ({
                     onPress={() =>
                       chargeAppointmentStatus("COMPLETED", appointments.id)
                     }
+                    disabled={appointmentMutation.isLoading}
                     key={value}
                   >
                     <SKText
-                      className="font-semibold text-[#E26850]"
+                      className="font-semibold text-[#2BDA82]"
                       fontWeight="semi-bold"
                     >
                       Complete
