@@ -6,7 +6,9 @@ import {
   initPaymentSheet,
   presentPaymentSheet,
 } from "@stripe/stripe-react-native";
+import { inferRouterOutputs } from "@trpc/server";
 
+import { AppRouter } from "@acme/api";
 import {
   AppointmentHistory,
   OrderStatus,
@@ -20,29 +22,22 @@ import AppointmentModal from "../../components/Seller/AppointmentModal";
 import SKText from "../../components/Utils/SKText";
 import statusHelper from "../../utils/statusfsm";
 import { trpc } from "../../utils/trpc";
+import { ArrayElement } from "../../utils/types";
 import Modal from "../Modal";
 import PaymentModal from "../Payment/StripeModal";
 
 /* import Cancellation from "./Cancellation";
 import Modal from "./Modal"; */
 
+type RouterOutput = inferRouterOutputs<AppRouter>;
+type AppointmentType = RouterOutput["appointment"]["getAppointments"];
 const Appointment = ({
   refetch,
   appointments,
   sellerMode,
 }: {
   refetch: any;
-  appointments: PrismaAppointment & {
-    price: Price & {
-      category: Category & {
-        Image: PrismaImage[];
-        seller: {
-          downPaymentPercentage: number | null;
-        };
-      };
-    };
-    history: AppointmentHistory[];
-  };
+  appointments: ArrayElement<AppointmentType>;
   sellerMode: boolean;
 }) => {
   const appointmentMutation =
@@ -51,12 +46,9 @@ const Appointment = ({
   const [isOpen, setIsOpen] = useState(false);
   const [stripeModalOpen, setStripeModalOpen] = useState(false);
   const [rescheduleModalOpen, setRescheduleModalOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  const fetchPaymentSheetParams = trpc.payment.getPaymentSheet.useMutation();
 
   const chargeAppointmentStatus = async (
-    newStatus: "APPROVED" | "DECLINED",
+    newStatus: "APPROVED" | "DECLINED" | "COMPLETED",
     itemId: string,
   ) => {
     await appointmentMutation.mutateAsync({
@@ -109,12 +101,7 @@ const Appointment = ({
 
       <View>
         <View className="flex  flex-row items-center justify-end gap-5">
-          {statusHelper(
-            appointments.status,
-            appointments.history,
-            sellerMode,
-            !!appointments.price.category.seller.downPaymentPercentage,
-          ).map((value) => {
+          {statusHelper(appointments, sellerMode).map((value) => {
             switch (value) {
               case "APPROVE":
                 return (
@@ -123,6 +110,7 @@ const Appointment = ({
                     onPress={() =>
                       chargeAppointmentStatus("APPROVED", appointments.id)
                     }
+                    disabled={appointmentMutation.isLoading}
                     key={value}
                   >
                     <Image
@@ -137,6 +125,7 @@ const Appointment = ({
                     onPress={() =>
                       chargeAppointmentStatus("DECLINED", appointments.id)
                     }
+                    disabled={appointmentMutation.isLoading}
                     key={value}
                   >
                     <Image
@@ -190,6 +179,24 @@ const Appointment = ({
                       fontWeight="semi-bold"
                     >
                       Cancel
+                    </SKText>
+                  </Pressable>
+                );
+              case "COMPLETE":
+                return (
+                  <Pressable
+                    className={`btn btn-outline btn-sm btn-error   p-2`}
+                    onPress={() =>
+                      chargeAppointmentStatus("COMPLETED", appointments.id)
+                    }
+                    disabled={appointmentMutation.isLoading}
+                    key={value}
+                  >
+                    <SKText
+                      className="font-semibold text-[#2BDA82]"
+                      fontWeight="semi-bold"
+                    >
+                      Complete
                     </SKText>
                   </Pressable>
                 );
