@@ -40,7 +40,7 @@ const reminder = async (req: NextApiRequest, res: NextApiResponse) => {
 							gt: prevTime
 						},
 						status: {
-							in: ['APPROVED', 'DOWNPAID']
+							in: ['APPROVED', 'DOWNPAID', 'PAID']
 						}
 					},
 					include: {

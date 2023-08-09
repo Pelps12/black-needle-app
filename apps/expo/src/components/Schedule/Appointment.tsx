@@ -8,6 +8,7 @@ import {
 } from "@stripe/stripe-react-native";
 
 import {
+  AppointmentHistory,
   OrderStatus,
   type Category,
   type Price,
@@ -17,6 +18,7 @@ import {
 
 import AppointmentModal from "../../components/Seller/AppointmentModal";
 import SKText from "../../components/Utils/SKText";
+import statusHelper from "../../utils/statusfsm";
 import { trpc } from "../../utils/trpc";
 import Modal from "../Modal";
 import PaymentModal from "../Payment/StripeModal";
@@ -39,10 +41,12 @@ const Appointment = ({
         };
       };
     };
+    history: AppointmentHistory[];
   };
   sellerMode: boolean;
 }) => {
-  const appointmentMutation = trpc.appointment.updateAppointmentStatus.useMutation();
+  const appointmentMutation =
+    trpc.appointment.updateAppointmentStatus.useMutation();
 
   const [isOpen, setIsOpen] = useState(false);
   const [stripeModalOpen, setStripeModalOpen] = useState(false);
@@ -51,13 +55,16 @@ const Appointment = ({
 
   const fetchPaymentSheetParams = trpc.payment.getPaymentSheet.useMutation();
 
-  const chargeAppointmentStatus = async (newStatus: OrderStatus, itemId: string) => {
-		await appointmentMutation.mutateAsync({
-			newStatus,
-			itemId
-		});
-		refetch();
-	};
+  const chargeAppointmentStatus = async (
+    newStatus: "APPROVED" | "DECLINED",
+    itemId: string,
+  ) => {
+    await appointmentMutation.mutateAsync({
+      newStatus,
+      itemId,
+    });
+    refetch();
+  };
 
   function closeModal() {
     setIsOpen(false);
@@ -68,7 +75,7 @@ const Appointment = ({
   }
   return (
     <View className="mx-2 my-4">
-      <View className="flex flex-row justify-between items-center">
+      <View className="flex flex-row items-center justify-between">
         <View className="flex flex-row items-center gap-2 ">
           <Image
             source={
@@ -102,70 +109,95 @@ const Appointment = ({
 
       <View>
         <View className="flex  flex-row items-center justify-end gap-5">
-          {sellerMode && appointments.status === "PENDING" && (
-            <View className="flex flex-row items-center">
-              <Pressable className=""onPress={() => chargeAppointmentStatus('APPROVED', appointments.id)}
-              >
-                <Image
-                  source={require("../../../assets/yes.svg")}
-                  className="mx-5 h-5 w-5 rounded-md object-cover"
-                />
-              </Pressable>
-              <Pressable onPress={() => chargeAppointmentStatus('DECLINED', appointments.id)}
-              >
-                <Image
-                  source={require("../../../assets/no.svg")}
-                  className="mx-5 h-5 w-5 rounded-md object-cover"
-                />
-              </Pressable>
-            </View>
-          )}
-          <View className="flex w-auto  flex-row items-center justify-center rounded-lg bg-[#d9d9d9]">
-            {!sellerMode && appointments.status === "APPROVED" && (
-              <Link
-                className={`btn btn-outline btn-sm btn-secondary  border-r p-2`}
-                href={`/schedule/payment?appointmentId=${appointments.id}`}
-              >
-                <Text className="font-semibold ">Pay</Text>
-              </Link>
-            )}
-
-            {
-              <Pressable
-                className={`btn btn-outline btn-sm btn-secondary  p-2`}
-                onPress={() => setRescheduleModalOpen(true)}
-              >
-                <SKText className="font-semibold " fontWeight="semi-bold">
-                  Reschedule
-                </SKText>
-              </Pressable>
-            }
-
-            {appointments.status === "DOWNPAID" &&
-              (appointments.appointmentDate &&
-              appointments.appointmentDate > new Date() ? (
-                <Pressable
-                  className={`btn btn-outline btn-sm btn-error   p-2`}
-                  onPress={() => openModal()}
-                >
-                  <SKText
-                    className="font-semibold text-[#E26850]"
-                    fontWeight="semi-bold"
+          {statusHelper(
+            appointments.status,
+            appointments.history,
+            sellerMode,
+            !!appointments.price.category.seller.downPaymentPercentage,
+          ).map((value) => {
+            switch (value) {
+              case "APPROVE":
+                return (
+                  <Pressable
+                    className=""
+                    onPress={() =>
+                      chargeAppointmentStatus("APPROVED", appointments.id)
+                    }
+                    key={value}
                   >
-                    Cancel
-                  </SKText>
-                </Pressable>
-              ) : (
-                <Pressable
-                  className={`btn btn-outline btn-sm btn-secondary  bg-[#72a2f9] p-2`}
-                  /* onPress={() => payForAppointment(appointments.id)} */
-                >
-                  <SKText className="font-semibold" fontWeight="semi-bold">
-                    Complete
-                  </SKText>
-                </Pressable>
-              ))}
-          </View>
+                    <Image
+                      source={require("../../../assets/yes.svg")}
+                      className="mx-5 h-5 w-5 rounded-md object-cover"
+                    />
+                  </Pressable>
+                );
+              case "DECLINE":
+                return (
+                  <Pressable
+                    onPress={() =>
+                      chargeAppointmentStatus("DECLINED", appointments.id)
+                    }
+                    key={value}
+                  >
+                    <Image
+                      source={require("../../../assets/no.svg")}
+                      className="mx-5 h-5 w-5 rounded-md object-cover"
+                    />
+                  </Pressable>
+                );
+              case "RESCHEDULE":
+                return (
+                  <Pressable
+                    className={`btn btn-outline btn-sm btn-secondary  p-2`}
+                    onPress={() => setRescheduleModalOpen(true)}
+                    key={value}
+                  >
+                    <SKText className="font-semibold " fontWeight="semi-bold">
+                      Reschedule
+                    </SKText>
+                  </Pressable>
+                );
+
+              case "DOWNPAY":
+                return (
+                  <Link
+                    className={`btn btn-outline btn-sm btn-secondary  border-r p-2`}
+                    href={`/schedule/payment?appointmentId=${appointments.id}`}
+                    key={value}
+                  >
+                    <Text className="font-semibold ">Pay</Text>
+                  </Link>
+                );
+              case "PAY":
+                return (
+                  <Link
+                    className={`btn btn-outline btn-sm btn-secondary  border-r p-2`}
+                    href={`/schedule/payment?appointmentId=${appointments.id}`}
+                    key={value}
+                  >
+                    <Text className="font-semibold ">Pay</Text>
+                  </Link>
+                );
+              case "CANCEL":
+                return (
+                  <Pressable
+                    className={`btn btn-outline btn-sm btn-error   p-2`}
+                    onPress={() => openModal()}
+                    key={value}
+                  >
+                    <SKText
+                      className="font-semibold text-[#E26850]"
+                      fontWeight="semi-bold"
+                    >
+                      Cancel
+                    </SKText>
+                  </Pressable>
+                );
+              default:
+                return null;
+            }
+          })}
+
           <SKText
             className={`${
               appointments.status === "PENDING"
