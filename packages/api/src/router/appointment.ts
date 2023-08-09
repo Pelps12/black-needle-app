@@ -709,7 +709,7 @@ export const appointmentRouter = router({
   updateAppointmentStatus: protectedProcedure
     .input(
       z.object({
-        newStatus: z.enum(["APPROVED", "DECLINED"]),
+        newStatus: z.enum(["APPROVED", "DECLINED", "COMPLETED"]),
         itemId: z.string(),
       }),
     )
@@ -776,7 +776,9 @@ export const appointmentRouter = router({
                 {
                   to: expoTokens,
                   title: updatedAppointment.seller.user.name || "Unknown User",
-                  body: `Appointment for ${updatedAppointment.price.name} approved`,
+                  body: `Appointment for ${
+                    updatedAppointment.price.name
+                  } ${updatedAppointment.status.toLowerCase()}`,
                   sound: "default",
                   data: {
                     senderId: updatedAppointment.userId,
@@ -789,9 +791,12 @@ export const appointmentRouter = router({
               twilio.messages.create({
                 body: `Appointment for ${
                   updatedAppointment.price.name
-                } approved by ${
+                } ${updatedAppointment.status.toLowerCase()} by ${
                   updatedAppointment.seller.user.name || "Seller"
-                }.\nGo to https://sakpa.co/profile to pay for the order`,
+                }.\n${
+                  updatedAppointment.status === "APPROVED" &&
+                  "Go to https://sakpa.co/profile to pay for the order"
+                }`,
                 to: `+1${updatedAppointment.user.phoneNumber}`,
                 messagingServiceSid: env.MESSAGING_SID,
               });

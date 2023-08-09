@@ -1,22 +1,28 @@
+import { inferRouterOutputs } from "@trpc/server";
+
+import { AppRouter } from "@acme/api";
 import { AppointmentHistory, OrderStatus } from "@acme/db";
 
+import { ArrayElement } from "./types";
+
+type RouterOutput = inferRouterOutputs<AppRouter>;
+type AppointmentType = RouterOutput["appointment"]["getAppointments"];
 const statusHelper = (
-  status: OrderStatus,
-  history: AppointmentHistory[],
+  appointment: ArrayElement<AppointmentType>,
   sellerMode: boolean,
-  dpEnabled: boolean,
 ): string[] => {
-  if (status === "PENDING") {
+  const dpEnabled = !!appointment.price.category.seller.downPaymentPercentage;
+  if (appointment.status === "PENDING") {
     if (sellerMode) {
       return ["APPROVE", "DECLINE"];
     } else {
-      if (history.find((prev) => prev.status === "PAID")) {
+      if (appointment.history.find((prev) => prev.status === "PAID")) {
         return ["RESCHEDULE", "CANCEL"];
       } else {
         return [];
       }
     }
-  } else if (status === "APPROVED") {
+  } else if (appointment.status === "APPROVED") {
     if (sellerMode) {
       return ["CANCEL"];
     } else {
@@ -26,19 +32,25 @@ const statusHelper = (
         return ["RESCHEDULE", "PAY"];
       }
     }
-  } else if (status === "DECLINED") {
+  } else if (appointment.status === "DECLINED") {
     if (sellerMode) {
       return [];
     } else {
       return ["RESCHEDULE"];
     }
-  } else if (status === "PAID") {
+  } else if (appointment.status === "PAID") {
     if (sellerMode) {
+      if (
+        appointment.appointmentDate &&
+        appointment.appointmentDate > new Date()
+      ) {
+        return ["CANCEL", "COMPLETE"];
+      }
       return ["CANCEL"];
     } else {
       return ["RESCHEDULE", "CANCEL"];
     }
-  } else if (status === "DOWNPAID") {
+  } else if (appointment.status === "DOWNPAID") {
     if (sellerMode) {
       return ["CANCEL"];
     } else {
