@@ -155,7 +155,7 @@ const JoinPage = () => {
 						</motion.div>
 					</div>
 
-					<div className="card lg:card-side bg-base-100 justify-between py-12">
+					<div className="card lg:card-side bg-base-100 justify-between py-12 gap-0">
 						<div className="card-body max-w-md">
 							<h1 className="card-title max-w-2xl mb-4 text-4xl font-extrabold tracking-tight leading-none md:text-5xl xl:text-6xl ">
 								<div>All-in-One management solution </div>
@@ -185,8 +185,8 @@ const JoinPage = () => {
 						<div className="p-6">
 							<figure>
 								<img
-									src="https://ucarecdn.com/f6501077-59b0-4ac2-8699-e6aff010bc2c/"
-									className="object-cover h-96 w-auto  rounded-md"
+									src="https://ucarecdn.com/01f154ff-e531-4211-9580-532c732e8944/"
+									className="object-cover h-auto md:h-[30rem] w-auto  rounded-md"
 									alt="Album"
 								/>
 							</figure>
