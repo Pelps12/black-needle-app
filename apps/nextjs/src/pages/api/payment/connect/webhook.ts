@@ -54,8 +54,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 					const account: any = event.data.object;
 					console.log('55', account);
 					const metadata: AccountCreateMetadata = account.metadata;
-					const userAgent: UserAgent = JSON.parse(metadata.userAgent);
-
 					console.log(metadata);
 					if (account.details_submitted) {
 						const user = await prisma.user.update({
@@ -81,10 +79,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 							mixpanel.track('Seller Created', {
 								distinct_id: user.id || randomUUID(),
 								$insert_id: randomUUID(),
-								ip: metadata.ip,
-								$os: userAgent.os,
-								$browser: userAgent.browser,
-								$browser_version: userAgent.browser_version
+								ip: metadata.ip
 							});
 						}
 					}
