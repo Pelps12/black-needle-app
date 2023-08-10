@@ -45,15 +45,18 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 			res.status(400).send(`Webhook Error: ${err.message}`);
 			return;
 		}
-
+		console.log('48');
 		try {
+			console.log('50');
 			switch (event.type) {
 				case 'account.updated':
+					console.log('53');
 					const account: any = event.data.object;
+					console.log('55', account);
 					const metadata: AccountCreateMetadata = account.metadata;
 					const userAgent: UserAgent = JSON.parse(metadata.userAgent);
 
-					console.log(metadata, account);
+					console.log(metadata);
 					if (account.details_submitted) {
 						const user = await prisma.user.update({
 							where: {
