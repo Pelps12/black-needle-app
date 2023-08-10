@@ -234,6 +234,28 @@ export const chatRouter = router({
     client.close();
     return tokenRequestData;
   }),
+
+  getNotifications: protectedProcedure.query(async ({ ctx }) => {
+    const count = await ctx.prisma.room.findMany({
+      where: {
+        Participant: {
+          some: {
+            userId: ctx.auth.userId,
+          },
+        },
+        Message: {
+          some: {
+            read: false,
+          },
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    return count;
+  }),
 });
 
 const sortRooms = (
