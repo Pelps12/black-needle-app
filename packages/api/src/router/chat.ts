@@ -168,6 +168,9 @@ export const chatRouter = router({
           where: {
             read: false,
             roomId: room.id,
+            userId: {
+              not: ctx.auth.userId,
+            },
           },
           data: {
             read: true,
