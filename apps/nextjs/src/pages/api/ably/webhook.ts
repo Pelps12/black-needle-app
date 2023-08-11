@@ -74,7 +74,8 @@ export default async function ably(req: NextApiRequest, res: NextApiResponse) {
 										body: text,
 										sound: 'default',
 										data: {
-											senderId: initiator.userId
+											senderId: initiator.userId,
+											roomId: roomId
 										}
 									}
 								]);

@@ -72,6 +72,7 @@ export const chatRouter = router({
                 sound: "default",
                 data: {
                   senderId: initiator.userId,
+                  roomId: room.id,
                 },
               },
             ]);
