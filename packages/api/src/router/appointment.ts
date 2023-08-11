@@ -481,7 +481,7 @@ export const appointmentRouter = router({
   refundPayment: protectedProcedure
     .input(
       z.object({
-        canceler: z.nativeEnum(Role),
+        canceler: z.nativeEnum(Role).optional(),
         appointmentId: z.string().cuid(),
         reason: z.string().optional(),
       }),
@@ -496,7 +496,10 @@ export const appointmentRouter = router({
           price: true,
         },
       });
-      if (input.canceler === "BUYER") {
+
+      const canceler =
+        appointment.sellerId === ctx.auth.userId ? "SELLER" : "BUYER";
+      if (canceler === "BUYER") {
         if (appointment.userId === ctx.auth.userId) {
           if (
             appointment.status === "DOWNPAID" &&
@@ -549,7 +552,7 @@ export const appointmentRouter = router({
             code: "UNAUTHORIZED",
           });
         }
-      } else if (input.canceler === "SELLER") {
+      } else if (canceler === "SELLER") {
         if ((appointment.sellerId = ctx.auth.userId)) {
           if (
             appointment.status === "DOWNPAID" &&
