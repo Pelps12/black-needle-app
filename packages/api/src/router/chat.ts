@@ -163,6 +163,18 @@ export const chatRouter = router({
         }),
       ]);
 
+      if (room) {
+        await ctx.prisma.message.updateMany({
+          where: {
+            read: false,
+            roomId: room.id,
+          },
+          data: {
+            read: true,
+          },
+        });
+      }
+
       return { room, user };
     }),
   getPreviousChats: protectedProcedure
@@ -247,6 +259,9 @@ export const chatRouter = router({
         Message: {
           some: {
             read: false,
+            NOT: {
+              userId: ctx.auth.userId,
+            },
           },
         },
       },

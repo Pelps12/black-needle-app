@@ -494,11 +494,22 @@ export const appointmentRouter = router({
         include: {
           seller: true,
           price: true,
+          history: true,
         },
       });
 
+      console.log(appointment);
+
+      if (appointment.history.find((apt) => apt.status === "COMPLETED")) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Appointment already completed",
+        });
+      }
+
       const canceler =
         appointment.sellerId === ctx.auth.userId ? "SELLER" : "BUYER";
+      console.log(canceler);
       if (canceler === "BUYER") {
         if (appointment.userId === ctx.auth.userId) {
           if (
@@ -528,8 +539,8 @@ export const appointmentRouter = router({
               },
             });
           } else if (
-            appointment.status === "APPROVED" &&
-            !appointment.seller.downPaymentPercentage
+            appointment.status === "APPROVED" ||
+            appointment.status === "PAID"
           ) {
             await ctx.prisma.appointment.update({
               where: {
@@ -584,27 +595,54 @@ export const appointmentRouter = router({
                 },
               },
             });
-          } else if (
-            appointment.status == "PAID" &&
-            !appointment.seller.downPaymentPercentage
-          ) {
-            await ctx.prisma.appointment.update({
-              where: {
-                id: input.appointmentId,
-              },
-              data: {
-                canceler: "SELLER",
-                cancellationReason: input.reason,
-                status: "CANCELED",
-                history: {
-                  create: {
-                    status: "CANCELED",
+          } else {
+            if (appointment.status === "PAID" && appointment.paymentIntent) {
+              await stripe.refunds.create({
+                amount: appointment.price.amount * 100,
+                payment_intent: appointment.paymentIntent,
+                currency: "usd",
+                reverse_transfer: true,
+              });
+              await ctx.prisma.appointment.update({
+                where: {
+                  id: input.appointmentId,
+                },
+                data: {
+                  canceler: "SELLER",
+                  cancellationReason: input.reason,
+                  status: "CANCELED",
+                  history: {
+                    create: {
+                      status: "CANCELED",
+                    },
                   },
                 },
-              },
-            });
+              });
+            }
+
+            if (appointment.status === "APPROVED") {
+              await ctx.prisma.appointment.update({
+                where: {
+                  id: input.appointmentId,
+                },
+                data: {
+                  canceler: "SELLER",
+                  cancellationReason: input.reason,
+                  status: "CANCELED",
+                  history: {
+                    create: {
+                      status: "CANCELED",
+                    },
+                  },
+                },
+              });
+            }
           }
         }
+      } else {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+        });
       }
     }),
 

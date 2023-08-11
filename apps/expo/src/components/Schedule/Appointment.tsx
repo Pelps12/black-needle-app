@@ -25,6 +25,7 @@ import { trpc } from "../../utils/trpc";
 import { ArrayElement } from "../../utils/types";
 import Modal from "../Modal";
 import PaymentModal from "../Payment/StripeModal";
+import CancellationModal from "./Cancellation";
 
 /* import Cancellation from "./Cancellation";
 import Modal from "./Modal"; */
@@ -234,6 +235,13 @@ const Appointment = ({
           closeModal={() => setRescheduleModalOpen(false)}
           reschedule={true}
           appointmentId={appointments.id}
+        />
+      </Modal>
+
+      <Modal modalVisible={isOpen} setModalVisible={setIsOpen} className="">
+        <CancellationModal
+          appointmentId={appointments.id}
+          closeModal={closeModal}
         />
       </Modal>
 
