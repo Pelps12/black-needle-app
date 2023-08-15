@@ -14,30 +14,6 @@ import * as TaskManager from "expo-task-manager";
 import { getNotificationNumber } from "../utils/misc";
 import { trpc } from "../utils/trpc";
 
-const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND-NOTIFICATION-TASK";
-
-TaskManager.defineTask<Notifications.Notification>(
-  BACKGROUND_NOTIFICATION_TASK,
-  async ({ data, error, executionInfo }) => {
-    const fetchHandler = trpc.chat.getNotifications.useQuery(undefined, {
-      enabled: false,
-    });
-    const [{ data: result }, notifications] = await Promise.all([
-      fetchHandler.refetch(),
-      Notifications.getPresentedNotificationsAsync(),
-    ]);
-    const totalCount = getNotificationNumber(
-      result?.map((val) => val.id),
-      notifications.map((not) => not.request.content.data.roomId),
-    );
-    Notifications.setBadgeCountAsync(totalCount);
-
-    // Do something with the notification data
-  },
-);
-
-Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
-
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,

@@ -309,11 +309,7 @@ export const appointmentRouter = router({
       if (input.sellerMode) {
         const appointments = await ctx.prisma.appointment.findMany({
           where: {
-            price: {
-              category: {
-                sellerId: ctx.auth.userId,
-              },
-            },
+            sellerId: ctx.auth.userId,
           },
           include: {
             price: {
@@ -331,6 +327,24 @@ export const appointmentRouter = router({
               },
             },
             history: true,
+            user: {
+              select: {
+                name: true,
+                image: true,
+                id: true,
+              },
+            },
+            seller: {
+              select: {
+                downPaymentPercentage: true,
+                user: {
+                  select: {
+                    name: true,
+                    image: true,
+                  },
+                },
+              },
+            },
           },
           orderBy: {
             createdAt: "desc",
@@ -354,6 +368,24 @@ export const appointmentRouter = router({
                         downPaymentPercentage: true,
                       },
                     },
+                  },
+                },
+              },
+            },
+            user: {
+              select: {
+                name: true,
+                image: true,
+                id: true,
+              },
+            },
+            seller: {
+              select: {
+                downPaymentPercentage: true,
+                user: {
+                  select: {
+                    name: true,
+                    image: true,
                   },
                 },
               },

@@ -55,15 +55,14 @@ const CustomHits = () => {
 function Hit({ hit }: { hit: any }) {
 	return (
 		<>
-			{hit.prices.map((item: any) => (
-				<Link
+			{/* <Link
 					href={`/seller/${hit.sellerId}?active=PRICES&productID=${item.id}`}
 					key={hit.id}
 					className="group"
 				>
-					<div className=" my-2 ">
+					<div className=" my-2 p-3 shadow-lg">
 						<ImageWithFallback
-							className="min-w-full max-w-xs md:max-w-md max-h-full shadow-lg object-cover rounded-lg h-[30vh] w-40 md:w-60 md:h-72  object-center mx-auto"
+							className="shadow-lg object-cover rounded-lg  aspect-square  object-center mx-auto"
 							alt="Picture f the "
 							width={270}
 							height={360}
@@ -73,7 +72,33 @@ function Hit({ hit }: { hit: any }) {
 						<h3 className="mt-4 text-xl text-gray-700 text-left font-bold">{item.name} </h3>
 						<p className="mt-1 text-md font-medium text-gray-900">${item.amount}</p>
 					</div>
-				</Link>
+				</Link> */}
+			{hit.prices.map((item: any) => (
+				<div className="shadow-lg py-3 px-4 border rounded-xl">
+					<a className="group rounded-xl overflow-hidden " href="#">
+						<div className="relative pt-[70%] lg:pt-[100%] rounded-xl overflow-hidden">
+							<img
+								className="w-full h-full absolute top-0 left-0 object-cover group-hover:scale-105 transition-transform duration-500 ease-in-out rounded-xl"
+								src="https://images.unsplash.com/photo-1586232702178-f044c5f4d4b7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1035&q=80"
+								alt="Image Description"
+							/>
+							<ImageWithFallback
+								className="w-full h-full absolute top-0 left-0 object-cover group-hover:scale-105 transition-transform duration-500 ease-in-out rounded-xl"
+								alt="Picture f the "
+								width={270}
+								height={360}
+								src={`${hit.Image[0].link}-/preview/938x432/-/quality/smart/-/format/auto/`}
+							/>
+						</div>
+
+						<div className="mt-7">
+							<h3 className="text-xl font-semibold text-neutral group-hover:text-gray-600 dark:text-gray-200">
+								{item.name}
+							</h3>
+							<p className="mt-3 text-neutral text-right text-lg">${item.amount}</p>
+						</div>
+					</a>
+				</div>
 			))}
 		</>
 	);
@@ -177,7 +202,7 @@ const Home: NextPage<HomePageProps> = ({ serverState, url }) => {
 							</div>
 						)}
 
-						<SearchBar attribute="school" text={text}/>
+						<SearchBar attribute="school" text={text} />
 						<CustomHits />
 					</main>
 					{/* {resultMut.isSuccess && (

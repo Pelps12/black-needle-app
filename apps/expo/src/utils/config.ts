@@ -3,7 +3,7 @@ import * as Updates from "expo-updates";
 let Config = {
   CLERK_PUBLISHABLE_KEY:
     "pk_test_ZW5vcm1vdXMtc2F3ZmlzaC05MS5jbGVyay5hY2NvdW50cy5kZXYk",
-  PUBLIC_URL: "https://dev.sakpa.co",
+  PUBLIC_URL: "https://dear-davis-albert-womens.trycloudflare.com",
   ALGOLIA_INDEX: "dev_sakpa",
   NEXT_PUBLIC_UPLOADCARE_PUB_KEY: "ee6b07357ef85077ad3e",
   STRIPE_PUBLISHABLE_KEY:

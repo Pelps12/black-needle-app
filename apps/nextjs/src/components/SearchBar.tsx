@@ -15,7 +15,9 @@ enum UserStatus {
 	DESC = 'desc'
 }
 
-const SearchBar: React.FC<UseRefinementListProps & UseSearchBoxProps & {text?: string}> = (props) => {
+const SearchBar: React.FC<UseRefinementListProps & UseSearchBoxProps & { text?: string }> = (
+	props
+) => {
 	const [searchInput, setSearchInput] = useState<string | null>(null);
 	const [selectedSchool, setSelectedSchool] = useState<string | undefined>('UT Dallas');
 
@@ -40,10 +42,10 @@ const SearchBar: React.FC<UseRefinementListProps & UseSearchBoxProps & {text?: s
 		setInputValue(query);
 	}
 	return (
-		<div className="mx-auto flex gap-2 flex-col md:flex-row md:justify-between max-w-3xl ">
-			<div className="mx-auto ">
+		<div className="mx-auto flex gap-2 flex-col md:flex-row md:justify-between max-w-3xl items-center">
+			<div className="mx-auto h-12 relative">
 				<select
-					className="select  max-w-xs select-secondary mx-auto"
+					className="select  max-w-xs select-secondary mx-auto rounded-xl"
 					value={selectedSchool}
 					onChange={(e) => handleRefine(e.target.value)}
 				>
@@ -55,14 +57,14 @@ const SearchBar: React.FC<UseRefinementListProps & UseSearchBoxProps & {text?: s
 				</select>
 			</div>
 
-			<div className="flex basis-3/4 gap-4 mx-auto w-96 justify-center  ">
+			<div className="flex basis-3/4 gap-4 mx-auto w-auto justify-center   border-2 rounded-xl p-2 items-center">
 				<input
-					className="input input-lg input-bordered basis-3/4 h-12 "
+					className="input input-lg  h-12 w-full"
 					ref={inputRef}
 					placeholder={`Search for ${props.text || 'services'}`}
 					onChange={(e) => setQuery(e.target.value)}
 				/>
-				<button onClick={() => console.log('HMM')} className="">
+				<button onClick={() => console.log('HMM')} className="h-10 w-10 bg-primary rounded-xl">
 					<svg
 						version="1.1"
 						id="Layer_1"
@@ -70,7 +72,7 @@ const SearchBar: React.FC<UseRefinementListProps & UseSearchBoxProps & {text?: s
 						xmlnsXlink="http://www.w3.org/1999/xlink"
 						x="0px"
 						y="0px"
-						className="h-6 fill-primary"
+						className="h-6 w-6 fill-white p-1 m-auto"
 						viewBox="0 0 122.879 119.799"
 						enableBackground="new 0 0 122.879 119.799"
 						xmlSpace="preserve"
