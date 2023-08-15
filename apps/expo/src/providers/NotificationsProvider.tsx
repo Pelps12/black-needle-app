@@ -52,7 +52,7 @@ const NotificationsProvider = ({
   const [isNavigationReady, setNavigationReady] = useState(false);
   const rootNav = useRootNavigation();
 
-  Notifications.setBadgeCountAsync(initialNotifications.data?.length ?? 0);
+  //Notifications.setBadgeCountAsync(initialNotifications.data?.length ?? 0);
 
   useEffect(() => {
     const unsubscribe = rootNav?.addListener("state", (event) => {

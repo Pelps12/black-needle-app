@@ -6,6 +6,7 @@ export const getNotificationNumber = (
     const concatenatedArray = [...backendArr, ...notifications];
     const uniqueElements = new Set(concatenatedArray);
     const cardinality = uniqueElements.size;
+    console.log("Cardinality", cardinality);
     return cardinality;
   } else {
     return 0;
