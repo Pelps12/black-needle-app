@@ -75,7 +75,11 @@ function Hit({ hit }: { hit: any }) {
 				</Link> */}
 			{hit.prices.map((item: any) => (
 				<div className="shadow-lg py-3 px-4 border rounded-xl">
-					<a className="group rounded-xl overflow-hidden " href="#">
+					<Link
+						className="group rounded-xl overflow-hidden "
+						href={`/seller/${hit.sellerId}?active=PRICES&productID=${item.id}`}
+						key={hit.id}
+					>
 						<div className="relative pt-[70%] lg:pt-[100%] rounded-xl overflow-hidden">
 							<img
 								className="w-full h-full absolute top-0 left-0 object-cover group-hover:scale-105 transition-transform duration-500 ease-in-out rounded-xl"
@@ -95,9 +99,9 @@ function Hit({ hit }: { hit: any }) {
 							<h3 className="text-xl font-semibold text-neutral group-hover:text-gray-600 dark:text-gray-200">
 								{item.name}
 							</h3>
-							<p className="mt-3 text-neutral text-right text-lg">${item.amount}</p>
+							<p className="mt-3 text-neutral  text-lg">${item.amount}</p>
 						</div>
-					</a>
+					</Link>
 				</div>
 			))}
 		</>

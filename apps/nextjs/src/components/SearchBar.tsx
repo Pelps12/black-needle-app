@@ -1,5 +1,3 @@
-import { trpc } from '../utils/trpc';
-import { useRouter } from 'next/router';
 import { useState, useEffect, SetStateAction, Dispatch, useRef } from 'react';
 import {
 	UseRefinementListProps,
