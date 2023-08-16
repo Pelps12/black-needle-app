@@ -183,6 +183,13 @@ const ChatPage = () => {
     }
   };
 
+  const handleBackButton = () => {
+    if(router.canGoBack()) { 
+      setAblyMessages([]); 
+      router.back();
+    }
+  }
+
   const handleSubmit = async (type: string) => {
     if (getRoom.isSuccess && getRoom.data.room) {
       if (type === "image") {
@@ -286,7 +293,7 @@ const ChatPage = () => {
     >
       <Fragment>
         <View className="relative mt-0 flex flex-row items-center border-b border-gray-300 p-3 pb-2 pt-0">
-          <Pressable onPress={() => router.canGoBack() && router.back()}>
+          <Pressable onPress={() => }>
             <Ionicons name="arrow-back" size={30} color="black" />
           </Pressable>
 
