@@ -107,70 +107,7 @@ export const config = {
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-	if (isbot(context.req.headers['user-agent'])) {
-		const uid =
-			typeof context.query.uid === 'string'
-				? context.query.uid
-				: context.query.uid == undefined
-				? ':)'
-				: context.query.uid[0]!;
-		console.log(uid);
-
-		const url = new URL(`${env.NEXT_PUBLIC_URL}/api/trpc/user.getCategories`);
-		url.searchParams.set('batch', '1');
-		url.searchParams.set(
-			'input',
-			JSON.stringify({
-				0: {
-					json: {
-						id: uid
-					}
-				}
-			})
-		);
-		console.log(url.toString());
-		const response = await fetch(url);
-		if (response.ok) {
-			const data = await response.json();
-			const user = data[0]?.result?.data?.json?.user;
-			console.log(user, ':)');
-			const productId =
-				typeof context.query.productID === 'string'
-					? context.query.productID
-					: context.query.productID == undefined
-					? ':)'
-					: context.query.productID[0]!;
-			if (user) {
-				const category = user?.seller?.Category.find((category: any) =>
-					category.prices.find((price: any) => price.id === productId)
-				);
-				return {
-					props: {
-						meta: {
-							id: user?.id,
-							title: `${user?.name} | Seller Page${category?.name && ' (' + category?.name + ')'}`,
-							image: category?.Image[0]?.link ?? user?.image
-						}
-					}
-				};
-			} else {
-				return {
-					props: {}
-				};
-			}
-		} else {
-			console.log(await response.text());
-			return {
-				props: {}
-			};
-		}
-
-		return {
-			props: {}
-		};
-	}
-
 	return {
-		props: {} // will be passed to the page component as props
+		props: {}
 	};
 };
