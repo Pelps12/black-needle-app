@@ -2,7 +2,6 @@ import { useBearStore, useMessageCountStore } from '../utils/messsageStore';
 import { trpc } from '../utils/trpc';
 import Modal from './Modal';
 import ShoppingCart from './ShoppingCart';
-import { assertConfiguration } from '@ably-labs/react-hooks';
 import { useUser, useAuth } from '@clerk/nextjs';
 import { motion } from 'framer-motion';
 import Head from 'next/head';
@@ -135,7 +134,7 @@ const Navbar = () => {
 								</label>
 								<ul
 									tabIndex={0}
-									className="menu menu-compact dropdown-content mt-3 p-2 shadow-lg bg-base-100 rounded-box w-52"
+									className="z-[60] menu menu-compact dropdown-content mt-3 p-2 shadow-lg bg-base-100 rounded-box w-52"
 								>
 									<li>
 										<Link href="/profile">Profile</Link>
@@ -145,7 +144,9 @@ const Navbar = () => {
 									</li>
 									<li>
 										{user?.publicMetadata.role === 'SELLER' ? (
-											<Link href={`/seller/${user.id}`}>Seller Page</Link>
+											<Link href={`/seller/${user.id}`} shallow={true}>
+												Seller Page
+											</Link>
 										) : (
 											<Link href="/join">Become a Seller</Link>
 										)}

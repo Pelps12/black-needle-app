@@ -33,6 +33,6 @@ module.exports = {
 			}
 		]
 	},
-
+	darkMode: 'false',
 	plugins: [require('daisyui')]
 };

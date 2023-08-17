@@ -383,7 +383,7 @@ const PricesTab = ({ productID, uid, posts, categories }) => {
 				</div>
 			</div>
 
-			<div className="flex flex-wrap items-center p-5 gap-3">
+			<div className="flex flex-wrap items-center p-5 gap-3 mx-auto">
 				{price &&
 					price != undefined &&
 					price.map((prc) => (

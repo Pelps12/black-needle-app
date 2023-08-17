@@ -15,7 +15,8 @@ import {
 } from "react-native";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
-import { Link, useSearchParams } from "expo-router";
+import { setNotificationHandler } from "expo-notifications";
+import { Link, router, useSearchParams } from "expo-router";
 import { useChannel } from "@ably-labs/react-hooks";
 import { useAuth } from "@clerk/clerk-expo";
 import {
@@ -44,6 +45,14 @@ type AblyMessage = {
   };
 };
 
+setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: false,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
+
 const ChatPage = () => {
   const { id } = useSearchParams();
   const idString =
@@ -60,6 +69,7 @@ const ChatPage = () => {
   });
 
   const createRoomRouter = trpc.chat.createRoom.useMutation();
+
   const prevMessRouter = trpc.chat.getPreviousChats.useInfiniteQuery(
     {
       limit: 20,
@@ -76,7 +86,7 @@ const ChatPage = () => {
       refetchOnWindowFocus: false,
       refetchOnMount: false,
       refetchOnReconnect: false,
-      staleTime: Infinity
+      staleTime: Infinity,
     },
   );
   const utils = trpc.useContext();
@@ -84,7 +94,7 @@ const ChatPage = () => {
   const { userId } = useAuth();
   const endRef = useRef<FlatList>(null);
 
-  const [_, ably] = useChannel(`chat:${userId}`, (message) => {
+  const [channel, ably] = useChannel(`chat:${userId}`, (message) => {
     console.log(userId, message);
     if (message.data.receipientId == userId) {
       setAblyMessages((ablyMessages) => [
@@ -159,19 +169,26 @@ const ChatPage = () => {
     return null;
   };
   const createRoomWrapper = () => {
-		if (id) {
-			createRoomRouter.mutate(
-				{
-					userId: idString
-				},
-				{
-					onSuccess: (data) => {
-						getRoom.refetch();
-					}
-				}
-			);
-		}
-	};
+    if (id) {
+      createRoomRouter.mutate(
+        {
+          userId: idString,
+        },
+        {
+          onSuccess: (data) => {
+            getRoom.refetch();
+          },
+        },
+      );
+    }
+  };
+
+  const handleBackButton = () => {
+    if(router.canGoBack()) { 
+      setAblyMessages([]); 
+      router.back();
+    }
+  }
 
   const handleSubmit = async (type: string) => {
     if (getRoom.isSuccess && getRoom.data.room) {
@@ -240,7 +257,6 @@ const ChatPage = () => {
       }
     }
     setMessageText("");
-    utils?.chat.getRecentRooms.invalidate();
   };
 
   useEffect(() => {
@@ -257,15 +273,17 @@ const ChatPage = () => {
   }, [ablyMessages]);
 
   useEffect(() => {
+    setAblyMessages([]);
     return () => {
       setAblyMessages([]);
+      utils.chat.getRecentRooms.invalidate();
       console.log("SENT");
     };
   }, []);
 
   useEffect(() => {
-    console.log(getRoom?.data?.room?.id)
-  }, [getRoom?.data?.room?.id])
+    console.log(getRoom?.data?.room?.id);
+  }, [getRoom?.data?.room?.id]);
 
   return (
     <KeyboardAvoidingView
@@ -275,9 +293,9 @@ const ChatPage = () => {
     >
       <Fragment>
         <View className="relative mt-0 flex flex-row items-center border-b border-gray-300 p-3 pb-2 pt-0">
-          <Link href="/chat">
+          <Pressable onPress={() => }>
             <Ionicons name="arrow-back" size={30} color="black" />
-          </Link>
+          </Pressable>
 
           {getRoom.data?.user?.image ? (
             <Image
@@ -304,50 +322,62 @@ const ChatPage = () => {
         </View>
         <View style={{ flex: 1 }}>
           <View className="space-y-2" style={{ flex: 0.9 }}>
-            {getRoom?.data?.room?.id  ? (
+            {getRoom?.data?.room?.id ? (
               <>
-              {prevMessRouter.data?.pages && ablyMessages && <SectionList
-                onEndReached={() => prevMessRouter.fetchNextPage()}
-                className="px-3"
-                sections={[
-                  {
-                    data: prevMessRouter.data?.pages,
-                    renderItem: (page) => (
-                      <FlatList
-                        data={page.item.messages}
-                        renderItem={({ item }) => (
-                          <MessageComponent message={item} userId={userId} />
-                        )}
-                        ref={endRef}
-                        keyExtractor={(item) => item.id.toString()}
-                        inverted={true}
-                      />
-                    ),
-                  },
-                  {
-                    data: ablyMessages,
-                    renderItem: (page) => (
-                      <AblyMessageComponent message={page.item} />
-                    ),
-                  },
-                ]}
-                contentContainerStyle={{
-                  paddingBottom: 20,
-                  flexDirection: "column-reverse",
-                }}
-                inverted={true}
-                onScrollToTop={() => console.log("SLOPPY TOPPY")}
-                keyExtractor={(item, idx) => idx.toString()}
-              />
-              }</>
-            ): getRoom.isFetched && <Pressable
-            className={`w-32 flex flex-row m-auto content-center items-center justify-center rounded-lg  bg-[#1dbaa7] px-3 py-3  text-black `}
-            onPress={() => createRoomWrapper()}
-          >
-            <SKTest className="mx-auto text-md text-center font-semibold text-white" fontWeight="semi-bold">
-              START CHAT
-            </SKTest>
-          </Pressable>}
+                {prevMessRouter.data?.pages && ablyMessages && (
+                  <SectionList
+                    onEndReached={() => prevMessRouter.fetchNextPage()}
+                    className="px-3"
+                    sections={[
+                      {
+                        data: prevMessRouter.data?.pages,
+                        renderItem: (page) => (
+                          <FlatList
+                            data={page.item.messages}
+                            renderItem={({ item }) => (
+                              <MessageComponent
+                                message={item}
+                                userId={userId}
+                              />
+                            )}
+                            ref={endRef}
+                            keyExtractor={(item) => item.id.toString()}
+                            inverted={true}
+                          />
+                        ),
+                      },
+                      {
+                        data: ablyMessages,
+                        renderItem: (page) => (
+                          <AblyMessageComponent message={page.item} />
+                        ),
+                      },
+                    ]}
+                    contentContainerStyle={{
+                      paddingBottom: 20,
+                      flexDirection: "column-reverse",
+                    }}
+                    inverted={true}
+                    onScrollToTop={() => console.log("SLOPPY TOPPY")}
+                    keyExtractor={(item, idx) => idx.toString()}
+                  />
+                )}
+              </>
+            ) : (
+              getRoom.isFetched && (
+                <Pressable
+                  className={`m-auto flex w-32 flex-row content-center items-center justify-center rounded-lg  bg-[#1dbaa7] px-3 py-3  text-black `}
+                  onPress={() => createRoomWrapper()}
+                >
+                  <SKTest
+                    className="text-md mx-auto text-center font-semibold text-white"
+                    fontWeight="semi-bold"
+                  >
+                    START CHAT
+                  </SKTest>
+                </Pressable>
+              )
+            )}
           </View>
 
           <View

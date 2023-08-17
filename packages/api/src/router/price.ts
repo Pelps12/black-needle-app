@@ -63,7 +63,6 @@ export const priceRouter = router({
       }
     }),
 
-  //Please do this
   updatePrice: protectedProcedure
     .input(
       z.object({

@@ -21,6 +21,7 @@ const NavigationProvider = ({ fontsLoaded }: { fontsLoaded: boolean }) => {
         sceneContainerStyle={{
           backgroundColor: "#f2f2f2",
         }}
+        backBehavior={"history"}
         screenOptions={{
           headerStyle: {
             backgroundColor: "#F2F2F2",

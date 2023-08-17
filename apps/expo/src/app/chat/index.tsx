@@ -14,7 +14,9 @@ import SKTest from "../../components/Utils/SKText";
 import { trpc } from "../../utils/trpc";
 
 const ChatIndex = () => {
-  const getPreviousChats = trpc.chat.getRecentRooms.useQuery();
+  const getPreviousChats = trpc.chat.getRecentRooms.useQuery(undefined, {
+    refetchInterval: 45000,
+  });
   const utils = trpc.useContext();
 
   const [refreshing, setRefreshing] = React.useState(false);
@@ -64,6 +66,16 @@ const Message = ({
   const otherUser = data.Participant.find(
     (participant) => participant.id !== userId,
   );
+  const isRead = React.useCallback(
+    (message: Message | undefined) => {
+      if (message) {
+        return !(message.userId !== userId && !message.read);
+      } else {
+        return true;
+      }
+    },
+    [userId],
+  );
   return (
     <>
       {userId && otherUser && (
@@ -82,10 +94,12 @@ const Message = ({
             )}
           </View>
 
-          <View className="w-full">
+          <View className="relative w-full">
             <View className="flex justify-between">
               <SKTest
-                className="ml-2 block font-semibold text-gray-600"
+                className={`ml-2 block font-semibold ${
+                  isRead(data.Message[0]) ? "text-gray-600" : "text-black"
+                }`}
                 fontWeight="semi-bold"
               >
                 {otherUser?.user.name ?? "No Name"}
@@ -100,7 +114,12 @@ const Message = ({
                 )}
               </SKTest>
             </View>
-            <SKTest className="ml-2 block text-sm text-gray-600">
+            <SKTest
+              className={`ml-2 block text-sm ${
+                isRead(data.Message[0]) ? "text-gray-600" : "text-black"
+              }`}
+              fontWeight={isRead(data.Message[0]) ? "normal" : "bold"}
+            >
               {data.Message[0]?.type !== "IMAGE" ? (
                 <>
                   {(data.Message[0]?.message.length ?? 0) < 20
@@ -110,7 +129,12 @@ const Message = ({
               ) : (
                 <View className="flex-row items-center">
                   <EvilIcons name="image" size={24} color="grey" />
-                  <SKTest className="text-gray-600">IMAGE</SKTest>
+                  <SKTest
+                    className="text-gray-600"
+                    fontWeight={isRead(data.Message[0]) ? "normal" : "bold"}
+                  >
+                    IMAGE
+                  </SKTest>
                 </View>
               )}
             </SKTest>

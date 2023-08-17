@@ -25,6 +25,7 @@ import { trpc } from "../../utils/trpc";
 import { ArrayElement } from "../../utils/types";
 import Modal from "../Modal";
 import PaymentModal from "../Payment/StripeModal";
+import CancellationModal from "./Cancellation";
 
 /* import Cancellation from "./Cancellation";
 import Modal from "./Modal"; */
@@ -77,12 +78,36 @@ const Appointment = ({
             className="h-36 w-36 rounded-xl"
           />
           <View>
-            <SKText className="text-xl font-semibold" fontWeight="semi-bold">
+            <View className="flex flex-row items-center gap-2">
+              <SKText className="text-xl font-semibold" fontWeight="semi-bold">
+                {(sellerMode
+                  ? appointments.user?.name
+                  : appointments.seller.user.name
+                )?.substring(0, 20) ?? "No Name"}
+                {((sellerMode
+                  ? appointments.user?.name
+                  : appointments.seller.user.name
+                )?.length ?? 0) > 20 && "..."}
+              </SKText>
+              <Image
+                source={
+                  `${
+                    sellerMode
+                      ? appointments.user.image
+                      : appointments.seller.user.image
+                  }` ||
+                  "https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png"
+                }
+                className="h-10 w-10 rounded-xl"
+              />
+            </View>
+
+            <SKText className="text-xl font-semibold">
               {appointments.price.name.substring(0, 20)}
               {appointments.price.name.length > 20 && "..."}
             </SKText>
             <View>
-              <SKText fontWeight="semi-bold">
+              <SKText>
                 {appointments.appointmentDate?.toLocaleDateString("en-US", {
                   month: "short",
                   day: "numeric",
@@ -234,6 +259,13 @@ const Appointment = ({
           closeModal={() => setRescheduleModalOpen(false)}
           reschedule={true}
           appointmentId={appointments.id}
+        />
+      </Modal>
+
+      <Modal modalVisible={isOpen} setModalVisible={setIsOpen} className="">
+        <CancellationModal
+          appointmentId={appointments.id}
+          closeModal={closeModal}
         />
       </Modal>
 

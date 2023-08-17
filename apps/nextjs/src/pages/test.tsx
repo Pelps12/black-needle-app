@@ -6,11 +6,7 @@ import React, { useEffect, useState } from 'react';
 const Test = () => {
 	const { userId, isSignedIn } = useAuth();
 
-	const trpcEndpt = trpc.upload.getPresignedUrl.useQuery({
-		type: 'GET',
-		roomId: 'cldcra91i0000mo0ffkxiye76',
-		key: '6fcd3bbd-d8af-4c9a-956c-f2d5cb554ef1'
-	});
+	const transform = trpc.search.algoliaTransform.useMutation();
 	// useEffect(() => {
 	// 	if (isSignedIn) {
 	// 		const test = async () => {
@@ -31,7 +27,7 @@ const Test = () => {
 	// }, [session]);
 	return (
 		<>
-			<img src={trpcEndpt.data} alt="" />
+			<button onClick={() => transform.mutate()}>CLICK</button>
 		</>
 	);
 };

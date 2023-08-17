@@ -10,6 +10,10 @@ export const searchRouter = router({
         Image: true,
       },
     });
-    return categories.map(({ id, ...rest }) => ({ objectID: id, ...rest }));
+    return categories.map(({ id, ...rest }) => ({
+      objectID: id,
+      school: "UT Dallas",
+      ...rest,
+    }));
   }),
 });
