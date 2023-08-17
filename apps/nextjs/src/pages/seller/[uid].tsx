@@ -91,23 +91,9 @@ const Sellers: NextPage<{
 				}}
 			/>
 
-			<DynamicSellerPage uid={uid} posts={categories} reviews={reviews} user={user} />
+			<SellersPage uid={uid} posts={categories} reviews={reviews} user={user} />
 		</>
 	);
 };
 
-const DynamicSellerPage = dynamic(() => import('../../components/SellersPage'), {
-	loading: () => <p>Loading...</p>
-});
-
 export default Sellers;
-
-export const config = {
-	runtime: 'experimental-edge'
-};
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-	return {
-		props: {}
-	};
-};

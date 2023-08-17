@@ -1,4 +1,5 @@
 import { env } from '@acme/env-config/env';
+import { authMiddleware } from '@clerk/nextjs';
 import { withClerkMiddleware } from '@clerk/nextjs/server';
 import { NextResponse, type NextRequest } from 'next/server';
 
@@ -6,20 +7,10 @@ const PUBLIC_FILE = /\.(.*)$/;
 
 // This function can be marked `async` if using `await` inside
 
-export default withClerkMiddleware((request: NextRequest) => {
-	const { pathname } = request.nextUrl;
-	const url = request.nextUrl.clone();
-
-	if (
-		pathname.startsWith('/_next') || // exclude Next.js internals
-		pathname.startsWith('/api') || //  exclude all API routes
-		pathname.startsWith('/static') || // exclude static files
-		PUBLIC_FILE.test(pathname)
-	) {
-		return NextResponse.next();
+export default authMiddleware({
+	publicRoutes: (req) => {
+		return true;
 	}
-
-	return NextResponse.next();
 });
 
 // Stop Middleware running on static files

@@ -10,7 +10,8 @@
 		"lint:fix": "pnpm lint --fix",
 		"start": "pnpm with-env next start",
 		"type-check": "tsc --noEmit",
-		"with-env": "dotenv -e ../../.env --"
+		"with-env": "dotenv -e ../../.env --",
+		"analyze": "dotenv -v ANALYZE=true next build"
 	},
 	"dependencies": {
 		"@acme/api": "^0.1.0",
@@ -23,6 +24,7 @@
 		"@formkit/auto-animate": "1.0.0-beta.6",
 		"@headlessui/react": "^1.7.14",
 		"@hookform/resolvers": "^3.1.0",
+		"@next/bundle-analyzer": "^13.4.16",
 		"@t3-oss/env-nextjs": "^0.3.1",
 		"@tanstack/react-query": "^4.28.0",
 		"@trpc/client": "^10.1.0",
@@ -38,6 +40,7 @@
 		"mixpanel-browser": "^2.46.0",
 		"next": "^13.3.0",
 		"next-auth": "^4.22.0",
+		"next-compose-plugins": "^2.2.1",
 		"next-seo": "^6.0.0",
 		"nextjs": "^0.0.3",
 		"react": "18.2.0",
