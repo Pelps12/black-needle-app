@@ -2,7 +2,6 @@ import { useBearStore, useMessageCountStore } from '../utils/messsageStore';
 import { trpc } from '../utils/trpc';
 import Modal from './Modal';
 import ShoppingCart from './ShoppingCart';
-import { assertConfiguration } from '@ably-labs/react-hooks';
 import { useUser, useAuth } from '@clerk/nextjs';
 import { motion } from 'framer-motion';
 import Head from 'next/head';

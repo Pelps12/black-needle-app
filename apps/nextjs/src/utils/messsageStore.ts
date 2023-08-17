@@ -1,9 +1,8 @@
-import { Types } from 'ably';
 import { create } from 'zustand';
 
 interface MessageState {
-	messages: Types.Message[];
-	addMessage: (message: Types.Message) => void;
+	messages: any[];
+	addMessage: (message: any) => void;
 }
 
 export const useBearStore = create((set) => ({
