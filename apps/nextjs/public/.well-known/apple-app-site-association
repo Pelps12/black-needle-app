@@ -1,0 +1,40 @@
+{
+	"applinks": {
+		"apps": [],
+		"details": [
+			{
+				"appID": "5UVF4ZZ7ZK.co.sakpa",
+				"paths": [
+					"*"
+				],
+				"components": [
+					{
+						"/": "/privacy",
+						"exclude": true,
+						"comment": "Matches any URL with a path that starts with /help/website/ and instructs the system not to open it as a universal link."
+					},
+					{
+						"/": "/support",
+						"exclude": true,
+						"comment": "Matches any URL with a path that starts with /help/website/ and instructs the system not to open it as a universal link."
+					},
+					{
+						"/": "/join",
+						"exclude": true,
+						"comment": "Matches any URL with a path that starts with /help/website/ and instructs the system not to open it as a universal link."
+					}
+				]
+			}
+		]
+	},
+	"activitycontinuation": {
+		"apps": [
+			"5UVF4ZZ7ZK.co.sakpa"
+		]
+	},
+	"webcredentials": {
+		"apps": [
+			"5UVF4ZZ7ZK.co.sakpa"
+		]
+	}
+}
