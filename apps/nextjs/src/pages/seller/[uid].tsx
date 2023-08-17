@@ -7,6 +7,7 @@ import { getAuth } from '@clerk/nextjs/server';
 import isbot from 'isbot';
 import { GetServerSideProps, NextPage } from 'next';
 import { NextSeo } from 'next-seo';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 
@@ -90,10 +91,14 @@ const Sellers: NextPage<{
 				}}
 			/>
 
-			<SellersPage uid={uid} posts={categories} reviews={reviews} user={user} />
+			<DynamicSellerPage uid={uid} posts={categories} reviews={reviews} user={user} />
 		</>
 	);
 };
+
+const DynamicSellerPage = dynamic(() => import('../../components/SellersPage'), {
+	loading: () => <p>Loading...</p>
+});
 
 export default Sellers;
 
