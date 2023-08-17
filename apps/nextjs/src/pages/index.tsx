@@ -101,6 +101,7 @@ function Hit({ hit }: { hit: any }) {
 						className="group rounded-xl overflow-hidden "
 						href={`/seller/${hit.sellerId}?active=PRICES&productID=${item.id}`}
 						key={hit.id}
+						shallow={true}
 					>
 						<div className="relative pt-[70%] lg:pt-[100%] rounded-xl overflow-hidden">
 							<img
@@ -303,8 +304,6 @@ const Home: NextPage<HomePageProps> = ({ serverState, url }) => {
 	);
 };
 
-export default Home;
-
 export const config = {
 	runtime: 'nodejs'
 };
@@ -324,3 +323,5 @@ export const getServerSideProps: GetServerSideProps<HomePageProps> =
 			}
 		};
 	};
+
+export default Home;

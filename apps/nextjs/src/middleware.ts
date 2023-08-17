@@ -8,9 +8,10 @@ const PUBLIC_FILE = /\.(.*)$/;
 // This function can be marked `async` if using `await` inside
 
 export default authMiddleware({
-	publicRoutes: (req) => {
+	publicRoutes: () => {
 		return true;
-	}
+	},
+	signInUrl: '/sign-in'
 });
 
 // Stop Middleware running on static files

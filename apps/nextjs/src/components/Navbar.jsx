@@ -144,7 +144,9 @@ const Navbar = () => {
 									</li>
 									<li>
 										{user?.publicMetadata.role === 'SELLER' ? (
-											<Link href={`/seller/${user.id}`}>Seller Page</Link>
+											<Link href={`/seller/${user.id}`} shallow={true}>
+												Seller Page
+											</Link>
 										) : (
 											<Link href="/join">Become a Seller</Link>
 										)}

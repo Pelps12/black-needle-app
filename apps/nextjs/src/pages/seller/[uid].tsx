@@ -20,7 +20,7 @@ import React, { useEffect, useState } from 'react';
 		props: objectData
 	};
 } */
-
+const twentyFourHoursInMs = 1000 * 60 * 60 * 24;
 const Sellers: NextPage<{
 	meta: {
 		id: string;
@@ -43,8 +43,11 @@ const Sellers: NextPage<{
 			id: id
 		},
 		{
-			refetchInterval: undefined,
-			enabled: false
+			refetchOnWindowFocus: false,
+			refetchOnMount: false,
+			refetchOnReconnect: false,
+			retry: false,
+			staleTime: twentyFourHoursInMs
 		}
 	);
 
@@ -52,20 +55,6 @@ const Sellers: NextPage<{
 		console.log(props);
 	}, []);
 
-	useEffect(() => {
-		async function anyNameFunction() {
-			const { data, isSuccess } = await getCat.refetch();
-			if (isSuccess) {
-				data.user?.name && setPageName(`${data.user.name} | Seller Page`);
-				setCategories(data.user?.seller?.Category);
-				setUser(data.user);
-				console.log(data);
-			}
-		}
-
-		// Execute the created function directly
-		anyNameFunction();
-	}, [router.isReady]);
 	const reviews = null;
 	return (
 		<>
@@ -91,9 +80,83 @@ const Sellers: NextPage<{
 				}}
 			/>
 
-			<SellersPage uid={uid} posts={categories} reviews={reviews} user={user} />
+			<SellersPage
+				uid={uid}
+				posts={getCat.data?.user?.seller?.Category}
+				reviews={reviews}
+				user={getCat.data?.user}
+			/>
 		</>
 	);
+};
+
+export const config = {
+	runtime: 'nodejs'
+};
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+	if (isbot(context.req.headers['user-agent'])) {
+		const uid =
+			typeof context.query.uid === 'string'
+				? context.query.uid
+				: context.query.uid == undefined
+				? ':)'
+				: context.query.uid[0]!;
+		console.log(uid);
+
+		const url = new URL(`${env.NEXT_PUBLIC_URL}/api/trpc/user.getCategories`);
+		url.searchParams.set('batch', '1');
+		url.searchParams.set(
+			'input',
+			JSON.stringify({
+				0: {
+					json: {
+						id: uid
+					}
+				}
+			})
+		);
+		console.log(url.toString());
+		const response = await fetch(url);
+		if (response.ok) {
+			const data = await response.json();
+			const user = data[0]?.result?.data?.json?.user;
+			console.log(user, ':)');
+			const productId =
+				typeof context.query.productID === 'string'
+					? context.query.productID
+					: context.query.productID == undefined
+					? ':)'
+					: context.query.productID[0]!;
+			if (user) {
+				const category = user?.seller?.Category.find((category: any) =>
+					category.prices.find((price: any) => price.id === productId)
+				);
+				return {
+					props: {
+						meta: {
+							id: user?.id,
+							title: `${user?.name} | Seller Page${category?.name && ' (' + category?.name + ')'}`,
+							image: category?.Image[0]?.link ?? user?.image
+						}
+					}
+				};
+			} else {
+				return {
+					props: {}
+				};
+			}
+		} else {
+			console.log(await response.text());
+			return {
+				props: {}
+			};
+		}
+	}
+
+	return {
+		props: {} // will be passed to the page component as props
+	};
 };
 
 export default Sellers;
