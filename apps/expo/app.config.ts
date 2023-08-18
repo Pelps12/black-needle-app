@@ -47,6 +47,7 @@ const defineConfig = (): ExpoConfig => ({
       "com.apple.developer.applesignin": ["Default"],
       "com.apple.developer.in-app-payments": ["merchant.co.sakpa"],
     },
+    associatedDomains: ["applinks:www.sakpa.co", "applinks:dev.sakpa.co"],
   },
   android: {
     adaptiveIcon: {
