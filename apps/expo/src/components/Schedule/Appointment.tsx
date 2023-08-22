@@ -98,7 +98,7 @@ const Appointment = ({
                   }` ||
                   "https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png"
                 }
-                className="h-10 w-10 rounded-xl"
+                className="h-5 w-5 rounded-xl"
               />
             </View>
 
