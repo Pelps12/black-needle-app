@@ -1,9 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  Alert,
   Pressable,
   SafeAreaView,
-  Share,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -12,7 +10,7 @@ import {
 import { Image } from "expo-image";
 import { Link, useSearchParams } from "expo-router";
 import { useUser } from "@clerk/clerk-expo";
-import { AntDesign, EvilIcons } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 
 import { Category, Price, Image as PrismaImage } from "@acme/db";
 
@@ -21,8 +19,7 @@ import AvailabilityModal from "../../components/Seller/AvailabilityModal";
 import Categories from "../../components/Seller/Categories";
 import Prices from "../../components/Seller/Prices";
 import ProtectedLink from "../../components/Utils/ProtectedLink";
-import SKText from "../../components/Utils/SKText";
-import Config from "../../utils/config";
+import SKTest from "../../components/Utils/SKText";
 import { trpc } from "../../utils/trpc";
 
 type SellerPageProps = {
@@ -51,25 +48,6 @@ const SellerPage: React.FC<SellerPageProps> = ({ sellerId }) => {
   const [categories, setCategories] = useState<
     (Category & { Image: PrismaImage[]; prices: Price[] })[] | undefined
   >(undefined);
-
-  const onShare = async () => {
-    try {
-      const result = await Share.share({
-        message: `${Config.PUBLIC_URL}/seller/${id}`,
-      });
-      if (result.action === Share.sharedAction) {
-        if (result.activityType) {
-          // shared with activity type of result.activityType
-        } else {
-          // shared
-        }
-      } else if (result.action === Share.dismissedAction) {
-        // dismissed
-      }
-    } catch (error: any) {
-      Alert.alert(error.message);
-    }
-  };
 
   useEffect(() => {
     async function anyNameFunction() {
@@ -113,29 +91,24 @@ const SellerPage: React.FC<SellerPageProps> = ({ sellerId }) => {
               source={require("../../../assets/placeholder.png")}
             />
           ) : (
-            <View className="flex flex-row items-center gap-2">
-              <SKText
-                className=" max-w-xs items-center text-2xl font-semibold"
-                fontWeight="semi-bold"
-              >
-                {categoriesEndpoint.data?.user?.name ?? "Unknown"}
-                {categoriesEndpoint.isSuccess &&
-                  categoriesEndpoint.data?.user?.id === clerkUser?.id &&
-                  user?.role === "SELLER" && (
-                    <Pressable
-                      className=" mt-1 pl-2"
-                      onPress={() => {
-                        setCalendarModalVisible(true);
-                      }}
-                    >
-                      <AntDesign name="calendar" size={18} color="black" />
-                    </Pressable>
-                  )}
-              </SKText>
-              <Pressable onPress={() => onShare()}>
-                <EvilIcons name="share-apple" size={32} color="black" />
-              </Pressable>
-            </View>
+            <SKTest
+              className=" max-w-xs text-2xl font-semibold"
+              fontWeight="semi-bold"
+            >
+              {categoriesEndpoint.data?.user?.name ?? "Unknown"}
+              {categoriesEndpoint.isSuccess &&
+                categoriesEndpoint.data?.user?.id === clerkUser?.id &&
+                user?.role === "SELLER" && (
+                  <Pressable
+                    className=" mt-1 pl-2"
+                    onPress={() => {
+                      setCalendarModalVisible(true);
+                    }}
+                  >
+                    <AntDesign name="calendar" size={18} color="black" />
+                  </Pressable>
+                )}
+            </SKTest>
           )}
           {categoriesEndpoint.isSuccess &&
             categoriesEndpoint.data?.user?.id !== clerkUser?.id && (
@@ -143,9 +116,9 @@ const SellerPage: React.FC<SellerPageProps> = ({ sellerId }) => {
                 <View
                   className={` flex flex-row content-center items-center justify-center rounded-lg  bg-[#1dbaa7] px-3 py-1  text-black `}
                 >
-                  <SKText className=" text-md text-center font-semibold text-white">
+                  <SKTest className=" text-md text-center font-semibold text-white">
                     CHAT
-                  </SKText>
+                  </SKTest>
                 </View>
               </ProtectedLink>
             )}
@@ -159,7 +132,7 @@ const SellerPage: React.FC<SellerPageProps> = ({ sellerId }) => {
               aria-current="page"
               onPress={() => setActiveTab("CATEGORIES")}
             >
-              <SKText
+              <SKTest
                 fontWeight="medium"
                 className={`inline-block rounded-t-lg px-4 py-4 text-center text-sm font-medium ${
                   activeTab == "CATEGORIES"
@@ -168,19 +141,19 @@ const SellerPage: React.FC<SellerPageProps> = ({ sellerId }) => {
                 }`}
               >
                 Categories
-              </SKText>
+              </SKTest>
             </Pressable>
           </View>
           <View className="mr-2">
             <Pressable onPress={() => setActiveTab("PRICES")}>
-              <SKText
+              <SKTest
                 fontWeight="medium"
                 className={`inline-block rounded-t-lg px-4 py-4 text-center text-sm font-medium ${
                   activeTab == "PRICES" ? "text-[#72a2f9]" : "text-[#25252D]"
                 }`}
               >
                 Prices
-              </SKText>
+              </SKTest>
             </Pressable>
           </View>
         </View>
