@@ -45,7 +45,7 @@ const defineConfig = (): ExpoConfig => ({
     bundleIdentifier: "co.sakpa",
     entitlements: {
       "com.apple.developer.applesignin": ["Default"],
-      "com.apple.developer.in-app-payments": ["merchant.co.sakpa"],
+      /* "com.apple.developer.in-app-payments": ["merchant.co.sakpa"], */
     },
     associatedDomains: ["applinks:www.sakpa.co", "applinks:dev.sakpa.co"],
   },
@@ -53,6 +53,8 @@ const defineConfig = (): ExpoConfig => ({
     adaptiveIcon: {
       foregroundImage: "./assets/sakpa_small_(2).png",
     },
+    package: "co.sakpa",
+    googleServicesFile: "./google-services.json",
   },
   extra: {
     eas: {
@@ -80,6 +82,7 @@ const defineConfig = (): ExpoConfig => ({
         enableGooglePay: true,
       },
     ],
+    "expo-router",
   ],
 });
 
