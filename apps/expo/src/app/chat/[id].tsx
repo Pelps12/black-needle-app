@@ -1,8 +1,16 @@
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
+  Alert,
   FlatList,
   Keyboard,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   Pressable,
   RefreshControl,
@@ -439,6 +447,46 @@ const MessageComponent = ({
     },
   );
 
+  const isValidURL = (urlString: string) => {
+    try {
+      console.log(Boolean(new URL(urlString)));
+      return Boolean(new URL(urlString));
+    } catch (e) {
+      return false;
+    }
+  };
+
+  const parseText = useCallback((text: string) => {
+    const words = text.split(" ");
+    return words.map((word) => {
+      return {
+        word,
+        isURL: isValidURL(word),
+      };
+    });
+  }, []);
+
+  const linkOpener = async (url: string) => {
+    // Checking if the link is supported for links with custom URL scheme.
+    const supported = await Linking.canOpenURL(url);
+
+    if (supported) {
+      // Opening the link with some app, if the URL scheme is "http" the web link should be opened
+      // by some browser in the mobile
+      await Linking.openURL(url);
+    } else {
+      Alert.alert(`Don't know how to open this URL: ${url}`);
+    }
+  };
+
+  const handlePress = (url: string) => {
+    if (isValidURL(url)) {
+      linkOpener(url);
+    }
+
+    return;
+  };
+
   return (
     <View
       className={`flex flex-row ${
@@ -453,13 +501,28 @@ const MessageComponent = ({
           />
         </View>
       ) : (
-        <View
-          className={`relative max-w-xs rounded-lg ${
-            message.userId === userId ? "bg-[#1dbaa7]" : "bg-white"
-          } px-4 py-2 text-gray-700 shadow`}
-        >
-          <SKTest className="block">{message.message}</SKTest>
-        </View>
+        <>
+          {isValidURL(message.message) ? (
+            <Pressable
+              className={`relative max-w-xs rounded-lg ${
+                message.userId === userId ? "bg-[#1dbaa7]" : "bg-white"
+              } px-4 py-2 text-gray-700 shadow`}
+              onPress={() => handlePress(message.message)}
+            >
+              <SKTest className="block text-[#293cb5] underline">
+                {message.message}
+              </SKTest>
+            </Pressable>
+          ) : (
+            <View
+              className={`relative max-w-xs rounded-lg ${
+                message.userId === userId ? "bg-[#1dbaa7]" : "bg-white"
+              } px-4 py-2 text-gray-700 shadow`}
+            >
+              <SKTest className="block">{message.message}</SKTest>
+            </View>
+          )}
+        </>
       )}
     </View>
   );
