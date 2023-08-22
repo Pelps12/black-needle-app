@@ -8,9 +8,8 @@ export function InfiniteHits({ hitComponent: Hit, ...props }) {
 
   return (
     <FlatList
-      data={hits}
+      data={hits.filter((result) => result.prices.length !== 0)}
       keyExtractor={(item, idx) => idx.toString()}
-      ItemSeparatorComponent={() => <View style={styles.separator} />}
       contentContainerStyle={{ paddingBottom: 150 }}
       ListFooterComponent={<View style={{ height: 110 }} />}
       renderItem={({ item }) => (

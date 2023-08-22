@@ -383,7 +383,7 @@ const PricesTab = ({ productID, uid, posts, categories }) => {
 				</div>
 			</div>
 
-			<div className="flex flex-wrap items-center p-5 gap-3 mx-auto">
+			<div className="md:grid md:grid-cols-2  lg:grid-cols-3 items-center mx-auto max-w-7xl p-5 place-items-center">
 				{price &&
 					price != undefined &&
 					price.map((prc) => (
@@ -391,7 +391,7 @@ const PricesTab = ({ productID, uid, posts, categories }) => {
 							<div
 								key={prc.id}
 								ref={prc.id === productID ? ref : null}
-								className="card w-96 bg-base-100 shadow-xl"
+								className="card w-96 bg-base-100 shadow-xl p-2 m-3"
 							>
 								<figure className="px-10 pt-10">
 									<ImageWithFallback

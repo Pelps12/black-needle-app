@@ -15,7 +15,7 @@ import {
   Poppins_600SemiBold,
   Poppins_700Bold,
   useFonts,
-} from "@expo-google-fonts/dev";
+} from "@expo-google-fonts/poppins";
 import { AntDesign, FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import { StripeProvider } from "@stripe/stripe-react-native";
 

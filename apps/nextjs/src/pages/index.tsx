@@ -1,3 +1,4 @@
+import type { Price } from '@acme/db';
 import { env } from '@acme/env-config/env';
 import SearchBar from '@components/SchoolSelect';
 import ImageWithFallback from '@components/Utils/ImageWithFallback';
@@ -9,7 +10,7 @@ import { NextSeo } from 'next-seo';
 import Head from 'next/head';
 import Link from 'next/link';
 import singletonRouter from 'next/router';
-import { useState, useEffect, SetStateAction, Dispatch } from 'react';
+import { useState, useEffect, SetStateAction, Dispatch, useCallback, useRef, memo } from 'react';
 import { renderToString } from 'react-dom/server';
 import { createInstantSearchRouterNext } from 'react-instantsearch-hooks-router-nextjs';
 import { getServerState } from 'react-instantsearch-hooks-server';
@@ -22,7 +23,9 @@ import {
 	InstantSearchServerState,
 	InstantSearchSSRProvider,
 	useHits,
-	RefinementList
+	RefinementList,
+	HitsProps,
+	useInfiniteHits
 } from 'react-instantsearch-hooks-web';
 import { SearchBoxClassNames } from 'react-instantsearch-hooks-web/dist/es/ui/SearchBox';
 import { useInView } from 'react-intersection-observer';
@@ -53,6 +56,43 @@ const CustomHits = () => {
 	);
 };
 
+const InfiniteHits = memo((props: HitsProps<any>) => {
+	const { hits, isLastPage, showMore } = useInfiniteHits(props);
+	const sentinelRef = useRef(null);
+
+	useEffect(() => {
+		if (sentinelRef.current !== null) {
+			const observer = new IntersectionObserver((entries) => {
+				entries.forEach((entry) => {
+					console.log('HEY');
+					if (entry.isIntersecting && !isLastPage) {
+						// Load more hits
+						showMore();
+					}
+				});
+			});
+
+			observer.observe(sentinelRef.current);
+
+			return () => {
+				observer.disconnect();
+			};
+		}
+	}, [isLastPage, showMore]);
+
+	return (
+		<div className="ais-InfiniteHits">
+			<ul className="ais-InfiniteHits-list">
+				<div className="grid p-2 md:grid-cols-3  gap-5">
+					{hits.map((hit) => (
+						<Hit hit={hit} />
+					))}
+					<div ref={sentinelRef} aria-hidden="true" />
+				</div>
+			</ul>
+		</div>
+	);
+});
 const CustomComponent = ({ classNames }: { classNames: Partial<SearchBoxClassNames> }) => {
 	return (
 		<svg
@@ -75,6 +115,29 @@ const CustomComponent = ({ classNames }: { classNames: Partial<SearchBoxClassNam
 };
 
 function Hit({ hit }: { hit: any }) {
+	const getPriceRange = useCallback(
+		(prices: Price[]) => {
+			console.log('Random Number');
+			const minimum = Math.min(...prices.map((price) => price.amount));
+			const maximum = Math.max(...prices.map((price) => price.amount));
+			if (minimum === maximum) {
+				return `$${minimum}`;
+			}
+			return `$${minimum} - $${maximum}`;
+		},
+		[hit]
+	);
+
+	const getTruncatedName = useCallback(
+		(name: string) => {
+			console.log(name.length);
+			return (name.length ?? 0) < 15 ? name : name.substring(0, 15) + ' ...';
+		},
+		[hit]
+	);
+	if (hit?.prices?.length === 0) {
+		return null;
+	}
 	return (
 		<>
 			{/* <Link
@@ -95,38 +158,32 @@ function Hit({ hit }: { hit: any }) {
 						<p className="mt-1 text-md font-medium text-gray-900">${item.amount}</p>
 					</div>
 				</Link> */}
-			{hit.prices.map((item: any) => (
-				<div className="shadow-lg py-3 px-4 border rounded-xl">
-					<Link
-						className="group rounded-xl overflow-hidden "
-						href={`/seller/${hit.sellerId}?active=PRICES&productID=${item.id}`}
-						key={hit.id}
-						shallow={true}
-					>
-						<div className="relative pt-[70%] lg:pt-[100%] rounded-xl overflow-hidden">
-							<img
-								className="w-full h-full absolute top-0 left-0 object-cover group-hover:scale-105 transition-transform duration-500 ease-in-out rounded-xl"
-								src="https://images.unsplash.com/photo-1586232702178-f044c5f4d4b7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1035&q=80"
-								alt="Image Description"
-							/>
-							<ImageWithFallback
-								className="w-full h-full absolute top-0 left-0 object-cover group-hover:scale-105 transition-transform duration-500 ease-in-out rounded-xl"
-								alt="Picture f the "
-								width={270}
-								height={360}
-								src={`${hit.Image[0].link}-/preview/938x432/-/quality/smart/-/format/auto/`}
-							/>
-						</div>
 
-						<div className="mt-7">
-							<h3 className="text-xl font-semibold text-neutral group-hover:text-gray-600 dark:text-gray-200">
-								{item.name}
-							</h3>
-							<p className="mt-3 text-neutral  text-lg">${item.amount}</p>
-						</div>
-					</Link>
-				</div>
-			))}
+			<div className="shadow-lg py-3 px-4 border rounded-xl relative">
+				<Link
+					className="group rounded-xl overflow-hidden flex flex-col items-start justify-between h-full"
+					href={`/seller/${hit.sellerId}?active=PRICES`}
+					key={hit.id}
+					shallow={true}
+				>
+					<div className="relative rounded-xl overflow-hidden w-full">
+						<ImageWithFallback
+							className="mx-auto h-56 w-full top-0 left-0 object-cover group-hover:scale-105 transition-transform duration-500 ease-in-out rounded-xl"
+							alt="Picture f the "
+							width={270}
+							height={360}
+							src={`${hit.Image[0].link}-/preview/938x432/-/quality/smart/-/format/auto/`}
+						/>
+					</div>
+
+					<div className="mt-7">
+						<h3 className="text-xl font-semibold text-neutral group-hover:text-gray-600 dark:text-gray-200">
+							{getTruncatedName(hit.name)}
+						</h3>
+						<p className="mt-3 text-neutral  text-lg">{getPriceRange(hit.prices)}</p>
+					</div>
+				</Link>
+			</div>
 		</>
 	);
 }
@@ -291,7 +348,7 @@ const Home: NextPage<HomePageProps> = ({ serverState, url }) => {
 							/>
 						</div>
 
-						<CustomHits />
+						<InfiniteHits />
 					</main>
 					{/* {resultMut.isSuccess && (
 				
