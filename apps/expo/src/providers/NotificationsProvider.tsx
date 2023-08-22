@@ -36,7 +36,9 @@ const NotificationsProvider = ({
   appIsReady: boolean;
 }) => {
   const mutation = trpc.user.errorLog.useMutation();
-  const initialNotifications = trpc.chat.getNotifications.useQuery();
+  const initialNotifications = trpc.chat.getNotifications.useQuery(undefined, {
+    refetchOnWindowFocus: true,
+  });
   const rootNavigationStateKey = useRootNavigationState().key;
   const [notification, setNotification] =
     useState<Notifications.Notification>();

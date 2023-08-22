@@ -40,6 +40,7 @@ import Modal from "../../components/Modal";
 import SKTest from "../../components/Utils/SKText";
 import SKText from "../../components/Utils/SKText";
 import SKTextInput from "../../components/Utils/SKTextInput";
+import { useMessagesContext } from "../../providers/AblyProvider";
 import { trpc } from "../../utils/trpc";
 
 type AblyMessage = {
@@ -47,19 +48,12 @@ type AblyMessage = {
   data: {
     roomId: string;
     message: string;
+    receipientId?: string;
   };
   extras?: {
     type: string;
   };
 };
-
-setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: false,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-  }),
-});
 
 const ChatPage = () => {
   const { id } = useSearchParams();
@@ -67,10 +61,10 @@ const ChatPage = () => {
     typeof id === "string" ? id : typeof id === "undefined" ? ":)" : id[0]!;
 
   const [messageText, setMessageText] = useState<string>("");
-  const [refreshing, setRefreshing] = useState(false);
   const [imageModalVisible, setImageModalVisible] = useState(false);
   const [image, setImage] = useState<string>();
-  const [ablyMessages, setAblyMessages] = useState<AblyMessage[]>([]);
+
+  const { ablyMessages, setAblyMessages, ably } = useMessagesContext();
 
   const getRoom = trpc.chat.getRoom.useQuery({
     userId: idString,
@@ -101,22 +95,6 @@ const ChatPage = () => {
 
   const { userId } = useAuth();
   const endRef = useRef<FlatList>(null);
-
-  const [channel, ably] = useChannel(`chat:${userId}`, (message) => {
-    console.log(userId, message);
-    if (message.data.receipientId == userId) {
-      setAblyMessages((ablyMessages) => [
-        ...ablyMessages,
-        {
-          isSender: false,
-          data: {
-            roomId: message.data.roomId,
-            message: message.data.message,
-          },
-        },
-      ]);
-    }
-  });
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -136,10 +114,6 @@ const ChatPage = () => {
     setImageModalVisible(false);
     setImage(undefined);
   };
-
-  useEffect(() => {
-    prevMessRouter.refetch();
-  }, []);
 
   const getBlob = async (fileUri: string) => {
     const resp = await fetch(fileUri);
@@ -193,7 +167,6 @@ const ChatPage = () => {
 
   const handleBackButton = () => {
     if (router.canGoBack()) {
-      setAblyMessages([]);
       router.back();
     }
   };
@@ -204,7 +177,7 @@ const ChatPage = () => {
         const result = await uploadImage();
         console.log(result);
         if (result) {
-          await ably.channels.get(`chat:${id}`).publish({
+          await ably?.channels.get(`chat:${id}`).publish({
             name: "message",
             data: {
               roomId: getRoom.data.room?.id,
@@ -234,7 +207,7 @@ const ChatPage = () => {
         }
       } else {
         if (messageText !== "") {
-          await ably.channels.get(`chat:${id}`).publish({
+          await ably?.channels.get(`chat:${id}`).publish({
             name: "message",
             data: {
               roomId: getRoom.data.room?.id,
@@ -281,9 +254,7 @@ const ChatPage = () => {
   }, [ablyMessages]);
 
   useEffect(() => {
-    setAblyMessages([]);
     return () => {
-      setAblyMessages([]);
       utils.chat.getRecentRooms.invalidate();
       console.log("SENT");
     };
@@ -355,7 +326,16 @@ const ChatPage = () => {
                         ),
                       },
                       {
-                        data: ablyMessages,
+                        data: ablyMessages.filter(
+                          (message) =>
+                            message.data.roomId === getRoom.data.room?.id &&
+                            !prevMessRouter.data.pages.find((page) =>
+                              page.messages.find(
+                                (db_message) =>
+                                  db_message.message === message.data.message,
+                              ),
+                            ),
+                        ),
                         renderItem: (page) => (
                           <AblyMessageComponent message={page.item} />
                         ),
