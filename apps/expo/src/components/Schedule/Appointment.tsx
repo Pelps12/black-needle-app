@@ -179,7 +179,7 @@ const Appointment = ({
                     href={`/schedule/payment?appointmentId=${appointments.id}`}
                     key={value}
                   >
-                    <Text className="font-semibold ">Pay</Text>
+                    <SKText className="font-semibold ">Pay</SKText>
                   </Link>
                 );
               case "PAY":
@@ -189,7 +189,7 @@ const Appointment = ({
                     href={`/schedule/payment?appointmentId=${appointments.id}`}
                     key={value}
                   >
-                    <Text className="font-semibold ">Pay</Text>
+                    <SKText className="font-semibold ">Pay</SKText>
                   </Link>
                 );
               case "CANCEL":
@@ -277,9 +277,9 @@ const Appointment = ({
         {/* <View className="sahdow-md m-auto rounded-lg bg-[#d9d9d9] p-4"> 
           <View>
             <View>
-              <Text className="text-5xl">Hello World!</Text>
+              <SKText className="text-5xl">Hello World!</SKText>
               <Pressable onPress={() => setModalVisible(false)}>
-                <Text>Hide Modal</Text>
+                <SKText>Hide Modal</SKText>
               </Pressable>
             </View>
           </View>

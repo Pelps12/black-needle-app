@@ -677,6 +677,118 @@ export const appointmentRouter = router({
         });
       }
     }),
+  payAppointment: protectedProcedure
+    .input(
+      z.object({
+        appointmentId: z.string().cuid(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const appointment = await ctx.prisma.appointment.findFirst({
+        where: {
+          id: input.appointmentId,
+          userId: ctx.auth.userId,
+        },
+        include: {
+          price: {
+            include: {
+              category: {
+                include: {
+                  Image: true,
+                  seller: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (appointment) {
+        const totalAmount = appointment.price.amount;
+        console.log(appointment.price.category);
+        const session = await stripe.checkout.sessions.create({
+          line_items: [
+            {
+              price_data: {
+                ...(appointment.price.category.seller.downPaymentPercentage
+                  ? {
+                      currency: "usd",
+                      product_data: {
+                        name: `${appointment.price.name} (Down Payment)`,
+                        images: appointment.price.category.Image.map(
+                          (image) => image.link,
+                        ),
+                      },
+                      unit_amount:
+                        appointment.price.amount *
+                        appointment.price.category.seller
+                          .downPaymentPercentage *
+                        100,
+                    }
+                  : {
+                      currency: "usd",
+                      product_data: {
+                        name: appointment.price.name,
+                        images: appointment.price.category.Image.map(
+                          (image) => image.link,
+                        ),
+                      },
+                      unit_amount: appointment.price.amount * 100,
+                    }),
+              },
+              quantity: 1,
+            },
+            ...(appointment.price.category.seller.downPaymentPercentage
+              ? []
+              : [
+                  {
+                    price_data: {
+                      currency: "usd",
+                      product_data: {
+                        name: "Service Fee",
+                      },
+                      unit_amount:
+                        totalAmount < 9 ? 135 : Math.ceil(totalAmount * 7),
+                    },
+
+                    quantity: 1,
+                  },
+                ]),
+          ],
+          success_url: `${env.NEXT_PUBLIC_URL}/profile`,
+          cancel_url: `${ctx.headers?.referer}/?canceled=true`,
+          custom_text: {
+            submit: {
+              message: "We have 7% service charge.",
+            },
+          },
+          mode: "payment",
+          payment_intent_data: {
+            transfer_group: appointment.id,
+
+            metadata: {
+              userId: ctx.auth.userId,
+              type: "appointment",
+              username:
+                (await clerkClient.users.getUser(ctx.auth.userId)).username ||
+                "Unknown User",
+              seller: JSON.stringify({
+                id: appointment.id,
+                sellerNumber: appointment.price.category.seller.phoneNumber,
+              }),
+              isDownPayment: `${Boolean(
+                appointment.price.category.seller.downPaymentPercentage,
+              )}`,
+            },
+          },
+        });
+        return session;
+      } else {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+        });
+      }
+    }),
 
   completePayment: protectedProcedure
     .input(
