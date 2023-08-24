@@ -30,6 +30,7 @@ export const paymentRouter = router({
               },
             },
           },
+          history: true,
           seller: true,
         },
       });
@@ -62,22 +63,31 @@ export const paymentRouter = router({
           },
         }),
       ]);
-      const totalAmount =
-        (appointment.seller.downPaymentPercentage
-          ? appointment.seller.downPaymentPercentage *
-            appointment.price.amount *
-            100
-          : appointment.price.amount * 100) +
-        (appointment.price.amount < 9
-          ? 135
-          : Math.ceil(appointment.price.amount * 7));
+      let newTotalAmount = 0;
+      if (
+        appointment.history.find((history) => history.status === "DOWNPAID")
+      ) {
+        newTotalAmount =
+          appointment.price.amount *
+          (1 - (appointment.seller?.downPaymentPercentage ?? 0)) *
+          100;
+      } else {
+        newTotalAmount =
+          appointment.price.amount *
+            (appointment.seller?.downPaymentPercentage ?? 0) *
+            100 +
+          (appointment.price.amount < 9
+            ? 135
+            : Math.ceil(appointment.price.amount * 7));
+      }
+
       const paymentIntent = await stripe.paymentIntents.create({
-        amount: totalAmount,
+        amount: newTotalAmount,
         currency: "usd",
         customer: stripeCustomerId,
         transfer_group: appointment.id,
         automatic_payment_methods: {
-          enabled: true
+          enabled: true,
         },
         metadata: {
           userId: ctx.auth.userId,

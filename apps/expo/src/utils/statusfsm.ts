@@ -27,9 +27,9 @@ const statusHelper = (
       return ["CANCEL"];
     } else {
       if (dpEnabled) {
-        return ["RESCHEDULE", "DOWNPAY"];
+        return ["RESCHEDULE", "DOWNPAY", "CANCEL"];
       } else {
-        return ["RESCHEDULE", "PAY"];
+        return ["RESCHEDULE", "PAY", "CANCEL"];
       }
     }
   } else if (appointment.status === "DECLINED") {
