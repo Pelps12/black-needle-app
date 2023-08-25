@@ -11,6 +11,7 @@ import {
   View,
 } from "react-native";
 import Constants from "expo-constants";
+import * as FileSystem from "expo-file-system";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { Link, useRouter } from "expo-router";
@@ -18,7 +19,6 @@ import { openBrowserAsync } from "expo-web-browser";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 import AnimatedLottieView from "lottie-react-native";
-import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import FormTextInput from "../components/Utils/FormTextInput";
@@ -40,7 +40,7 @@ const Profile = () => {
   const { user, isLoaded } = useUser();
   const router = useRouter();
 
-  const [image, setImage] = useState<string | undefined>(user?.imageUrl);
+  const [image, setImage] = useState<string | undefined>();
   const [username, setUsername] = useState<string | null | undefined>(
     user?.username ?? user?.fullName,
   );
@@ -68,15 +68,12 @@ const Profile = () => {
   const handleSubmit = async (e: GestureResponderEvent) => {
     console.log(image, username);
     if (user) {
-      let uriParts = image?.split(".");
-      let fileType = uriParts && uriParts[uriParts.length - 1];
-      const file = image ? await dataURItoBlob(image) : null;
-      console.log(file?.size);
-      const formdata = new FormData();
-      if (file) {
-        formdata.append("userId", user.id);
-        formdata.append("file", file);
-      }
+      const file = image
+        ? await FileSystem.readAsStringAsync(image, {
+            encoding: FileSystem.EncodingType.Base64,
+          })
+        : null;
+
       const [userResult, imageResult] = await Promise.all([
         username
           ? updateUser.mutateAsync({
@@ -84,19 +81,15 @@ const Profile = () => {
             })
           : [],
         file
-          ? fetch(`${Config?.PUBLIC_URL as string}/api/clerk/profile`, {
-              method: "POST",
-              body: formdata,
+          ? user.setProfileImage({
+              file: `data:image/png;base64,${file}`,
             })
           : [],
       ]);
-      if (file) {
-        (imageResult as Response)
-          .json()
-          .then((result: any) => console.log(result));
-      }
+      console.log(userResult, imageResult);
       setImage(undefined);
       setUsername(undefined);
+      setEditMode(false);
       user.reload();
     }
   };
@@ -188,7 +181,7 @@ const Profile = () => {
         <Pressable onPress={handleProfilePicChange}>
           {/* Temporary */}
           <Image
-            source={image ?? user?.profileImageUrl}
+            source={user?.profileImageUrl ?? image}
             className="h-20 w-20 rounded-xl "
             placeholder={require("../../assets/placeholder.png")}
           />

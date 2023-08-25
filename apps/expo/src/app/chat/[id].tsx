@@ -50,8 +50,8 @@ type AblyMessage = {
     message: string;
     receipientId?: string;
   };
-  extras?: {
-    type: string;
+  extras: {
+    headers: Record<string, string | undefined>;
   };
 };
 
@@ -560,7 +560,7 @@ const AblyMessageComponent = ({ message }: { message: AblyMessage }) => {
       key: message.data.message,
     },
     {
-      enabled: message.extras?.type === "image",
+      enabled: message.extras.headers.type === "image",
     },
   );
   return (
@@ -569,7 +569,7 @@ const AblyMessageComponent = ({ message }: { message: AblyMessage }) => {
         message.isSender ? "justify-end" : "justify-start"
       } my-2`}
     >
-      {message.extras?.type === "image" ? (
+      {message.extras.headers.type === "image" ? (
         <View className="max-w-s relative rounded-lg ">
           <Image
             source={chatImageRouter.data}

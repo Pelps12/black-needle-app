@@ -124,6 +124,9 @@ importers:
       expo-device:
         specifier: ^5.2.1
         version: 5.2.1(expo@48.0.16)
+      expo-file-system:
+        specifier: ~15.2.2
+        version: 15.2.2(expo@48.0.16)
       expo-image:
         specifier: ^1.0.1
         version: 1.0.1(expo@48.0.16)
