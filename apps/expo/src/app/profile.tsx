@@ -181,7 +181,7 @@ const Profile = () => {
         <Pressable onPress={handleProfilePicChange}>
           {/* Temporary */}
           <Image
-            source={user?.profileImageUrl ?? image}
+            source={image ?? user?.profileImageUrl}
             className="h-20 w-20 rounded-xl "
             placeholder={require("../../assets/placeholder.png")}
           />
