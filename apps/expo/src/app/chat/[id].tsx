@@ -200,7 +200,9 @@ const ChatPage = () => {
                 message: result,
               },
               extras: {
-                type: "image",
+                headers: {
+                  type: "image",
+                },
               },
             },
           ]);
