@@ -43,18 +43,6 @@ import SKTextInput from "../../components/Utils/SKTextInput";
 import { useMessagesContext } from "../../providers/AblyProvider";
 import { trpc } from "../../utils/trpc";
 
-type AblyMessage = {
-  isSender: boolean;
-  data: {
-    roomId: string;
-    message: string;
-    receipientId?: string;
-  };
-  extras: {
-    headers: Record<string, string | undefined>;
-  };
-};
-
 const ChatPage = () => {
   const { id } = useSearchParams();
   const idString =
@@ -232,7 +220,9 @@ const ChatPage = () => {
                 message: messageText,
               },
               extras: {
-                type: "text",
+                headers: {
+                  type: "text",
+                },
               },
             },
           ]);
