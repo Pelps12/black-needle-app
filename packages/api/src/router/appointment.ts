@@ -106,7 +106,10 @@ export const appointmentRouter = router({
       const diff = (offset - new Date().getTimezoneOffset()) / 60;
       console.log("DIFF", diff);
       const start = new Date(input.date);
-      console.log(start);
+      console.log(
+        new Date(input.date.setHours(0, 0, 0, 0)),
+        new Date(input.date.setHours(23, 59, 59, 999)),
+      );
       const [seller, price] = await Promise.all([
         ctx.prisma.seller.findFirst({
           where: {
@@ -122,10 +125,10 @@ export const appointmentRouter = router({
                   where: {
                     appointmentDate: {
                       lte: new Date(input.date.setHours(23, 59, 59, 999)),
-                      gte: input.date,
+                      gte: new Date(input.date.setHours(0, 0, 0, 0)),
                     },
                     status: {
-                      notIn: ["DECLINED", "CANCELED", "FAILED"],
+                      notIn: ["DECLINED", "CANCELED", "FAILED", "PENDING"],
                     },
                   },
                   include: {

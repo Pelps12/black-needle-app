@@ -30,7 +30,7 @@ type AblyMessage = {
     receipientId?: string;
   };
   extras?: {
-    type: string;
+    headers: Record<string, string | undefined>;
   };
 };
 
