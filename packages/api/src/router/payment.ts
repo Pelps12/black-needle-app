@@ -97,7 +97,7 @@ export const paymentRouter = router({
             sellerNumber: appointment.seller.phoneNumber,
           }),
           userAgent: JSON.stringify({}),
-          isDownPayment: `${Boolean(appointment.seller.downPaymentPercentage) && downPaid}`,
+          isDownPayment: `${Boolean(appointment.seller.downPaymentPercentage) && !downPaid}`,
         },
       });
       if (!paymentIntent.client_secret) {
