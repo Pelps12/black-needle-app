@@ -194,6 +194,9 @@ const BuyerAppointment = ({
                   })}
                   setOpen={setOpen}
                   setValue={setSelectedMonth}
+                  onChangeValue={(e) => {
+                    setCurrentMonthHandler(e);
+                  }}
                   listMode="MODAL"
                 />
               </View>
