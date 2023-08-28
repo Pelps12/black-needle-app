@@ -149,6 +149,7 @@ model Message {
   userId  String
   message String   @db.Text
   sendAt  DateTime
+  read    Boolean? @default(false)
   type MessageType?
   user    User     @relation(fields: [userId], references: [id], onUpdate: Cascade)
   room    Room     @relation(fields: [roomId], references: [id], onUpdate: Cascade)

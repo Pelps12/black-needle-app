@@ -6,8 +6,11 @@ import {
   initPaymentSheet,
   presentPaymentSheet,
 } from "@stripe/stripe-react-native";
+import { inferRouterOutputs } from "@trpc/server";
 
+import { AppRouter } from "@acme/api";
 import {
+  AppointmentHistory,
   OrderStatus,
   type Category,
   type Price,
@@ -17,47 +20,44 @@ import {
 
 import AppointmentModal from "../../components/Seller/AppointmentModal";
 import SKText from "../../components/Utils/SKText";
+import statusHelper from "../../utils/statusfsm";
 import { trpc } from "../../utils/trpc";
+import { ArrayElement } from "../../utils/types";
 import Modal from "../Modal";
 import PaymentModal from "../Payment/StripeModal";
+import CancellationModal from "./Cancellation";
 
 /* import Cancellation from "./Cancellation";
 import Modal from "./Modal"; */
 
+type RouterOutput = inferRouterOutputs<AppRouter>;
+type AppointmentType = RouterOutput["appointment"]["getAppointments"];
 const Appointment = ({
   refetch,
   appointments,
   sellerMode,
 }: {
   refetch: any;
-  appointments: PrismaAppointment & {
-    price: Price & {
-      category: Category & {
-        Image: PrismaImage[];
-        seller: {
-          downPaymentPercentage: number | null;
-        };
-      };
-    };
-  };
+  appointments: ArrayElement<AppointmentType>;
   sellerMode: boolean;
 }) => {
-  const appointmentMutation = trpc.appointment.updateAppointmentStatus.useMutation();
+  const appointmentMutation =
+    trpc.appointment.updateAppointmentStatus.useMutation();
 
   const [isOpen, setIsOpen] = useState(false);
   const [stripeModalOpen, setStripeModalOpen] = useState(false);
   const [rescheduleModalOpen, setRescheduleModalOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
 
-  const fetchPaymentSheetParams = trpc.payment.getPaymentSheet.useMutation();
-
-  const chargeAppointmentStatus = async (newStatus: OrderStatus, itemId: string) => {
-		await appointmentMutation.mutateAsync({
-			newStatus,
-			itemId
-		});
-		refetch();
-	};
+  const chargeAppointmentStatus = async (
+    newStatus: "APPROVED" | "DECLINED" | "COMPLETED",
+    itemId: string,
+  ) => {
+    await appointmentMutation.mutateAsync({
+      newStatus,
+      itemId,
+    });
+    refetch();
+  };
 
   function closeModal() {
     setIsOpen(false);
@@ -68,7 +68,7 @@ const Appointment = ({
   }
   return (
     <View className="mx-2 my-4">
-      <View className="flex flex-row justify-between items-center">
+      <View className="flex flex-row items-center justify-between">
         <View className="flex flex-row items-center gap-2 ">
           <Image
             source={
@@ -78,12 +78,36 @@ const Appointment = ({
             className="h-36 w-36 rounded-xl"
           />
           <View>
-            <SKText className="text-xl font-semibold" fontWeight="semi-bold">
+            <View className="flex flex-row items-center gap-2">
+              <SKText className="text-xl font-semibold" fontWeight="semi-bold">
+                {(sellerMode
+                  ? appointments.user?.name
+                  : appointments.seller.user.name
+                )?.substring(0, 20) ?? "No Name"}
+                {((sellerMode
+                  ? appointments.user?.name
+                  : appointments.seller.user.name
+                )?.length ?? 0) > 20 && "..."}
+              </SKText>
+              <Image
+                source={
+                  `${
+                    sellerMode
+                      ? appointments.user.image
+                      : appointments.seller.user.image
+                  }` ||
+                  "https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png"
+                }
+                className="h-5 w-5 rounded-xl"
+              />
+            </View>
+
+            <SKText className="text-xl font-semibold">
               {appointments.price.name.substring(0, 20)}
               {appointments.price.name.length > 20 && "..."}
             </SKText>
             <View>
-              <SKText fontWeight="semi-bold">
+              <SKText>
                 {appointments.appointmentDate?.toLocaleDateString("en-US", {
                   month: "short",
                   day: "numeric",
@@ -102,70 +126,110 @@ const Appointment = ({
 
       <View>
         <View className="flex  flex-row items-center justify-end gap-5">
-          {sellerMode && appointments.status === "PENDING" && (
-            <View className="flex flex-row items-center">
-              <Pressable className=""onPress={() => chargeAppointmentStatus('APPROVED', appointments.id)}
-              >
-                <Image
-                  source={require("../../../assets/yes.svg")}
-                  className="mx-5 h-5 w-5 rounded-md object-cover"
-                />
-              </Pressable>
-              <Pressable onPress={() => chargeAppointmentStatus('DECLINED', appointments.id)}
-              >
-                <Image
-                  source={require("../../../assets/no.svg")}
-                  className="mx-5 h-5 w-5 rounded-md object-cover"
-                />
-              </Pressable>
-            </View>
-          )}
-          <View className="flex w-auto  flex-row items-center justify-center rounded-lg bg-[#d9d9d9]">
-            {!sellerMode && appointments.status === "APPROVED" && (
-              <Link
-                className={`btn btn-outline btn-sm btn-secondary  border-r p-2`}
-                href={`/schedule/payment?appointmentId=${appointments.id}`}
-              >
-                <Text className="font-semibold ">Pay</Text>
-              </Link>
-            )}
-
-            {
-              <Pressable
-                className={`btn btn-outline btn-sm btn-secondary  p-2`}
-                onPress={() => setRescheduleModalOpen(true)}
-              >
-                <SKText className="font-semibold " fontWeight="semi-bold">
-                  Reschedule
-                </SKText>
-              </Pressable>
-            }
-
-            {appointments.status === "DOWNPAID" &&
-              (appointments.appointmentDate &&
-              appointments.appointmentDate > new Date() ? (
-                <Pressable
-                  className={`btn btn-outline btn-sm btn-error   p-2`}
-                  onPress={() => openModal()}
-                >
-                  <SKText
-                    className="font-semibold text-[#E26850]"
-                    fontWeight="semi-bold"
+          {statusHelper(appointments, sellerMode).map((value) => {
+            switch (value) {
+              case "APPROVE":
+                return (
+                  <Pressable
+                    className=""
+                    onPress={() =>
+                      chargeAppointmentStatus("APPROVED", appointments.id)
+                    }
+                    disabled={appointmentMutation.isLoading}
+                    key={value}
                   >
-                    Cancel
-                  </SKText>
-                </Pressable>
-              ) : (
-                <Pressable
-                  className={`btn btn-outline btn-sm btn-secondary  bg-[#72a2f9] p-2`}
-                  /* onPress={() => payForAppointment(appointments.id)} */
-                >
-                  <SKText className="font-semibold" fontWeight="semi-bold">
-                    Complete
-                  </SKText>
-                </Pressable>
-              ))}
-          </View>
+                    <Image
+                      source={require("../../../assets/yes.svg")}
+                      className="mx-5 h-5 w-5 rounded-md object-cover"
+                    />
+                  </Pressable>
+                );
+              case "DECLINE":
+                return (
+                  <Pressable
+                    onPress={() =>
+                      chargeAppointmentStatus("DECLINED", appointments.id)
+                    }
+                    disabled={appointmentMutation.isLoading}
+                    key={value}
+                  >
+                    <Image
+                      source={require("../../../assets/no.svg")}
+                      className="mx-5 h-5 w-5 rounded-md object-cover"
+                    />
+                  </Pressable>
+                );
+              case "RESCHEDULE":
+                return (
+                  <Pressable
+                    className={`btn btn-outline btn-sm btn-secondary  p-2`}
+                    onPress={() => setRescheduleModalOpen(true)}
+                    key={value}
+                  >
+                    <SKText className="font-semibold " fontWeight="semi-bold">
+                      Reschedule
+                    </SKText>
+                  </Pressable>
+                );
+
+              case "DOWNPAY":
+                return (
+                  <Link
+                    className={`btn btn-outline btn-sm btn-secondary  border-r p-2`}
+                    href={`/schedule/payment?appointmentId=${appointments.id}`}
+                    key={value}
+                  >
+                    <SKText className="font-semibold ">Pay</SKText>
+                  </Link>
+                );
+              case "PAY":
+                return (
+                  <Link
+                    className={`btn btn-outline btn-sm btn-secondary  border-r p-2`}
+                    href={`/schedule/payment?appointmentId=${appointments.id}`}
+                    key={value}
+                  >
+                    <SKText className="font-semibold ">Pay</SKText>
+                  </Link>
+                );
+              case "CANCEL":
+                return (
+                  <Pressable
+                    className={`btn btn-outline btn-sm btn-error   p-2`}
+                    onPress={() => openModal()}
+                    key={value}
+                  >
+                    <SKText
+                      className="font-semibold text-[#E26850]"
+                      fontWeight="semi-bold"
+                    >
+                      Cancel
+                    </SKText>
+                  </Pressable>
+                );
+              case "COMPLETE":
+                return (
+                  <Pressable
+                    className={`btn btn-outline btn-sm btn-error   p-2`}
+                    onPress={() =>
+                      chargeAppointmentStatus("COMPLETED", appointments.id)
+                    }
+                    disabled={appointmentMutation.isLoading}
+                    key={value}
+                  >
+                    <SKText
+                      className="font-semibold text-[#2BDA82]"
+                      fontWeight="semi-bold"
+                    >
+                      Complete
+                    </SKText>
+                  </Pressable>
+                );
+              default:
+                return null;
+            }
+          })}
+
           <SKText
             className={`${
               appointments.status === "PENDING"
@@ -198,6 +262,13 @@ const Appointment = ({
         />
       </Modal>
 
+      <Modal modalVisible={isOpen} setModalVisible={setIsOpen} className="">
+        <CancellationModal
+          appointmentId={appointments.id}
+          closeModal={closeModal}
+        />
+      </Modal>
+
       <Modal
         modalVisible={stripeModalOpen}
         setModalVisible={setStripeModalOpen}
@@ -206,9 +277,9 @@ const Appointment = ({
         {/* <View className="sahdow-md m-auto rounded-lg bg-[#d9d9d9] p-4"> 
           <View>
             <View>
-              <Text className="text-5xl">Hello World!</Text>
+              <SKText className="text-5xl">Hello World!</SKText>
               <Pressable onPress={() => setModalVisible(false)}>
-                <Text>Hide Modal</Text>
+                <SKText>Hide Modal</SKText>
               </Pressable>
             </View>
           </View>

@@ -6,7 +6,12 @@ import React, { useEffect, useState } from 'react';
 const Test2 = () => {
 	const { userId, isSignedIn } = useAuth();
 
-	const trpcEndpt = trpc.search.algoliaTransform.useMutation();
+	const trpcEndpt = trpc.appointment.getFreeTimeslots.useQuery({
+		sellerId: 'user_2SlAlmInXxOM3ZqGnnnpY3M5AwD',
+		day: 'SATURDAY',
+		date: new Date('2023-08-26T05:00:00.000Z'),
+		priceId: 'cle8zq63e0005l90fw8n0lwoy'
+	});
 	// useEffect(() => {
 	// 	if (isSignedIn) {
 	// 		const test = async () => {
@@ -25,19 +30,7 @@ const Test2 = () => {
 	// 		} catch (err) {}
 	// 	}
 	// }, [session]);
-	return (
-		<>
-			<button
-				onClick={() =>
-					trpcEndpt.mutate(undefined, {
-						onSuccess(data) {
-							console.log(data);
-						}
-					})
-				}
-			></button>
-		</>
-	);
+	return <></>;
 };
 
 export default Test2;

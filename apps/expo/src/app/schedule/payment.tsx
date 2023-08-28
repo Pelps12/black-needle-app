@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   FlatList,
@@ -31,7 +31,8 @@ import {
 } from "@acme/db";
 
 import SKText from "../../components/Utils/SKText";
-import { trpc } from "../../utils/trpc";
+import { RouterOutputs, trpc } from "../../utils/trpc";
+import { ArrayElement } from "../../utils/types";
 
 const PaymentModal = ({ closeModal }: { closeModal: () => void }) => {
   const { appointmentId } = useLocalSearchParams();
@@ -66,16 +67,7 @@ const PaymentModalHidden = ({
   appointment,
   closeModal,
 }: {
-  appointment: PrismaAppointment & {
-    price: Price & {
-      category: Category & {
-        Image: PrismaImage[];
-        seller: {
-          downPaymentPercentage: number | null;
-        };
-      };
-    };
-  };
+  appointment: ArrayElement<RouterOutputs["appointment"]["getAppointments"]>;
   closeModal: () => void;
 }) => {
   const getPaymentIntentSecret = trpc.payment.getPaymentSheet.useMutation();
@@ -84,16 +76,30 @@ const PaymentModalHidden = ({
   const { confirmPayment, loading: stripeLoading } = useConfirmPayment();
   const [state, setState] = useState<string | undefined>("Not started");
   const [loading, setLoading] = useState(false);
-
-  const totalAmount =
-    (appointment.price.category.seller.downPaymentPercentage
-      ? appointment.price.category.seller.downPaymentPercentage *
+  let newTotalAmount = useMemo(() => {
+    console.log(appointment.history);
+    if (appointment.history.find((history) => history.status === "DOWNPAID")) {
+      return (
         appointment.price.amount *
+        (1 - (appointment.seller?.downPaymentPercentage ?? 0)) *
         100
-      : appointment.price.amount * 100) +
-    (appointment.price.amount < 9
-      ? 135
-      : Math.ceil(appointment.price.amount * 7));
+      );
+    } else {
+      console.log(
+        appointment.price.amount < 9
+          ? 135
+          : Math.ceil(appointment.price.amount * 7),
+      );
+      return (
+        appointment.price.amount *
+          (appointment.seller?.downPaymentPercentage ?? 0) *
+          100 +
+        (appointment.price.amount < 9
+          ? 135
+          : Math.ceil(appointment.price.amount * 7))
+      );
+    }
+  }, [appointment]);
 
   const handlePayPress = async () => {
     getPaymentIntentSecret.mutate(
@@ -124,7 +130,7 @@ const PaymentModalHidden = ({
         appointmentId: appointment.id,
       },
       {
-        onSuccess: async ({ client_secret }) => {
+        onSuccess: async ({ client_secret, price }) => {
           setState("B");
           try {
             const { error, paymentIntent } = await confirmPlatformPayPayment(
@@ -134,7 +140,7 @@ const PaymentModalHidden = ({
                   cartItems: [
                     {
                       label: appointment.price.name,
-                      amount: (totalAmount / 100).toFixed(2),
+                      amount: (price / 100).toFixed(2),
                       paymentType: PlatformPay.PaymentType.Immediate,
                     },
                   ],
@@ -237,7 +243,7 @@ const PaymentModalHidden = ({
             </SKText>
           </View>
           <SKText className="text-xl font-extrabold" fontWeight="bold">
-            ${(totalAmount / 100).toFixed(2)}
+            ${(newTotalAmount / 100).toFixed(2)}
           </SKText>
         </View>
       </View>

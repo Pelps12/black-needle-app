@@ -1,5 +1,6 @@
 import { prisma } from '@acme/db';
 import { env } from '@acme/env-config';
+import { clerkClient } from '@clerk/nextjs';
 import Mixpanel from 'mixpanel';
 import { NextApiRequest, NextApiResponse } from 'next/types';
 import { randomUUID } from 'node:crypto';
@@ -44,13 +45,16 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 			res.status(400).send(`Webhook Error: ${err.message}`);
 			return;
 		}
-
+		console.log('48');
 		try {
+			console.log('50');
 			switch (event.type) {
 				case 'account.updated':
+					console.log('53');
 					const account: any = event.data.object;
+					console.log('55', account);
 					const metadata: AccountCreateMetadata = account.metadata;
-					const userAgent: UserAgent = JSON.parse(metadata.userAgent);
+					console.log(metadata);
 					if (account.details_submitted) {
 						const user = await prisma.user.update({
 							where: {
@@ -60,22 +64,28 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 								role: 'SELLER'
 							}
 						});
+						console.log(user);
 						if (user) {
 							mixpanel.people.set(user.id, {
 								role: 'SELLER'
 							});
 
+							clerkClient.users.updateUser(user.id, {
+								publicMetadata: {
+									role: 'SELLER'
+								}
+							});
+
 							mixpanel.track('Seller Created', {
 								distinct_id: user.id || randomUUID(),
 								$insert_id: randomUUID(),
-								ip: metadata.ip,
-								$os: userAgent.os,
-								$browser: userAgent.browser,
-								$browser_version: userAgent.browser_version
+								ip: metadata.ip
 							});
 						}
 					}
 					res.status(200).json({ received: true });
+				default:
+					res.status(400).json({ error: 'Invalid message' });
 			}
 		} catch (err: any) {
 			if (err instanceof Stripe.errors.StripeError) {

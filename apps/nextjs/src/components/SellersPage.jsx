@@ -41,28 +41,37 @@ const SellersPage = ({ uid, posts, reviews, user }) => {
 	return (
 		<>
 			<ProfileCard setActive={setActive} seller={user}></ProfileCard>
-			<div className="tabs tabs-boxed bg-base-100 justify-center gap-5 md:gap-10">
-				<div className={`tab ${active === 'CATEGORIES' && 'tab-active'}`}>
+			<div className="tabs bg-base-100 w-auto mx-auto justify-center gap-5 md:gap-10">
+				<div
+					className={`tab font-semibold  ${
+						active === 'CATEGORIES' && 'font-bold tab-active border-primary tab-bordered'
+					}`}
+				>
 					<button
 						onClick={() => onButtonClick('CATEGORIES')}
-						className="text-xl font-bold dark:text-black-500"
+						className="text-xl  dark:text-black-500"
 					>
 						CATEGORIES
 					</button>
 				</div>
-				<div className={`tab ${active === 'PRICES' && 'tab-active'}`}>
-					<button
-						onClick={() => onButtonClick('PRICES')}
-						className="text-xl font-bold dark:text-black-500"
-					>
+				<div
+					className={`tab  font-semibold ${
+						active === 'PRICES' && 'font-bold tab-active border-primary tab-bordered'
+					}`}
+				>
+					<button onClick={() => onButtonClick('PRICES')} className="text-xl  dark:text-black-500 ">
 						PRICES
 					</button>
 				</div>
 				{isSignedIn && userId === uid ? (
-					<div className={`tab ${active === 'AVAILABILITY' && 'tab-active'}`}>
+					<div
+						className={`tab font-semibold ${
+							active === 'AVAILABILITY' && 'font-bold tab-active border-primary tab-bordered '
+						}`}
+					>
 						<button
 							onClick={() => onButtonClick('AVAILABILITY')}
-							className="text-xl font-bold dark:text-black-500"
+							className="text-xl  dark:text-black-500"
 						>
 							AVAILABILITY
 						</button>

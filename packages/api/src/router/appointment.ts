@@ -13,7 +13,7 @@ import { env } from "@acme/env-config/env";
 
 import { protectedProcedure, publicProcedure, router } from "../trpc";
 import { stripe } from "../utils/stripe";
-import {twilio} from "../utils/twilio"
+import { twilio } from "../utils/twilio";
 
 const expo = new Expo({ accessToken: env.EXPO_ACCESS_TOKEN });
 function addSeconds(date: Date, seconds: number) {
@@ -40,27 +40,28 @@ export const appointmentRouter = router({
       return deletedAvailability.count !== 0;
     }),
   editSellerAvailibility: protectedProcedure
-		.input(
-			z.object({
-				availiabilityId: z.string(),
-				from: z.number().optional(),
-				to: z.number().optional(),
-				day: z.nativeEnum(Day).optional(),
-			})
-		).mutation(async({input, ctx}) => {
-			const updatedTimeslot = await ctx.prisma.sellerAvailability.update({
-				where: {
-					id: input.availiabilityId
-				},
-				data: {
-					from: input.from,
-					to: input.to,
-					day: input.day,
-					sellerId: ctx.auth.userId
-				}
-			})
-			return updatedTimeslot;
-		}),
+    .input(
+      z.object({
+        availiabilityId: z.string(),
+        from: z.number().optional(),
+        to: z.number().optional(),
+        day: z.nativeEnum(Day).optional(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const updatedTimeslot = await ctx.prisma.sellerAvailability.update({
+        where: {
+          id: input.availiabilityId,
+        },
+        data: {
+          from: input.from,
+          to: input.to,
+          day: input.day,
+          sellerId: ctx.auth.userId,
+        },
+      });
+      return updatedTimeslot;
+    }),
   getSellerAvailabilty: protectedProcedure
     .input(
       z.object({
@@ -105,7 +106,10 @@ export const appointmentRouter = router({
       const diff = (offset - new Date().getTimezoneOffset()) / 60;
       console.log("DIFF", diff);
       const start = new Date(input.date);
-      console.log(start);
+      console.log(
+        new Date(input.date.setHours(0, 0, 0, 0)),
+        new Date(input.date.setHours(23, 59, 59, 999)),
+      );
       const [seller, price] = await Promise.all([
         ctx.prisma.seller.findFirst({
           where: {
@@ -121,10 +125,10 @@ export const appointmentRouter = router({
                   where: {
                     appointmentDate: {
                       lte: new Date(input.date.setHours(23, 59, 59, 999)),
-                      gte: input.date,
+                      gte: new Date(input.date.setHours(0, 0, 0, 0)),
                     },
                     status: {
-                      notIn: ["DECLINED", "CANCELED", "FAILED"],
+                      notIn: ["DECLINED", "CANCELED", "FAILED", "PENDING"],
                     },
                   },
                   include: {
@@ -249,8 +253,8 @@ export const appointmentRouter = router({
           history: {
             create: {
               status: "PENDING",
-            }
-          }
+            },
+          },
         },
         include: {
           price: {
@@ -271,7 +275,7 @@ export const appointmentRouter = router({
               },
             },
           },
-          user: true
+          user: true,
         },
       });
       if (appointment) {
@@ -283,14 +287,12 @@ export const appointmentRouter = router({
           const ticket = await expo.sendPushNotificationsAsync([
             {
               to: expoTokens,
-              title: `New Appointment from ${
-                appointment.user.name ?? "User"
-              }`,
+              title: `New Appointment from ${appointment.user.name ?? "User"}`,
               body: "Respond to their request",
               sound: "default",
               data: {
                 senderId: ctx.auth.userId,
-                type: "schedule"
+                type: "schedule",
               },
             },
           ]);
@@ -310,11 +312,7 @@ export const appointmentRouter = router({
       if (input.sellerMode) {
         const appointments = await ctx.prisma.appointment.findMany({
           where: {
-            price: {
-              category: {
-                sellerId: ctx.auth.userId,
-              },
-            },
+            sellerId: ctx.auth.userId,
           },
           include: {
             price: {
@@ -327,6 +325,25 @@ export const appointmentRouter = router({
                         downPaymentPercentage: true,
                       },
                     },
+                  },
+                },
+              },
+            },
+            history: true,
+            user: {
+              select: {
+                name: true,
+                image: true,
+                id: true,
+              },
+            },
+            seller: {
+              select: {
+                downPaymentPercentage: true,
+                user: {
+                  select: {
+                    name: true,
+                    image: true,
                   },
                 },
               },
@@ -358,6 +375,25 @@ export const appointmentRouter = router({
                 },
               },
             },
+            user: {
+              select: {
+                name: true,
+                image: true,
+                id: true,
+              },
+            },
+            seller: {
+              select: {
+                downPaymentPercentage: true,
+                user: {
+                  select: {
+                    name: true,
+                    image: true,
+                  },
+                },
+              },
+            },
+            history: true,
           },
           orderBy: {
             createdAt: "desc",
@@ -425,9 +461,9 @@ export const appointmentRouter = router({
           status: "PENDING",
           history: {
             create: {
-              status: "PENDING"
-            }
-          }
+              status: "PENDING",
+            },
+          },
         },
         include: {
           price: {
@@ -480,7 +516,7 @@ export const appointmentRouter = router({
   refundPayment: protectedProcedure
     .input(
       z.object({
-        canceler: z.nativeEnum(Role),
+        canceler: z.nativeEnum(Role).optional(),
         appointmentId: z.string().cuid(),
         reason: z.string().optional(),
       }),
@@ -493,9 +529,23 @@ export const appointmentRouter = router({
         include: {
           seller: true,
           price: true,
+          history: true,
         },
       });
-      if (input.canceler === "BUYER") {
+
+      console.log(appointment);
+
+      if (appointment.history.find((apt) => apt.status === "COMPLETED")) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Appointment already completed",
+        });
+      }
+
+      const canceler =
+        appointment.sellerId === ctx.auth.userId ? "SELLER" : "BUYER";
+      console.log(canceler);
+      if (canceler === "BUYER") {
         if (appointment.userId === ctx.auth.userId) {
           if (
             appointment.status === "DOWNPAID" &&
@@ -518,14 +568,14 @@ export const appointmentRouter = router({
                 status: "CANCELED",
                 history: {
                   create: {
-                    status: "CANCELED"
-                  }
-                }
+                    status: "CANCELED",
+                  },
+                },
               },
             });
           } else if (
-            appointment.status === "APPROVED" &&
-            !appointment.seller.downPaymentPercentage
+            appointment.status === "APPROVED" ||
+            appointment.status === "PAID"
           ) {
             await ctx.prisma.appointment.update({
               where: {
@@ -537,9 +587,9 @@ export const appointmentRouter = router({
                 status: "CANCELED",
                 history: {
                   create: {
-                    status: "CANCELED"
-                  }
-                }
+                    status: "CANCELED",
+                  },
+                },
               },
             });
           }
@@ -548,7 +598,7 @@ export const appointmentRouter = router({
             code: "UNAUTHORIZED",
           });
         }
-      } else if (input.canceler === "SELLER") {
+      } else if (canceler === "SELLER") {
         if ((appointment.sellerId = ctx.auth.userId)) {
           if (
             appointment.status === "DOWNPAID" &&
@@ -575,35 +625,174 @@ export const appointmentRouter = router({
                 status: "CANCELED",
                 history: {
                   create: {
-                    status: "CANCELED"
-                  }
-                }
+                    status: "CANCELED",
+                  },
+                },
               },
             });
-          } else if (
-            appointment.status == "PAID" &&
-            !appointment.seller.downPaymentPercentage
-          ) {
-            await ctx.prisma.appointment.update({
-              where: {
-                id: input.appointmentId,
-              },
-              data: {
-                canceler: "SELLER",
-                cancellationReason: input.reason,
-                status: "CANCELED",
-                history: {
-                  create: {
-                    status: "CANCELED"
-                  }
-                }
-              },
-            });
+          } else {
+            if (appointment.status === "PAID" && appointment.paymentIntent) {
+              await stripe.refunds.create({
+                amount: appointment.price.amount * 100,
+                payment_intent: appointment.paymentIntent,
+                currency: "usd",
+                reverse_transfer: true,
+              });
+              await ctx.prisma.appointment.update({
+                where: {
+                  id: input.appointmentId,
+                },
+                data: {
+                  canceler: "SELLER",
+                  cancellationReason: input.reason,
+                  status: "CANCELED",
+                  history: {
+                    create: {
+                      status: "CANCELED",
+                    },
+                  },
+                },
+              });
+            }
+
+            if (appointment.status === "APPROVED") {
+              await ctx.prisma.appointment.update({
+                where: {
+                  id: input.appointmentId,
+                },
+                data: {
+                  canceler: "SELLER",
+                  cancellationReason: input.reason,
+                  status: "CANCELED",
+                  history: {
+                    create: {
+                      status: "CANCELED",
+                    },
+                  },
+                },
+              });
+            }
           }
         }
+      } else {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+        });
       }
     }),
-    
+  payAppointment: protectedProcedure
+    .input(
+      z.object({
+        appointmentId: z.string().cuid(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const appointment = await ctx.prisma.appointment.findFirst({
+        where: {
+          id: input.appointmentId,
+          userId: ctx.auth.userId,
+        },
+        include: {
+          price: {
+            include: {
+              category: {
+                include: {
+                  Image: true,
+                  seller: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (appointment) {
+        const totalAmount = appointment.price.amount;
+        console.log(appointment.price.category);
+        const session = await stripe.checkout.sessions.create({
+          line_items: [
+            {
+              price_data: {
+                ...(appointment.price.category.seller.downPaymentPercentage
+                  ? {
+                      currency: "usd",
+                      product_data: {
+                        name: `${appointment.price.name} (Down Payment)`,
+                        images: appointment.price.category.Image.map(
+                          (image) => image.link,
+                        ),
+                      },
+                      unit_amount:
+                        appointment.price.amount *
+                        appointment.price.category.seller
+                          .downPaymentPercentage *
+                        100,
+                    }
+                  : {
+                      currency: "usd",
+                      product_data: {
+                        name: appointment.price.name,
+                        images: appointment.price.category.Image.map(
+                          (image) => image.link,
+                        ),
+                      },
+                      unit_amount: appointment.price.amount * 100,
+                    }),
+              },
+              quantity: 1,
+            },
+            ...(appointment.price.category.seller.downPaymentPercentage
+              ? []
+              : [
+                  {
+                    price_data: {
+                      currency: "usd",
+                      product_data: {
+                        name: "Service Fee",
+                      },
+                      unit_amount:
+                        totalAmount < 9 ? 135 : Math.ceil(totalAmount * 7),
+                    },
+
+                    quantity: 1,
+                  },
+                ]),
+          ],
+          success_url: `${env.NEXT_PUBLIC_URL}/profile`,
+          cancel_url: `${ctx.headers?.referer}/?canceled=true`,
+          custom_text: {
+            submit: {
+              message: "We have 7% service charge.",
+            },
+          },
+          mode: "payment",
+          payment_intent_data: {
+            transfer_group: appointment.id,
+
+            metadata: {
+              userId: ctx.auth.userId,
+              type: "appointment",
+              username:
+                (await clerkClient.users.getUser(ctx.auth.userId)).username ||
+                "Unknown User",
+              seller: JSON.stringify({
+                id: appointment.id,
+                sellerNumber: appointment.price.category.seller.phoneNumber,
+              }),
+              isDownPayment: `${Boolean(
+                appointment.price.category.seller.downPaymentPercentage,
+              )}`,
+            },
+          },
+        });
+        return session;
+      } else {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+        });
+      }
+    }),
+
   completePayment: protectedProcedure
     .input(
       z.object({
@@ -704,117 +893,136 @@ export const appointmentRouter = router({
         });
       }
     }),
-    /**Very vulnerable to bad actors that are sellers */
-    updateAppointmentStatus: protectedProcedure
-		.input(
-			z.object({
-				newStatus: z.nativeEnum(OrderStatus),
-				itemId: z.string()
-			})
-		)
-		.mutation(async ({ input, ctx }) => {
-			{
-				const appointment = await ctx.prisma.appointment.findFirst({
-					where: {
-						id: input.itemId,
-						price: {
-							category: {
-								sellerId: ctx.auth.userId
-							}
-						}
-					}
-				});
-				if (appointment) {
-					const updatedAppointment = await ctx.prisma.appointment.update({
-						where: {
-							id: input.itemId
-						},
-						data: {
-							status: input.newStatus,
-							updatedAt: new Date(),
+  /**Very vulnerable to bad actors that are sellers */
+  updateAppointmentStatus: protectedProcedure
+    .input(
+      z.object({
+        newStatus: z.enum(["APPROVED", "DECLINED", "COMPLETED"]),
+        itemId: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      {
+        const appointment = await ctx.prisma.appointment.findFirst({
+          where: {
+            id: input.itemId,
+            price: {
+              category: {
+                sellerId: ctx.auth.userId,
+              },
+            },
+          },
+          include: {
+            history: true,
+          },
+        });
+        let newStatus: OrderStatus | undefined;
+
+        if (input.newStatus === "APPROVED") {
+          if (appointment?.history.find((prev) => prev.status === "PAID")) {
+            newStatus = "PAID";
+          } else if (
+            appointment?.history.find((prev) => prev.status === "DOWNPAID")
+          ) {
+            newStatus = "DOWNPAID";
+          }
+        }
+        if (appointment) {
+          const updatedAppointment = await ctx.prisma.appointment.update({
+            where: {
+              id: input.itemId,
+            },
+            data: {
+              status: newStatus || input.newStatus,
+              updatedAt: new Date(),
               history: {
                 create: {
-                  status: input.newStatus
-                }
-              }
-						},
-						include: {
-							price: true,
+                  status: newStatus || input.newStatus,
+                },
+              },
+            },
+            include: {
+              price: true,
               seller: {
                 select: {
-                  user: true
-                }
+                  user: true,
+                },
               },
-							user: {
+              user: {
                 include: {
-                  tokens: true
-                }
+                  tokens: true,
+                },
               },
-              
-						}
-					});
-          const expoTokens = updatedAppointment.user.tokens.map((token) => token.token as ExpoPushToken)
+            },
+          });
+          const expoTokens = updatedAppointment.user.tokens
+            .map((token) => token.token as ExpoPushToken)
             .filter((token) => Expo.isExpoPushToken(token));
-					if (updatedAppointment.status === 'APPROVED') {
-            
+          if (updatedAppointment.status !== "DECLINED") {
             if (expoTokens.length > 0) {
               const ticket = await expo.sendPushNotificationsAsync([
                 {
                   to: expoTokens,
-                  title: updatedAppointment.seller.user.name || 'Unknown User',
-                  body: `Appointment for ${updatedAppointment.price.name} approved`,
-                  sound: 'default',
+                  title: updatedAppointment.seller.user.name || "Unknown User",
+                  body: `Appointment for ${
+                    updatedAppointment.price.name
+                  } ${updatedAppointment.status.toLowerCase()}`,
+                  sound: "default",
                   data: {
                     senderId: updatedAppointment.userId,
-                    type: "schedule"
-                  }
-                }
+                    type: "schedule",
+                  },
+                },
               ]);
               console.log(ticket);
             } else {
               twilio.messages.create({
-                body: `Appointment for ${updatedAppointment.price.name} approved by ${
-                  updatedAppointment.seller.user.name || 'Seller'
+                body: `Appointment for ${
+                  updatedAppointment.price.name
+                } ${updatedAppointment.status.toLowerCase()} by ${
+                  updatedAppointment.seller.user.name || "Seller"
+                }.\n${
+                  updatedAppointment.status === "APPROVED" &&
+                  "Go to https://sakpa.co/profile to pay for the order"
+                }`,
+                to: `+1${updatedAppointment.user.phoneNumber}`,
+                messagingServiceSid: env.MESSAGING_SID,
+              });
+            }
+          } else {
+            if (expoTokens.length > 0) {
+              const ticket = await expo.sendPushNotificationsAsync([
+                {
+                  to: expoTokens,
+                  title: updatedAppointment.seller.user.name || "Unknown User",
+                  body: `Appointment for ${updatedAppointment.price.name} declined`,
+                  sound: "default",
+                  data: {
+                    senderId: updatedAppointment.userId,
+                    type: "schedule",
+                  },
+                },
+              ]);
+            } else {
+              twilio.messages.create({
+                body: `Appointment for ${
+                  updatedAppointment.price.name
+                } declined by ${
+                  updatedAppointment.seller.user.name || "Seller"
                 }.\nGo to https://sakpa.co/profile to pay for the order`,
                 to: `+1${updatedAppointment.user.phoneNumber}`,
-                messagingServiceSid: env.MESSAGING_SID
+                messagingServiceSid: env.MESSAGING_SID,
               });
-						
-					} 
-        }else {
-          if (expoTokens.length > 0) {
-            const ticket = await expo.sendPushNotificationsAsync([
-              {
-                to: expoTokens,
-                title: updatedAppointment.seller.user.name || 'Unknown User',
-                body: `Appointment for ${updatedAppointment.price.name} declined`,
-                sound: 'default',
-                data: {
-                  senderId: updatedAppointment.userId,
-                  type: "schedule"
-                }
-              }
-            ]);
-          } else {
-            twilio.messages.create({
-              body: `Appointment for ${updatedAppointment.price.name} declined by ${
-								updatedAppointment.seller.user.name || 'Seller'
+            }
+          }
 
-              }.\nGo to https://sakpa.co/profile to pay for the order`,
-              to: `+1${updatedAppointment.user.phoneNumber}`,
-              messagingServiceSid: env.MESSAGING_SID
-            });
-          
+          return updatedAppointment;
+        } else {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Invalid input",
+          });
         }
-					}
-
-					return updatedAppointment;
-				} else {
-					throw new TRPCError({
-						code: 'BAD_REQUEST',
-						message: 'Invalid input'
-					});
-				}
-			}
-		}),
+      }
+    }),
 });

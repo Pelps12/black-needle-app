@@ -72,6 +72,7 @@ export const chatRouter = router({
                 sound: "default",
                 data: {
                   senderId: initiator.userId,
+                  roomId: room.id,
                 },
               },
             ]);
@@ -162,6 +163,21 @@ export const chatRouter = router({
         }),
       ]);
 
+      if (room) {
+        await ctx.prisma.message.updateMany({
+          where: {
+            read: false,
+            roomId: room.id,
+            userId: {
+              not: ctx.auth.userId,
+            },
+          },
+          data: {
+            read: true,
+          },
+        });
+      }
+
       return { room, user };
     }),
   getPreviousChats: protectedProcedure
@@ -233,6 +249,31 @@ export const chatRouter = router({
     });
     client.close();
     return tokenRequestData;
+  }),
+
+  getNotifications: protectedProcedure.query(async ({ ctx }) => {
+    const count = await ctx.prisma.room.findMany({
+      where: {
+        Participant: {
+          some: {
+            userId: ctx.auth.userId,
+          },
+        },
+        Message: {
+          some: {
+            read: false,
+            NOT: {
+              userId: ctx.auth.userId,
+            },
+          },
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    return count;
   }),
 });
 

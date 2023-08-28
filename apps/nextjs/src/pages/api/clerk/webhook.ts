@@ -75,7 +75,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 						id: msg.data.id
 					},
 					data: {
-						name: msg.data.username ?? undefined,
+						name: msg.data.username ?? msg.data.email_addresses[0].email_address,
 						image: msg.data.profile_image_url,
 						email: msg.data.email_addresses[0].email_address,
 						role: msg.data.public_metadata.role ?? 'BUYER'

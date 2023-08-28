@@ -122,7 +122,8 @@ const Chat: FC<{ id: string | undefined; rId: string | undefined; routerReady: b
 				name: 'message',
 				data: {
 					roomId: getRoom.data.room?.id,
-					message: messageText
+					message: messageText,
+					receipientId: rId
 				}
 			});
 			setAblyMessages([

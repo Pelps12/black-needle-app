@@ -122,15 +122,19 @@ const BuyerAppointment = ({
     console.log(time);
 
     if (reschedule && appointmentId) {
-      const result = await rescheduleAppointment.mutateAsync({
-        appointmentId: appointmentId,
-        date: time.date,
-        sellerAvailability: time.availabilityId,
-      });
-      if (rescheduleAppointment.isSuccess) {
-        trpc.useContext().appointment.getAppointments.refetch();
-        closeModal();
-      }
+      rescheduleAppointment.mutate(
+        {
+          appointmentId: appointmentId,
+          date: time.date,
+          sellerAvailability: time.availabilityId,
+        },
+        {
+          onSuccess: () => {
+            utils.appointment.getAppointments.refetch();
+            closeModal();
+          },
+        },
+      );
     } else {
       createAppointment.mutate(
         {
@@ -310,6 +314,10 @@ const BuyerAppointment = ({
                   className={`flex items-center rounded-lg bg-[#1dbaa7] p-3  ${
                     createAppointment.isLoading ? "btn-disabled" : "btn-primary"
                   }`}
+                  disabled={
+                    createAppointment.isLoading ||
+                    rescheduleAppointment.isLoading
+                  }
                   onPress={() => onSelectTime(selectedTimeSlot)}
                 >
                   {createAppointment.isLoading ? (

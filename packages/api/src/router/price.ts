@@ -63,7 +63,6 @@ export const priceRouter = router({
       }
     }),
 
-  //Please do this
   updatePrice: protectedProcedure
     .input(
       z.object({
@@ -98,7 +97,7 @@ export const priceRouter = router({
           data: {
             name: input.name,
             amount: input.amount,
-            categoryId: input.categoryId || price.categoryId,
+            categoryId: input.categoryId,
             type: input.type,
           },
           include: {
@@ -111,21 +110,21 @@ export const priceRouter = router({
             },
           },
         });
+        /*  doc: {
+          name: updatedPrice.name,
+          'seller-id': updatedPrice.category.sellerId,
+          amount: updatedPrice.amount,
+          'category-name': updatedPrice.category.name,
+          'category-id': updatedPrice.category.id,
+          school: updatedPrice.category.seller.school,
+          'seller-icon': ctx.session.user.image,
+          image: updatedPrice.category.Image[0]?.link || ':)' //Gets random image from sellers category
+        } */
 
-        /* client.update({
-					index: 'products',
-					id: price.id,
-					doc: {
-						name: updatedPrice.name,
-						'seller-id': updatedPrice.category.sellerId,
-						amount: updatedPrice.amount,
-						'category-name': updatedPrice.category.name,
-						'category-id': updatedPrice.category.id,
-						school: updatedPrice.category.seller.school,
-						'seller-icon': ctx.session.user.image,
-						image: updatedPrice.category.Image[0]?.link || ':)' //Gets random image from sellers category
-					}
-				}); */
+        algoliaIndex.partialUpdateObject({
+          objectID: updatedPrice.categoryId,
+          prices: updatedPrice.category.prices,
+        });
 
         return {
           updatedPrice,
@@ -143,12 +142,17 @@ export const priceRouter = router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      //Optimize this shit. It disgusts me
       const price = await ctx.prisma.price.findFirst({
         where: {
           id: input.priceId,
         },
         include: {
-          category: true,
+          category: {
+            include: {
+              prices: true,
+            },
+          },
         },
       });
       if (!price) {
@@ -164,11 +168,13 @@ export const priceRouter = router({
             id: input.priceId,
           },
         });
-        /* 
-				client.delete({
-					index: 'products',
-					id: deletedPrice.id
-				}); */
+
+        algoliaIndex.partialUpdateObject({
+          objectID: price.categoryId,
+          prices: price.category.prices.filter(
+            (price) => price.id !== deletedPrice.id,
+          ),
+        });
         return {
           deletedPrice,
         };

@@ -2,14 +2,16 @@ import React, { useRef, useState } from "react";
 import { StyleSheet, TextInput, View } from "react-native";
 import { UseSearchBoxProps, useSearchBox } from "react-instantsearch-hooks";
 
-export function SearchBox(props: UseSearchBoxProps)  {
+import SKTextInput from "../../components/Utils/SKTextInput";
+
+export function SearchBox(props: UseSearchBoxProps) {
   const { query, refine } = useSearchBox(props);
   const [inputValue, setInputValue] = useState(query);
   const inputRef = useRef<TextInput>(null);
 
   function setQuery(newQuery: string) {
     setInputValue(newQuery);
-    console.log(newQuery)
+    console.log(newQuery);
     refine(newQuery);
   }
 
@@ -22,11 +24,11 @@ export function SearchBox(props: UseSearchBoxProps)  {
   }
 
   return (
-    <View className="bg-[#f2f2f2] py-6 pl-2 pr-0 basis-2/3">
-      <TextInput
+    <View className="basis-2/3 bg-[#f2f2f2] py-6 pl-2 pr-0">
+      <SKTextInput
         ref={inputRef}
         style={styles.input}
-        className="w-[3/4] rounded-tl-lg rounded-bl-lg"
+        className="w-[3/4] rounded-bl-lg rounded-tl-lg"
         value={inputValue}
         onChangeText={setQuery}
         clearButtonMode="while-editing"

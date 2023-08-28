@@ -414,6 +414,27 @@ export const userRouter = router({
           message: "From must be less than to",
         });
       }
+
+      const otherTimeslots = await ctx.prisma.sellerAvailability.findMany({
+        where: {
+          day: input.day,
+        },
+      });
+
+      otherTimeslots.forEach((ts) => {
+        if (
+          !(
+            (input.from < ts.from && input.to <= ts.to) ||
+            (input.from >= ts.from && input.to > ts.to)
+          )
+        ) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "You have a conflicting availability",
+          });
+        }
+      });
+
       const timeslot = await ctx.prisma.sellerAvailability.create({
         data: {
           from: input.from,

@@ -1,5 +1,9 @@
 // @ts-check
 
+// @ts-ignore
+
+import withBundleAnalyzer from '@next/bundle-analyzer';
+
 /**
  * Don't be scared of the generics here.
  * All they do is to give us autocompletion when using this.
@@ -12,7 +16,7 @@ function defineNextConfig(config) {
 	return config;
 }
 
-export default defineNextConfig({
+const config = defineNextConfig({
 	reactStrictMode: true,
 	swcMinify: true,
 	transpilePackages: ['@acme/api', '@acme/auth', '@acme/db', '@acme/env-config'],
@@ -26,3 +30,7 @@ export default defineNextConfig({
 		]
 	}
 });
+
+const bundleAnalyzer = withBundleAnalyzer({ enabled: process.env.ANALYZE === 'true' });
+
+export default bundleAnalyzer(config);

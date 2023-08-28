@@ -26,7 +26,6 @@ import {
 } from "@acme/db";
 
 import { trpc } from "../../utils/trpc";
-import { router } from "expo-router";
 
 const PaymentModal = ({
   appointment,
@@ -45,66 +44,76 @@ const PaymentModal = ({
   closeModal: () => void;
 }) => {
   const getPaymentIntentSecret = trpc.payment.getPaymentSheet.useMutation();
- 
+
   const [isApplePaySupported, setIsApplePaySupported] = useState(false);
   const { confirmPayment, loading: stripeLoading } = useConfirmPayment();
 
   //NOT IDEAL PLEASE FIX THIS
-  const totalAmount  =
-  (appointment.price.category.seller.downPaymentPercentage
-    ? appointment.price.category.seller.downPaymentPercentage *
-      appointment.price.amount *
-      100
-    : appointment.price.amount * 100) +
-  (appointment.price.amount < 9
-    ? 135
-    : Math.ceil(appointment.price.amount * 7));
+  const totalAmount =
+    (appointment.price.category.seller.downPaymentPercentage
+      ? appointment.price.category.seller.downPaymentPercentage *
+        appointment.price.amount *
+        100
+      : appointment.price.amount * 100) +
+    (appointment.price.amount < 9
+      ? 135
+      : Math.ceil(appointment.price.amount * 7));
 
   const handlePayPress = async () => {
-    getPaymentIntentSecret.mutate({
-      appointmentId: appointment.id,
-    }, {
-      onSuccess: async ({client_secret}) => {
-        const { error, paymentIntent } = await confirmPayment(client_secret, {
-          paymentMethodType: "Card",
-        });
-    
-        if (error) {
-          Alert.alert(`Error code: ${error.code}`, error.message);
-        } else if (paymentIntent) {
-          Alert.alert("Success", "Payment Successful");
-          closeModal()
-        }
-      }
-    }); 
+    getPaymentIntentSecret.mutate(
+      {
+        appointmentId: appointment.id,
+      },
+      {
+        onSuccess: async ({ client_secret }) => {
+          const { error, paymentIntent } = await confirmPayment(client_secret, {
+            paymentMethodType: "Card",
+          });
+
+          if (error) {
+            Alert.alert(`Error code: ${error.code}`, error.message);
+          } else if (paymentIntent) {
+            Alert.alert("Success", "Payment Successful");
+            closeModal();
+          }
+        },
+      },
+    );
   };
 
   const handleApplePayPress = async () => {
-    getPaymentIntentSecret.mutate({
-      appointmentId: appointment.id,
-    }, {
-      onSuccess: async ({client_secret}) => {
-        const { error, paymentIntent } = await confirmPlatformPayPayment(client_secret, {
-          applePay: {
-            cartItems: [{
-              label: appointment.price.name,
-              amount: String(totalAmount),
-              paymentType: PlatformPay.PaymentType.Immediate
-            }],
-            merchantCountryCode: "US",
-            currencyCode: "US"
+    getPaymentIntentSecret.mutate(
+      {
+        appointmentId: appointment.id,
+      },
+      {
+        onSuccess: async ({ client_secret }) => {
+          const { error, paymentIntent } = await confirmPlatformPayPayment(
+            client_secret,
+            {
+              applePay: {
+                cartItems: [
+                  {
+                    label: appointment.price.name,
+                    amount: String(totalAmount),
+                    paymentType: PlatformPay.PaymentType.Immediate,
+                  },
+                ],
+                merchantCountryCode: "US",
+                currencyCode: "US",
+              },
+            },
+          );
+          if (error) {
+            Alert.alert(`Error code: ${error.code}`, error.message);
+          } else if (paymentIntent) {
+            Alert.alert("Success", "Payment Successful");
+            closeModal();
           }
-        });
-        if (error) {
-          Alert.alert(`Error code: ${error.code}`, error.message);
-        } else if (paymentIntent) {
-          Alert.alert("Success", "Payment Successful");
-         closeModal()
-        }
-      }
-    });
-  }
-  
+        },
+      },
+    );
+  };
 
   useEffect(() => {
     (async function () {
@@ -141,7 +150,7 @@ const PaymentModal = ({
             </Text>
           </View>
           <Text className="text-xl font-extrabold">
-            ${(totalAmount/100).toFixed(2)}
+            ${(totalAmount / 100).toFixed(2)}
           </Text>
         </View>
       </View>
@@ -163,20 +172,22 @@ const PaymentModal = ({
         <Text className="mx-auto text-2xl font-semibold text-white">PAY</Text>
       </Pressable>
 
-      {<PlatformPayButton
-        onPress={handleApplePayPress}
-        type={PlatformPay.ButtonType.Book}
-        appearance={PlatformPay.ButtonStyle.Black}
-        borderRadius={4}
-        style={{
-          width: "60%",
-          height: 50,
-          marginLeft: "auto",
-          marginRight: "auto",
-          borderRadius: 10,
-          marginBottom: 10,
-        }}
-      />}
+      {
+        <PlatformPayButton
+          onPress={handleApplePayPress}
+          type={PlatformPay.ButtonType.Book}
+          appearance={PlatformPay.ButtonStyle.Black}
+          borderRadius={4}
+          style={{
+            width: "60%",
+            height: 50,
+            marginLeft: "auto",
+            marginRight: "auto",
+            borderRadius: 10,
+            marginBottom: 10,
+          }}
+        />
+      }
     </SafeAreaView>
   );
 };

@@ -22,7 +22,8 @@ const config: DefaultSeoProps = {
 		handle: '@sakpa.co',
 		site: '@sakpa.co',
 		cardType: 'summary_large_image'
-	}
+	},
+	additionalMetaTags: [{ name: 'apple-itunes-app', content: 'app-id=6449915755' }]
 };
 
 export default config;
