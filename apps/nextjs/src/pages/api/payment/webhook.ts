@@ -208,13 +208,13 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 							price: appointment.price.amount,
 							seller_id: sellerId
 						});
+						twilio.messages.create({
+							body: `${username} has paid`,
+							to: `$1${itemData[0]?.sellerNumber}`,
+							messagingServiceSid: env.MESSAGING_SID
+						});
 
-						const [message, transfer] = await Promise.all([
-							twilio.messages.create({
-								body: `${username} has paid`,
-								to: `$1${itemData[0]?.sellerNumber}`,
-								messagingServiceSid: env.MESSAGING_SID
-							}),
+						const [transfer] = await Promise.all([
 							stripe.transfers.create({
 								amount:
 									downPayment === 'false' //If it is not a down payment
