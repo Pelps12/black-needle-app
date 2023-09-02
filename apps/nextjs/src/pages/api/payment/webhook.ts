@@ -208,11 +208,17 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 							price: appointment.price.amount,
 							seller_id: sellerId
 						});
-						twilio.messages.create({
-							body: `${username} has paid`,
-							to: `$1${itemData[0]?.sellerNumber}`,
-							messagingServiceSid: env.MESSAGING_SID
-						});
+						if (
+							itemData[0]?.sellerNumber?.match(
+								/^(\+\d{1,2}\s?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/
+							)
+						) {
+							twilio.messages.create({
+								body: `${username} has paid`,
+								to: `$1${itemData[0]?.sellerNumber}`,
+								messagingServiceSid: env.MESSAGING_SID
+							});
+						}
 
 						const [transfer] = await Promise.all([
 							stripe.transfers.create({
