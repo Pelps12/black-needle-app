@@ -92,7 +92,7 @@ const PaymentModalHidden = ({
       );
       return (
         appointment.price.amount *
-          (appointment.seller?.downPaymentPercentage ?? 0) *
+          (appointment.seller?.downPaymentPercentage ?? 1) *
           100 +
         (appointment.price.amount < 9
           ? 135
