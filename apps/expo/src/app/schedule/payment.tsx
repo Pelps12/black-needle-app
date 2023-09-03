@@ -81,7 +81,7 @@ const PaymentModalHidden = ({
     if (appointment.history.find((history) => history.status === "DOWNPAID")) {
       return (
         appointment.price.amount *
-        (1 - (appointment.seller?.downPaymentPercentage ?? 0)) *
+        (1 - (appointment.seller?.downPaymentPercentage ?? 1)) *
         100
       );
     } else {

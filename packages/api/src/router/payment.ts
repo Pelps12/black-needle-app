@@ -64,7 +64,9 @@ export const paymentRouter = router({
         }),
       ]);
       let newTotalAmount = 0;
-      const downPaid = !!appointment.history.find((history) => history.status === "DOWNPAID");
+      const downPaid = !!appointment.history.find(
+        (history) => history.status === "DOWNPAID",
+      );
       if (downPaid) {
         newTotalAmount =
           appointment.price.amount *
@@ -73,7 +75,7 @@ export const paymentRouter = router({
       } else {
         newTotalAmount =
           appointment.price.amount *
-            (appointment.seller?.downPaymentPercentage ?? 0) *
+            (appointment.seller?.downPaymentPercentage ?? 1) *
             100 +
           (appointment.price.amount < 9
             ? 135
@@ -97,7 +99,9 @@ export const paymentRouter = router({
             sellerNumber: appointment.seller.phoneNumber,
           }),
           userAgent: JSON.stringify({}),
-          isDownPayment: `${Boolean(appointment.seller.downPaymentPercentage) && !downPaid}`,
+          isDownPayment: `${
+            Boolean(appointment.seller.downPaymentPercentage) && !downPaid
+          }`,
         },
       });
       if (!paymentIntent.client_secret) {
