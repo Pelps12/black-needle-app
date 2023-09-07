@@ -2,7 +2,7 @@ import React from "react";
 import { FlatList, RefreshControl, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
-import { Link, useNavigation } from "expo-router";
+import { Link, Stack, useNavigation } from "expo-router";
 import { useAuth } from "@clerk/clerk-expo";
 import { EvilIcons } from "@expo/vector-icons";
 import formatDistanceStrict from "date-fns/formatDistanceStrict";
@@ -29,9 +29,11 @@ const ChatIndex = () => {
 
   return (
     <View>
-      <SKTest className="mx-3 text-4xl font-bold" fontWeight="semi-bold">
-        Messages
-      </SKTest>
+      <Stack.Screen
+        options={{
+          title: "Messages",
+        }}
+      />
       <Loading loading={getPreviousChats.isLoading} />
       {getPreviousChats.data && (
         <FlatList

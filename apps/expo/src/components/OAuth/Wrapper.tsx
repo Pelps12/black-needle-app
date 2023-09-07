@@ -60,7 +60,7 @@ const OAuthWrapper = ({ mode }: { mode: "signin" | "signup" }) => {
       });
       if (createdSessionId && setActive) {
         setActive({ session: createdSessionId });
-        router.push("/");
+        router.replace("/home");
         const token = await registerForPushNotificationsAsync();
         if (token) {
           tokenMutation.mutate({
@@ -86,7 +86,7 @@ const OAuthWrapper = ({ mode }: { mode: "signin" | "signup" }) => {
       });
       if (createdSessionId && setActive) {
         setActive({ session: createdSessionId });
-        router.push("/");
+        router.replace("/home");
       } else {
         // Modify this code to use signIn or signUp to set this missing requirements you set in your dashboard.
         throw new Error(

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View } from "react-native";
-import { Slot, SplashScreen, Tabs } from "expo-router";
+import { Slot, SplashScreen, Stack, Tabs } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
@@ -17,6 +17,17 @@ const NavigationProvider = ({ fontsLoaded }: { fontsLoaded: boolean }) => {
   }, [fontsLoaded, isLoaded]);
   return (
     <>
+      <Stack
+        initialRouteName="home/index"
+        screenOptions={({ route }) => {
+          return {
+            headerShown: route.name !== "home",
+            header: (props) => <Header {...props} />,
+          };
+        }}
+      />
+
+      {/*
       <Tabs
         sceneContainerStyle={{
           backgroundColor: "#f2f2f2",
@@ -146,7 +157,7 @@ const NavigationProvider = ({ fontsLoaded }: { fontsLoaded: boolean }) => {
             href: null,
           }}
         />
-      </Tabs>
+      </Tabs> */}
 
       <StatusBar />
     </>

@@ -21,10 +21,11 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { setNotificationHandler } from "expo-notifications";
-import { Link, router, useSearchParams } from "expo-router";
+import { Link, Stack, router, useSearchParams } from "expo-router";
 import { useChannel } from "@ably-labs/react-hooks";
 import { useAuth } from "@clerk/clerk-expo";
 import {
@@ -262,6 +263,15 @@ const ChatPage = () => {
       keyboardVerticalOffset={100}
       style={{ flex: 1 }}
     >
+      <Stack.Screen
+        options={{
+          // https://reactnavigation.org/docs/headers#setting-the-header-title
+          title: "Chat",
+          // https://reactnavigation.org/docs/headers#adjusting-header-styles
+
+          headerStyle: {},
+        }}
+      />
       <Fragment>
         <View className="relative mt-0 flex flex-row items-center border-b border-gray-300 p-3 pb-2 pt-0">
           <Pressable onPress={() => handleBackButton()}>

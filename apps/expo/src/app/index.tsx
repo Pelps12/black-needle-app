@@ -1,15 +1,24 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Text, View } from "react-native";
+import { router } from "expo-router";
+import { useAuth } from "@clerk/clerk-expo";
 
 import SearchWrapper from "../components/Search/Wrapper";
 import SKTest from "../components/Utils/SKText";
 
 const Index = () => {
+  const { isSignedIn, isLoaded } = useAuth();
+  useEffect(() => {
+    if (isSignedIn) {
+      router.replace("/home");
+    }
+  }, [isSignedIn]);
+
+  if (!isLoaded) {
+    return null;
+  }
   return (
-    <View className="mt-0 bg-[##F2F2F2] pt-0 -z-50">
-      <SKTest fontWeight="semi-bold" className="mx-4 text-4xl font-bold">
-        Home
-      </SKTest>
+    <View className="-z-50 mt-0 bg-[##F2F2F2] pt-0">
       <SearchWrapper />
     </View>
   );
