@@ -69,7 +69,11 @@ export const userRouter = router({
         },
         include: {
           Image: true,
-          seller: true,
+          seller: {
+            include: {
+              services: true,
+            },
+          },
         },
       });
 
@@ -81,6 +85,9 @@ export const userRouter = router({
         prices: [],
         Image: category.Image,
         school: category.seller.school,
+        ...(category.seller.services[0]?.serviceName
+          ? { service: category.seller.services[0]?.serviceName }
+          : {}),
       });
 
       return category;

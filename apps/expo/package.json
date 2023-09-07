@@ -1,7 +1,7 @@
 {
   "name": "@acme/expo",
   "version": "0.1.0",
-  "main": "index.tsx",
+  "main": "index.js",
   "scripts": {
     "clean": "git clean -xdf .expo .turbo node_modules",
     "dev": "expo start --tunnel",
@@ -43,7 +43,7 @@
     "expo-linking": "~4.0.1",
     "expo-media-library": "^15.2.3",
     "expo-notifications": "^0.18.1",
-    "expo-router": "^2.0.2",
+    "expo-router": "^2.0.5",
     "expo-secure-store": "^12.1.1",
     "expo-splash-screen": "~0.18.2",
     "expo-status-bar": "~1.4.4",

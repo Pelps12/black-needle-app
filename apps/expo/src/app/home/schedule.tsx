@@ -8,7 +8,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { useSearchParams } from "expo-router";
+import { Stack, useSearchParams } from "expo-router";
 import { useUser } from "@clerk/clerk-expo";
 
 import Appointment from "../../components/Schedule/Appointment";
@@ -40,6 +40,11 @@ const SellerPage = () => {
 
   return (
     <SafeAreaView className="">
+      <Stack.Screen
+        options={{
+          title: "Schedule",
+        }}
+      />
       <View>
         <View className="flex flex-row flex-wrap justify-center border-b border-gray-200">
           <View className="mr-2">

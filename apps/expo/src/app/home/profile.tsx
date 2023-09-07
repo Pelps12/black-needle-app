@@ -14,21 +14,21 @@ import Constants from "expo-constants";
 import * as FileSystem from "expo-file-system";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
-import { Link, useRouter } from "expo-router";
+import { Link, Stack, useRouter } from "expo-router";
 import { openBrowserAsync } from "expo-web-browser";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 import AnimatedLottieView from "lottie-react-native";
 import { z } from "zod";
 
-import FormTextInput from "../components/Utils/FormTextInput";
-import ProtectedLink from "../components/Utils/ProtectedLink";
-import SKTest from "../components/Utils/SKText";
-import SKText from "../components/Utils/SKText";
-import SKTextInput from "../components/Utils/SKTextInput";
-import Config from "../utils/config";
-import dataURItoBlob from "../utils/dataURItoBlob";
-import { trpc } from "../utils/trpc";
+import FormTextInput from "../../components/Utils/FormTextInput";
+import ProtectedLink from "../../components/Utils/ProtectedLink";
+import SKTest from "../../components/Utils/SKText";
+import SKText from "../../components/Utils/SKText";
+import SKTextInput from "../../components/Utils/SKTextInput";
+import Config from "../../utils/config";
+import dataURItoBlob from "../../utils/dataURItoBlob";
+import { trpc } from "../../utils/trpc";
 
 const formSchema = z.object({
   image: z.string().optional(),
@@ -144,13 +144,12 @@ const Profile = () => {
   };
   return (
     <View className="">
+      <Stack.Screen
+        options={{
+          title: "Profile",
+        }}
+      />
       <View className="flex-row justify-between">
-        <View>
-          <SKTest className="mx-3 text-4xl font-bold" fontWeight="semi-bold">
-            Profile
-          </SKTest>
-        </View>
-
         <View className="items-center">
           {!editMode ? (
             <Pressable
@@ -183,7 +182,7 @@ const Profile = () => {
           <Image
             source={image ?? user?.profileImageUrl}
             className="h-20 w-20 rounded-xl "
-            placeholder={require("../../assets/placeholder.png")}
+            placeholder={require("../../../assets/placeholder.png")}
           />
           <SKTextInput
             className="hidden w-auto rounded-md   border-b p-0.5 text-2xl font-semibold"
@@ -206,7 +205,7 @@ const Profile = () => {
           {!isLoaded ? (
             <Image
               className="mr-2 h-10 w-48 rounded-xl shadow-sm"
-              source={require("../../assets/placeholder.png")}
+              source={require("../../../assets/placeholder.png")}
             />
           ) : (
             <>

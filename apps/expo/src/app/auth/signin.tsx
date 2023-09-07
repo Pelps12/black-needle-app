@@ -55,7 +55,7 @@ const SignInWithOAuth = () => {
         if (result?.status === "complete" && setEmailFlowActive) {
           setErrorMessage("");
           setEmailFlowActive({ session: result.createdSessionId });
-          router.push("/");
+          router.push("/home");
         }
       } catch (err: any) {
         // Handle the error here

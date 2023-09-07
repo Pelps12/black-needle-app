@@ -60,7 +60,7 @@ const SignUp = () => {
       });
 
       await setActive({ session: completeSignUp.createdSessionId });
-      router.push("/");
+      router.push("/home");
       setErrorMessage("");
     } catch (err: any) {
       console.error(JSON.stringify(err, null, 2));

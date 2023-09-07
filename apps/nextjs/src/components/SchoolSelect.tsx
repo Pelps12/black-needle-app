@@ -1,7 +1,9 @@
 import { useState, useRef } from 'react';
 import {
+	ClearRefinements,
 	UseRefinementListProps,
 	UseSearchBoxProps,
+	useClearRefinements,
 	useRefinementList,
 	useSearchBox
 } from 'react-instantsearch-hooks-web';
@@ -18,6 +20,7 @@ const SearchBar: React.FC<UseRefinementListProps & UseSearchBoxProps & { text?: 
 	const [selectedSchool, setSelectedSchool] = useState<string | undefined>('UT Dallas');
 
 	const { items, refine, canRefine } = useRefinementList(props);
+
 	const { query, refine: searchRefine } = useSearchBox(props);
 
 	const [inputValue, setInputValue] = useState(query);
@@ -25,6 +28,7 @@ const SearchBar: React.FC<UseRefinementListProps & UseSearchBoxProps & { text?: 
 
 	const handleRefine = (value: string | null) => {
 		console.log(value);
+
 		canRefine && value && refine(value);
 	};
 

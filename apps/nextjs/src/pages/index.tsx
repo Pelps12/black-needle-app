@@ -1,6 +1,7 @@
 import type { Price } from '@acme/db';
 import { env } from '@acme/env-config/env';
 import SearchBar from '@components/SchoolSelect';
+import Services from '@components/Search/Services';
 import ImageWithFallback from '@components/Utils/ImageWithFallback';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import algoliasearch from 'algoliasearch/lite';
@@ -59,26 +60,6 @@ const CustomHits = () => {
 const InfiniteHits = memo((props: HitsProps<any>) => {
 	const { hits, isLastPage, showMore } = useInfiniteHits(props);
 	const sentinelRef = useRef(null);
-
-	useEffect(() => {
-		if (sentinelRef.current !== null) {
-			const observer = new IntersectionObserver((entries) => {
-				entries.forEach((entry) => {
-					console.log('HEY');
-					if (entry.isIntersecting && !isLastPage) {
-						// Load more hits
-						showMore();
-					}
-				});
-			});
-
-			observer.observe(sentinelRef.current);
-
-			return () => {
-				observer.disconnect();
-			};
-		}
-	}, [isLastPage, showMore]);
 
 	return (
 		<div className="ais-InfiniteHits">
@@ -347,6 +328,8 @@ const Home: NextPage<HomePageProps> = ({ serverState, url }) => {
 								submitIconComponent={CustomComponent}
 							/>
 						</div>
+
+						<Services attribute="service" />
 
 						<InfiniteHits />
 					</main>

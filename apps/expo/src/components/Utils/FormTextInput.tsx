@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, TextInput, TextInputProps } from "react-native";
-import { ProfileFormSchemaType } from "app/profile";
+import { ProfileFormSchemaType } from "app/home/profile";
 import { Control, FieldValues, useController } from "react-hook-form";
 
 type FontWeight = "normal" | "medium" | "semi-bold" | "bold";

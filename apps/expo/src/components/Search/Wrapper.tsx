@@ -11,6 +11,7 @@ import { InfiniteHits } from "./InfinteHits";
 import RefinementList from "./RefinementList";
 import Result from "./Result";
 import { SearchBox } from "./SearchBox";
+import Services from "./Services";
 
 const searchClient = algoliasearch(
   "MXKJ7URABT",
@@ -29,6 +30,7 @@ export default function App() {
 
           <RefinementList attribute="school" />
         </View>
+        <Services attribute="service" />
 
         <InfiniteHits maxHitsPerPage={5} hitComponent={Result} />
       </InstantSearch>
