@@ -36,9 +36,9 @@ const SearchBar: React.FC<UseRefinementListProps & UseSearchBoxProps & { text?: 
 		setInputValue(query);
 	}
 	return (
-		<div className="mx-auto h-16 relative ">
+		<div className="mx-auto  relative ">
 			<select
-				className="select select-lg h-16 max-w-xs select-secondary mx-auto rounded-xl"
+				className="select select-sm lg:select-md  max-w-xs select-secondary mx-auto rounded-md lg:rounded-xl"
 				value={selectedSchool}
 				onChange={(e) => handleRefine(e.target.value)}
 			>

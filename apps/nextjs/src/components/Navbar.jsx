@@ -70,7 +70,7 @@ const Navbar = () => {
 		<>
 			<div className="navbar bg-base-100">
 				<div className="flex-1">
-					<Link className="font-bold text-xl no-animation uppercase p-0 flex items-end" href="/">
+					<Link className="font-semibold text-2xl no-animation p-0 flex items-end" href="/">
 						<Image src="/logo.svg" width={50} height={50} alt="Logo" />
 						akpa
 					</Link>

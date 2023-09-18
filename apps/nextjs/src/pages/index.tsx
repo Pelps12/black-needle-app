@@ -1,5 +1,6 @@
 import type { Price } from '@acme/db';
 import { env } from '@acme/env-config/env';
+import ImageCarousel from '@components/ImageCarousel';
 import SearchBar from '@components/SchoolSelect';
 import Services from '@components/Search/Services';
 import ImageWithFallback from '@components/Utils/ImageWithFallback';
@@ -9,9 +10,19 @@ import type { NextPage } from 'next';
 import { GetServerSideProps } from 'next';
 import { NextSeo } from 'next-seo';
 import Head from 'next/head';
+import Image from 'next/image';
 import Link from 'next/link';
 import singletonRouter from 'next/router';
-import { useState, useEffect, SetStateAction, Dispatch, useCallback, useRef, memo } from 'react';
+import {
+	useState,
+	useEffect,
+	SetStateAction,
+	Dispatch,
+	useCallback,
+	useRef,
+	memo,
+	useMemo
+} from 'react';
 import { renderToString } from 'react-dom/server';
 import { createInstantSearchRouterNext } from 'react-instantsearch-hooks-router-nextjs';
 import { getServerState } from 'react-instantsearch-hooks-server';
@@ -83,7 +94,7 @@ const CustomComponent = ({ classNames }: { classNames: Partial<SearchBoxClassNam
 			xmlnsXlink="http://www.w3.org/1999/xlink"
 			x="0px"
 			y="0px"
-			className="h-16 w-12 fill-white p-3 bg-primary m-2 rounded-xl"
+			className="h-10 sm:h-12 sm:w-10 w-8 fill-white p-2 sm:p-3 bg-primary m-2 rounded-xl"
 			viewBox="0 0 122.879 119.799"
 			enableBackground="new 0 0 122.879 119.799"
 			xmlSpace="preserve"
@@ -93,6 +104,10 @@ const CustomComponent = ({ classNames }: { classNames: Partial<SearchBoxClassNam
 			</g>
 		</svg>
 	);
+};
+
+const LoadingComponent = () => {
+	return <span className="loading loading-dots loading-sm"></span>;
 };
 
 function Hit({ hit }: { hit: any }) {
@@ -111,8 +126,9 @@ function Hit({ hit }: { hit: any }) {
 
 	const getTruncatedName = useCallback(
 		(name: string) => {
+			const limit = hit.prices.length > 1 ? 12 : 20;
 			console.log(name.length);
-			return (name.length ?? 0) < 15 ? name : name.substring(0, 15) + ' ...';
+			return (name.length ?? 0) < limit ? name : name.substring(0, limit) + ' ...';
 		},
 		[hit]
 	);
@@ -140,28 +156,31 @@ function Hit({ hit }: { hit: any }) {
 					</div>
 				</Link> */}
 
-			<div className="shadow-lg py-3 px-4 border rounded-xl relative">
+			<div className="py-3 px-4   relative ">
 				<Link
-					className="group rounded-xl overflow-hidden flex flex-col items-start justify-between h-full"
-					href={`/seller/${hit.sellerId}?active=PRICES`}
+					className="group  overflow-hidden flex flex-col items-start justify-between h-full"
+					href={`/seller/${hit.sellerId}?active=PRICES&productID=${hit.prices[0]?.id}`}
 					key={hit.id}
 					shallow={true}
+					prefetch={true}
 				>
 					<div className="relative rounded-xl overflow-hidden w-full">
 						<ImageWithFallback
-							className="mx-auto h-56 w-full top-0 left-0 object-cover group-hover:scale-105 transition-transform duration-500 ease-in-out rounded-xl"
-							alt="Picture f the "
-							width={270}
-							height={360}
+							className="mx-auto w-full h-64 md:h-72 top-0 left-0 object-cover group-hover:scale-105 transition-transform duration-500 ease-in-out rounded-xl"
+							alt={hit.name}
+							width={360}
+							height={270}
 							src={`${hit.Image[0].link}-/preview/938x432/-/quality/smart/-/format/auto/`}
 						/>
 					</div>
 
-					<div className="mt-7">
-						<h3 className="text-xl font-semibold text-neutral group-hover:text-gray-600 dark:text-gray-200">
-							{getTruncatedName(hit.name)}
-						</h3>
-						<p className="mt-3 text-neutral  text-lg">{getPriceRange(hit.prices)}</p>
+					<div className="mt-4 flex w-full flex-row gap-0 items-center font-semibold justify-between">
+						<div className=" text-left text-xl  text-gray-700 tooltip " data-tip={hit.name}>
+							<p>{getTruncatedName(hit.name)} </p>
+						</div>
+						<div className="text-md rounded-lg bg-primary px-2 py-1 font-medium text-gray-900">
+							<p>{getPriceRange(hit.prices)} </p>
+						</div>
 					</div>
 				</Link>
 			</div>
@@ -173,17 +192,27 @@ const Home: NextPage<HomePageProps> = ({ serverState, url }) => {
 	const [test, setTest] = useState(true);
 	const [animationParent]: any = useAutoAnimate();
 	const [count, setCount] = useState(0);
-	const arr = ['catering', 'hairdressing', 'accessories', 'services'];
+	const arr = useMemo(() => {
+		return [
+			{
+				image: '/homepage/barbering.jpg',
+				service: 'barbering'
+			},
+			{
+				image: '/homepage/catering.jpeg',
+				service: 'catering'
+			},
+			{
+				image: '/homepage/hairdressing.jpg',
+				service: 'hairdressing'
+			}
+		];
+	}, []);
 
-	// const resultMut = trpc.search.getSearchedPrices.useMutation();
-
-	const [text, setText] = useState('services');
-	const [filterValue, setFilterValue] = useState<UserStatus>(UserStatus.NOTHING);
 	const { ref } = useInView({
 		/* Optional options */
 		threshold: 0
 	});
-	const [isRunning, setIsRunning] = useState<boolean>(true);
 
 	function waitforme(milisec: number) {
 		return new Promise((resolve) => {
@@ -193,22 +222,17 @@ const Home: NextPage<HomePageProps> = ({ serverState, url }) => {
 		});
 	}
 
-	useInterval(
-		async () => {
-			setTest(false);
+	useInterval(async () => {
+		setTest(false);
+		if (arr.length > 0) {
+			setTimeout(() => {
+				setCount((count + 1) % arr.length);
+				setTest(true);
+			}, 600);
+		}
 
-			setCount(count + 1);
-			await waitforme(700);
-			setText(arr[count]!);
-			setTest(true);
-			//console.log(count);
-
-			if (count === 3) {
-				setCount(0);
-			}
-		},
-		isRunning ? 3000 : null
-	);
+		//console.log(count);
+	}, 3000);
 
 	return (
 		<>
@@ -241,97 +265,76 @@ const Home: NextPage<HomePageProps> = ({ serverState, url }) => {
 					}}
 					insights={true}
 				>
-					<main className="mx-auto max-w-3xl" ref={animationParent}>
-						{isRunning && (
-							<div className="mx-0  px-2 py-4 font-semibold">
-								<div className="flex items-center  w-full mx-auto justify-center">
-									<h2 className="text-4xl sm:text-5xl md:text-7xl text-left pt-4 px-4 pb-2  justify-start leading-tight justify-self-end">
-										Get
-									</h2>
-									<div
-										ref={ref}
-										className={`transition ease-in duration-600 pt-4 px-4 pb-2 text-4xl sm:text-5xl md:text-7xl text-left text-secondary basis-3/4 leading-tight ${
-											test ? 'opacity-100' : 'opacity-0'
+					<main className="mx-auto" ref={animationParent}>
+						<div className="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8">
+							<div className="grid lg:grid-cols-7 lg:gap-x-8 xl:gap-x-12 lg:items-center">
+								<div className="lg:col-span-4 mt-10 lg:mt-0">
+									<ImageWithFallback
+										className={`transition ease-in duration-600 w-[900px] h-auto rounded-xl object-cover aspect-[4/3] ${
+											test !== undefined && !test ? 'opacity-0' : 'opacity-100'
 										}`}
-									>
-										{text}
-									</div>
+										src={arr[count]?.image ?? ''}
+										alt="Image Description"
+										width={900}
+										height={700}
+									/>
 								</div>
 
-								<h2 className="text-4xl sm:text-5xl md:text-7xl pt-4 px-4 pb-2 text-center">
-									on your{' '}
-									<span className="before:block before:absolute before:-inset-1 before:-skew-y-3 before:bg-primary relative inline-block">
-										<span className="relative text-white">campus</span>
-									</span>
-								</h2>
-							</div>
-						)}
-						<div className="mx-auto flex gap-2 flex-col md:flex-row md:justify-between max-w-3xl items-center relative">
-							<div className="hidden md:block absolute bottom-0 left-0 translate-y-10 -translate-x-32">
-								<svg
-									className="w-40 h-auto text-primary"
-									width="347"
-									height="188"
-									viewBox="0 0 347 188"
-									fill="none"
-									xmlns="http://www.w3.org/2000/svg"
-								>
-									<path
-										d="M4 82.4591C54.7956 92.8751 30.9771 162.782 68.2065 181.385C112.642 203.59 127.943 78.57 122.161 25.5053C120.504 2.2376 93.4028 -8.11128 89.7468 25.5053C85.8633 61.2125 130.186 199.678 180.982 146.248L214.898 107.02C224.322 95.4118 242.9 79.2851 258.6 107.02C274.299 134.754 299.315 125.589 309.861 117.539L343 93.4426"
-										stroke="currentColor"
-										stroke-width="7"
-										stroke-linecap="round"
-									/>
-								</svg>
-							</div>
+								<div className="lg:col-span-3">
+									<div className="mx-0  px-2 py-4 font-semibold text-3xl sm:text-4xl md:text-6xl">
+										<div className="flex items-start  w-full mx-auto justify-center">
+											<h2 className=" text-left pt-4 px-4 pb-2  justify-start leading-tight justify-self-end">
+												Get
+											</h2>
+											<div
+												ref={ref}
+												className={`transition ease-in duration-600 pt-4 px-4 pb-2 text-left text-secondary basis-3/4 leading-tight ${
+													test ? 'opacity-100' : 'opacity-0'
+												}`}
+											>
+												{arr[count]?.service ?? 'services'}
+											</div>
+										</div>
 
-							<div className="hidden md:block absolute top-0 right-0 -translate-y-12 translate-x-20">
-								<svg
-									className="w-16 h-auto text-secondary"
-									width="121"
-									height="135"
-									viewBox="0 0 121 135"
-									fill="none"
-									xmlns="http://www.w3.org/2000/svg"
-								>
-									<path
-										d="M5 16.4754C11.7688 27.4499 21.2452 57.3224 5 89.0164"
-										stroke="currentColor"
-										stroke-width="10"
-										stroke-linecap="round"
-									/>
-									<path
-										d="M33.6761 112.104C44.6984 98.1239 74.2618 57.6776 83.4821 5"
-										stroke="currentColor"
-										stroke-width="10"
-										stroke-linecap="round"
-									/>
-									<path
-										d="M50.5525 130C68.2064 127.495 110.731 117.541 116 78.0874"
-										stroke="currentColor"
-										stroke-width="10"
-										stroke-linecap="round"
-									/>
-								</svg>
+										<h2 className=" pt-4 px-4 pb-2 text-left">
+											on your{' '}
+											<span className="before:block before:absolute before:-inset-1 before:-skew-y-3 before:bg-primary relative inline-block">
+												<span className="relative text-white">campus</span>
+											</span>
+										</h2>
+									</div>
+
+									<div className="mx-4">
+										<SearchBar attribute="school" />
+										<SearchBox
+											classNames={{
+												root: 'my-2 flex basis-3/4 gap-4 mx-auto w-auto justify-center   border-2 rounded-md px-2 py-1 items-center',
+												form: 'relative w-full flex items-center',
+												input:
+													'input input-md sm:h-12 sm:input-lg input-bordered input-primary w-full',
+												submitIcon: 'absolute top-0 right-0',
+												resetIcon: 'hidden',
+												reset: 'hidden'
+											}}
+											placeholder={`Search for ${arr[count]?.service ?? 'services'}`}
+											submitIconComponent={CustomComponent}
+											loadingIconComponent={LoadingComponent}
+										/>
+									</div>
+
+									<div className="mt-6 lg:mt-12">
+										<span className="text-xs font-medium text-gray-800 uppercase dark:text-gray-200">
+											Choose a service
+										</span>
+
+										<Services attribute="service" />
+									</div>
+								</div>
 							</div>
-							<SearchBar attribute="school" />
-							<SearchBox
-								classNames={{
-									root: 'flex basis-3/4 gap-4 mx-auto w-auto justify-center   border-2 rounded-xl p-2 items-center',
-									form: 'relative w-full flex items-center',
-									input: 'input input-lg input-bordered input-primary w-full',
-									submitIcon: 'absolute top-0 right-0',
-									resetIcon: 'hidden',
-									reset: 'hidden'
-								}}
-								placeholder={`Search for ${text}`}
-								submitIconComponent={CustomComponent}
-							/>
 						</div>
-
-						<Services attribute="service" />
-
-						<InfiniteHits />
+						<div className="max-w-5xl mx-auto">
+							<InfiniteHits />
+						</div>
 					</main>
 					{/* {resultMut.isSuccess && (
 				

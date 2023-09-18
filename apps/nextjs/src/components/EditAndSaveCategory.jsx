@@ -28,7 +28,7 @@ const EditAndSaveCategory = ({
 	return (
 		<div className="flex justify-between items-center">
 			<h2
-				className="font-epilogue text-left text-3xl text-secondary p-5 font-black basis-2/3 uppercase"
+				className=" text-left text-3xl text-secondary p-5 font-black basis-2/3 uppercase"
 				key={post.id}
 			>
 				{post.name}

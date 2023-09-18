@@ -153,7 +153,7 @@ const BlankCategory = ({
       console.log(`image/${fileType}`);
       formData.append(`my_file(${index}).jpg`, {
         uri: file.uri,
-        name: "John",
+        name: file.name ?? String(Int(Math.random() * 100)),
         type: `image/${fileType}`,
       });
     });
