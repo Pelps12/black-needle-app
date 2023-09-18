@@ -88,33 +88,35 @@ const SellersPage = ({ uid, posts, reviews, user }) => {
 					</button>
 				</div> */}
 			</div>
-			{active === 'CATEGORIES' && (
-				<GalleryTab
-					uid={uid}
-					posts={posts}
-					setCategories={setCategories}
-					categories={categories}
-				></GalleryTab>
-			)}
-			{active === 'PRICES' && (
-				<PricesTab
-					productID={router.query.productID}
-					uid={uid}
-					posts={posts}
-					categories={categories}
-					setCategories={setCategories}
-				></PricesTab>
-			)}
-			{active === 'AVAILABILITY' && (
-				<Availability
-					productID={router.query.productID}
-					uid={uid}
-					posts={posts}
-					categories={categories}
-					setCategories={setCategories}
-				></Availability>
-			)}
-			{active === 'REVIEWS' && <RatingTab posts={posts} reviews={reviews}></RatingTab>}
+			<div className="max-w-7xl mx-auto">
+				{active === 'CATEGORIES' && (
+					<GalleryTab
+						uid={uid}
+						posts={posts}
+						setCategories={setCategories}
+						categories={categories}
+					></GalleryTab>
+				)}
+				{active === 'PRICES' && (
+					<PricesTab
+						productID={router.query.productID}
+						uid={uid}
+						posts={posts}
+						categories={categories}
+						setCategories={setCategories}
+					></PricesTab>
+				)}
+				{active === 'AVAILABILITY' && (
+					<Availability
+						productID={router.query.productID}
+						uid={uid}
+						posts={posts}
+						categories={categories}
+						setCategories={setCategories}
+					></Availability>
+				)}
+				{active === 'REVIEWS' && <RatingTab posts={posts} reviews={reviews}></RatingTab>}
+			</div>
 		</>
 	);
 };

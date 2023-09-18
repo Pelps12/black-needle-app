@@ -27,10 +27,7 @@ const EditAndSaveCategory = ({
 	}, [uploading]);
 	return (
 		<div className="flex justify-between items-center">
-			<h2
-				className=" text-left text-3xl text-secondary p-5 font-black basis-2/3 uppercase"
-				key={post.id}
-			>
+			<h2 className=" text-left text-3xl text-secondary p-5 font-semibold basis-2/3" key={post.id}>
 				{post.name}
 			</h2>
 			{}
