@@ -26,7 +26,7 @@ const config = defineNextConfig({
 			'pbs.twimg.com',
 			'ucarecdn.com',
 			'images.clerk.dev',
-			'www.gravatar.com'
+			'images.unsplash.com'
 		]
 	}
 });

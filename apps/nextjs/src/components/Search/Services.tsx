@@ -37,7 +37,7 @@ const Services: React.FC<UseRefinementListProps & UseSearchBoxProps & { text?: s
 		}
 	};
 	return (
-		<div className="mt-2 sm:mt-4 flex justify-center gap-3">
+		<div className="mt-2 sm:mt-4 grid grid-cols-2 md:grid-cols-4 gap-3 w-full">
 			<>
 				{items.map((item) => (
 					<button
