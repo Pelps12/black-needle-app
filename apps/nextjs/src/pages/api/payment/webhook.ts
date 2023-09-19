@@ -56,10 +56,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 					const orderId: string = paymentIntent.metadata.orderId;
 					const username: string = paymentIntent.metadata.username;
 					const userId: string = paymentIntent.metadata.userId;
-					const ip: string = paymentIntent.metadata.ip;
+					//const ip: string = paymentIntent.metadata.ip;
 					const sellerId: string | undefined = paymentIntent.metadata.sellerId;
 
-					const userAgent: UserAgent = JSON.parse(paymentIntent.metadata.userAgent);
+					//const userAgent: UserAgent = JSON.parse(paymentIntent.metadata.userAgent);
 					const itemData: {
 						id: string | undefined;
 						sellerNumber: string | undefined;
@@ -143,7 +143,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 								})
 							);
 
-							mixpanelEvent.push({
+							/* mixpanelEvent.push({
 								event: 'Item Purchased',
 								properties: {
 									distinct_id: userId,
@@ -157,7 +157,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 									order_group_id: orderId,
 									$os: userAgent.os
 								}
-							});
+							}); */
 						});
 
 						order.OrderOnItem.map((item) => {
@@ -198,7 +198,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 								seller: true
 							}
 						});
-						mixpanel.track('Appointment Made', {
+						/* mixpanel.track('Appointment Made', {
 							distinct_id: userId || randomUUID(),
 							$insert_id: randomUUID(),
 							ip: ip,
@@ -207,7 +207,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 							$browser_version: userAgent.browser_version,
 							price: appointment.price.amount,
 							seller_id: sellerId
-						});
+						}); */
 						if (
 							itemData[0]?.sellerNumber?.match(
 								/^(\+\d{1,2}\s?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/
