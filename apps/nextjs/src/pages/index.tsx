@@ -236,113 +236,111 @@ const Home: NextPage<HomePageProps> = ({ serverState, url }) => {
 
 	return (
 		<>
-			<InstantSearchSSRProvider {...serverState}>
-				<NextSeo
-					title="Sakpa"
-					description="Get services from fellow students on your campus."
-					openGraph={{
-						title: 'Sakpa. From students by students',
-						description: 'A marketplace for students on campus to get services from others',
-						url: `https://${env.NEXT_PUBLIC_URL}`
-					}}
-				/>
+			<NextSeo
+				title="Sakpa"
+				description="Get services from fellow students on your campus."
+				openGraph={{
+					title: 'Sakpa. From students by students',
+					description: 'A marketplace for students on campus to get services from others',
+					url: `https://${env.NEXT_PUBLIC_URL}`
+				}}
+			/>
 
-				<Head>
-					<title>Sakpa</title>
-					<meta name="description" content="Get services from fellow students on your campus." />
+			<Head>
+				<title>Sakpa</title>
+				<meta name="description" content="Get services from fellow students on your campus." />
 
-					<link rel="icon" href="/favicon.ico" />
-					<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-				</Head>
-				<InstantSearch
-					searchClient={searchClient}
-					indexName={env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME}
-					routing={{
-						router: createInstantSearchRouterNext({
-							serverUrl: url,
-							singletonRouter
-						})
-					}}
-					insights={true}
-				>
-					<main className="mx-auto" ref={animationParent}>
-						<div className="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8">
-							<div className="grid lg:grid-cols-7 lg:gap-x-8 xl:gap-x-12 lg:items-center">
-								<div className="lg:col-span-4 mt-10 lg:mt-0">
-									<ImageWithFallback
-										className={`transition ease-in duration-600 w-[900px] h-auto rounded-xl object-cover aspect-[4/3] ${
-											test !== undefined && !test ? 'opacity-0' : 'opacity-100'
-										}`}
-										src={arr[count]?.image ?? ''}
-										alt="Image Description"
-										width={900}
-										height={700}
+				<link rel="icon" href="/favicon.ico" />
+				<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+			</Head>
+			<InstantSearch
+				searchClient={searchClient}
+				indexName={env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME}
+				routing={{
+					router: createInstantSearchRouterNext({
+						serverUrl: url,
+						singletonRouter
+					})
+				}}
+				insights={true}
+			>
+				<main className="mx-auto" ref={animationParent}>
+					<div className="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8">
+						<div className="grid lg:grid-cols-7 lg:gap-x-8 xl:gap-x-12 lg:items-center">
+							<div className="lg:col-span-4 mt-10 lg:mt-0">
+								<ImageWithFallback
+									className={`transition ease-in duration-600 w-[900px] h-auto rounded-xl object-cover aspect-[4/3] ${
+										test !== undefined && !test ? 'opacity-0' : 'opacity-100'
+									}`}
+									src={arr[count]?.image ?? ''}
+									alt="Image Description"
+									width={900}
+									height={700}
+								/>
+							</div>
+
+							<div className="lg:col-span-3">
+								<div className="mx-0  px-2 py-4 font-semibold text-3xl sm:text-4xl md:text-6xl">
+									<div className="flex items-start  w-full mx-auto justify-center">
+										<h2 className=" text-left pt-4 px-4 pb-2  justify-start leading-tight justify-self-end">
+											Get
+										</h2>
+										<div
+											ref={ref}
+											className={`transition ease-in duration-600 pt-4 px-4 pb-2 text-left text-secondary basis-3/4 leading-tight ${
+												test ? 'opacity-100' : 'opacity-0'
+											}`}
+										>
+											{arr[count]?.service ?? 'services'}
+										</div>
+									</div>
+
+									<h2 className=" pt-4 px-4 pb-2 text-left">
+										on your{' '}
+										<span className="before:block before:absolute before:-inset-1 before:-skew-y-3 before:bg-primary relative inline-block">
+											<span className="relative text-white">campus</span>
+										</span>
+									</h2>
+								</div>
+
+								<div className="mx-4">
+									<SearchBar attribute="school" />
+									<SearchBox
+										classNames={{
+											root: 'my-2 flex basis-3/4 gap-4 mx-auto w-auto justify-center   border-2 rounded-md px-2 py-1 items-center',
+											form: 'relative w-full flex items-center',
+											input:
+												'input input-md sm:h-12 sm:input-lg input-bordered input-primary w-full',
+											submitIcon: 'absolute top-0 right-0',
+											resetIcon: 'hidden',
+											reset: 'hidden'
+										}}
+										placeholder={`Search for ${arr[count]?.service ?? 'services'}`}
+										submitIconComponent={CustomComponent}
+										loadingIconComponent={LoadingComponent}
 									/>
 								</div>
 
-								<div className="lg:col-span-3">
-									<div className="mx-0  px-2 py-4 font-semibold text-3xl sm:text-4xl md:text-6xl">
-										<div className="flex items-start  w-full mx-auto justify-center">
-											<h2 className=" text-left pt-4 px-4 pb-2  justify-start leading-tight justify-self-end">
-												Get
-											</h2>
-											<div
-												ref={ref}
-												className={`transition ease-in duration-600 pt-4 px-4 pb-2 text-left text-secondary basis-3/4 leading-tight ${
-													test ? 'opacity-100' : 'opacity-0'
-												}`}
-											>
-												{arr[count]?.service ?? 'services'}
-											</div>
-										</div>
+								<div className="mt-6 lg:mt-12">
+									<span className="text-xs font-medium text-gray-800 uppercase dark:text-gray-200">
+										Choose a service
+									</span>
 
-										<h2 className=" pt-4 px-4 pb-2 text-left">
-											on your{' '}
-											<span className="before:block before:absolute before:-inset-1 before:-skew-y-3 before:bg-primary relative inline-block">
-												<span className="relative text-white">campus</span>
-											</span>
-										</h2>
-									</div>
-
-									<div className="mx-4">
-										<SearchBar attribute="school" />
-										<SearchBox
-											classNames={{
-												root: 'my-2 flex basis-3/4 gap-4 mx-auto w-auto justify-center   border-2 rounded-md px-2 py-1 items-center',
-												form: 'relative w-full flex items-center',
-												input:
-													'input input-md sm:h-12 sm:input-lg input-bordered input-primary w-full',
-												submitIcon: 'absolute top-0 right-0',
-												resetIcon: 'hidden',
-												reset: 'hidden'
-											}}
-											placeholder={`Search for ${arr[count]?.service ?? 'services'}`}
-											submitIconComponent={CustomComponent}
-											loadingIconComponent={LoadingComponent}
-										/>
-									</div>
-
-									<div className="mt-6 lg:mt-12">
-										<span className="text-xs font-medium text-gray-800 uppercase dark:text-gray-200">
-											Choose a service
-										</span>
-
-										<Services attribute="service" />
-									</div>
+									<Services attribute="service" />
 								</div>
 							</div>
 						</div>
-						<div className="max-w-5xl mx-auto">
-							<InfiniteHits />
-						</div>
-					</main>
-					{/* {resultMut.isSuccess && (
+					</div>
+					<div className="max-w-5xl mx-auto">
+						<InfiniteHits />
+					</div>
+				</main>
+				{/* {resultMut.isSuccess && (
 				
 			)}
 
 			{resultMut.isIdle && <NewUser />} */}
-				</InstantSearch>
-			</InstantSearchSSRProvider>
+			</InstantSearch>
 		</>
 	);
 };
@@ -350,21 +348,5 @@ const Home: NextPage<HomePageProps> = ({ serverState, url }) => {
 export const config = {
 	runtime: 'nodejs'
 };
-
-export const getServerSideProps: GetServerSideProps<HomePageProps> =
-	async function getServerSideProps({ req }) {
-		const protocol = req.headers.referer?.split('://')[0] || 'https';
-		const url = `${protocol}://${req.headers.host}${req.url}`;
-		const serverState = await getServerState(<Home url={url} />, {
-			renderToString
-		});
-
-		return {
-			props: {
-				serverState,
-				url
-			}
-		};
-	};
 
 export default Home;
